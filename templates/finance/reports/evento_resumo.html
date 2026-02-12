@@ -1,0 +1,95 @@
+{% extends "layout/base.html" %}
+{% load finance_extras %}
+{% block content %}
+<div class="d-flex align-items-center mb-3">
+  <div>
+    <h2 class="page-title">Demonstrativo do {{ rotulo_evento_singular }}</h2>
+    <div class="text-muted">{{ evento.nome }} ({{ evento.data_inicio }} - {{ evento.data_fim }})</div>
+  </div>
+  <div class="ms-auto">
+    <button class="btn btn-outline" type="button" onclick="window.print()">Imprimir</button>
+  </div>
+</div>
+
+<div class="row row-cards">
+  <div class="col-md-3">
+    <div class="card">
+      <div class="card-body">
+        <div class="subheader">Total receitas</div>
+        <div class="h2">{{ total_receitas|brl }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card">
+      <div class="card-body">
+        <div class="subheader">Total despesas</div>
+        <div class="h2">{{ total_despesas|brl }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card">
+      <div class="card-body">
+        <div class="subheader">Saldo</div>
+        <div class="h2">{{ saldo|brl }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card">
+      <div class="card-body">
+        <div class="subheader">Lancamentos</div>
+        <div class="h2">{{ qtd_lancamentos }}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row row-cards">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Resumo por categoria</h3>
+      </div>
+      <div class="table-responsive">
+        <table class="table card-table table-vcenter">
+          <thead>
+            <tr>
+              <th>Categoria</th>
+              <th>Tipo</th>
+              <th class="text-end">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in resumo_categorias %}
+              <tr>
+                <td>{{ item.categoria__nome }}</td>
+                <td>{{ item.tipo }}</td>
+                <td class="text-end">{{ item.total|brl }}</td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="3">Nenhum lancamento encontrado.</td></tr>
+            {% endfor %}
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="2"><strong>Total geral</strong></td>
+              <td class="text-end"><strong>{{ total_geral|brl }}</strong></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<style>
+  @media print {
+    .navbar, .navbar-vertical, .btn { display: none !important; }
+    .page-wrapper { margin: 0; }
+  }
+</style>
+{% endblock %}

@@ -1,0 +1,104 @@
+{% extends "layout/base.html" %}
+{% block content %}
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title">{{ acao }} {{ rotulo_evento_singular|lower }}</h3>
+  </div>
+  <div class="card-body">
+    <form method="post">
+      {% csrf_token %}
+      {{ form.non_field_errors }}
+      <div class="row">
+        <div class="col-md-6">
+          <label class="form-label">Nome</label>
+          {{ form.nome }}
+          {{ form.nome.errors }}
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Inicio</label>
+          {{ form.data_inicio }}
+          {{ form.data_inicio.errors }}
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Fim</label>
+          {{ form.data_fim }}
+          {{ form.data_fim.errors }}
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-3">
+          <label class="form-label">Status</label>
+          {{ form.status }}
+          {{ form.status.errors }}
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Ativo</label>
+          <div class="form-check">
+            {{ form.ativo }}
+            <label class="form-check-label" for="{{ form.ativo.id_for_label }}">Ativo</label>
+          </div>
+          {{ form.ativo.errors }}
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Fechado</label>
+          <div class="form-check">
+            {{ form.fechado }}
+            <label class="form-check-label" for="{{ form.fechado.id_for_label }}">Fechado</label>
+          </div>
+          {{ form.fechado.errors }}
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Responsavel</label>
+          {{ form.responsavel_geral }}
+          {{ form.responsavel_geral.errors }}
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Centro de custo</label>
+          {{ form.centro_custo }}
+          {{ form.centro_custo.errors }}
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-4">
+          <label class="form-label">Taxa base</label>
+          {{ form.taxa_base }}
+          {{ form.taxa_base.errors }}
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Taxa trabalhador</label>
+          {{ form.taxa_trabalhador }}
+          {{ form.taxa_trabalhador.errors }}
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Adicional chale</label>
+          {{ form.adicional_chale }}
+          {{ form.adicional_chale.errors }}
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-6">
+          <label class="form-label">Prev participantes</label>
+          {{ form.prev_participantes }}
+          {{ form.prev_participantes.errors }}
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Prev trabalhadores</label>
+          {{ form.prev_trabalhadores }}
+          {{ form.prev_trabalhadores.errors }}
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-12">
+          <label class="form-label">Observacoes</label>
+          {{ form.observacoes }}
+          {{ form.observacoes.errors }}
+        </div>
+      </div>
+      <div class="text-end" style="margin-top: 12px;">
+        <button class="btn btn-primary" type="submit">Salvar</button>
+        <a class="btn btn-outline" href="{% url 'core:eventos_lista' %}">Cancelar</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

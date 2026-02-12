@@ -1,0 +1,265 @@
+{% extends "layout/base.html" %}
+{% block page_header %}
+<div class="page-header d-print-none">
+  <div class="row align-items-center">
+    <div class="col">
+      <div class="page-pretitle">Visao geral</div>
+      <h2 class="page-title">Dashboard</h2>
+      <ol class="breadcrumb breadcrumb-arrows mt-2">
+        <li class="breadcrumb-item"><a href="/">Inicio</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Dashboard</li>
+      </ol>
+    </div>
+    {% if pode_escrever %}
+    <div class="col-auto ms-auto d-print-none">
+      <a class="btn btn-primary" href="{% url 'finance:lancamento_criar' %}">
+        <i class="ti ti-plus me-1" aria-hidden="true"></i>Novo lancamento
+      </a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+{% block content %}
+<div class="row row-cards">
+  <div class="col-sm-6 col-lg-3">
+    <div class="card">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <span class="avatar avatar-sm bg-green-lt me-3">
+            <i class="ti ti-trending-up" aria-hidden="true"></i>
+          </span>
+          <div>
+            <div class="text-muted">Total receitas</div>
+            <div class="h2 mb-0">R$ {{ total_receitas|floatformat:2 }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-lg-3">
+    <div class="card">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <span class="avatar avatar-sm bg-red-lt me-3">
+            <i class="ti ti-trending-down" aria-hidden="true"></i>
+          </span>
+          <div>
+            <div class="text-muted">Total despesas</div>
+            <div class="h2 mb-0">R$ {{ total_despesas|floatformat:2 }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-lg-3">
+    <div class="card">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <span class="avatar avatar-sm bg-blue-lt me-3">
+            <i class="ti ti-scale" aria-hidden="true"></i>
+          </span>
+          <div>
+            <div class="text-muted">Saldo</div>
+            <div class="h2 mb-0">R$ {{ saldo|floatformat:2 }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-lg-3">
+    <div class="card">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <span class="avatar avatar-sm bg-azure-lt me-3">
+            <i class="ti ti-receipt" aria-hidden="true"></i>
+          </span>
+          <div>
+            <div class="text-muted">Lancamentos</div>
+            <div class="h2 mb-0">{{ qtd_lancamentos }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% if module_kpis.estoque or module_kpis.hospedagem or module_kpis.notificacoes %}
+<div class="row row-cards mt-1">
+  {% if module_kpis.estoque %}
+  <div class="col-md-4">
+    <div class="card">
+      <div class="card-header"><h3 class="card-title">Estoque</h3></div>
+      <div class="card-body">
+        <div class="text-muted">Produtos: <strong>{{ module_kpis.estoque.produtos_total }}</strong></div>
+        <div class="text-danger">Abaixo do minimo: <strong>{{ module_kpis.estoque.alerta_baixo }}</strong></div>
+        <div class="text-warning">Acima do maximo: <strong>{{ module_kpis.estoque.alerta_acima }}</strong></div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+  {% if module_kpis.hospedagem %}
+  <div class="col-md-4">
+    <div class="card">
+      <div class="card-header"><h3 class="card-title">Hospedagem</h3></div>
+      <div class="card-body">
+        <div class="text-muted">Reservas no ciclo: <strong>{{ module_kpis.hospedagem.reservas_total }}</strong></div>
+        <div class="text-success">Confirmadas: <strong>{{ module_kpis.hospedagem.reservas_confirmadas }}</strong></div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+  {% if module_kpis.notificacoes %}
+  <div class="col-md-4">
+    <div class="card">
+      <div class="card-header"><h3 class="card-title">Lembretes</h3></div>
+      <div class="card-body">
+        <div class="text-muted">Ativos: <strong>{{ module_kpis.notificacoes.lembretes_ativos }}</strong></div>
+        <div class="text-warning">Pendentes: <strong>{{ module_kpis.notificacoes.lembretes_pendentes }}</strong></div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endif %}
+
+<div class="row row-cards">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h3 class="card-title">Receitas e despesas por dia</h3>
+        <div class="btn-group btn-group-sm" role="group" aria-label="Tipo de grafico">
+          <button type="button" class="btn btn-outline active" id="btn-chart-bar">Barras</button>
+          <button type="button" class="btn btn-outline" id="btn-chart-line">Linha</button>
+        </div>
+      </div>
+      <div class="card-body">
+        <canvas id="chart" height="120"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row row-cards">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Saldo acumulado por dia</h3>
+      </div>
+      <div class="card-body">
+        <canvas id="chart-saldo" height="120"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+  const chartData = {{ chart_data|safe }};
+  const ctx = document.getElementById('chart');
+  const chartTypeStorageKey = 'eventa_dashboard_main_chart_type';
+  const btnChartBar = document.getElementById('btn-chart-bar');
+  const btnChartLine = document.getElementById('btn-chart-line');
+  let mainChart;
+
+  function updateMainChartButtons(type) {
+    btnChartBar.classList.toggle('active', type === 'bar');
+    btnChartLine.classList.toggle('active', type === 'line');
+  }
+
+  function buildMainDataset(type) {
+    const shared = {
+      borderWidth: 1,
+    };
+    if (type === 'line') {
+      return [
+        {
+          label: 'Receitas',
+          data: chartData.receitas,
+          borderColor: '#16a34a',
+          backgroundColor: 'rgba(22,163,74,0.15)',
+          tension: 0.2,
+          fill: false,
+          ...shared
+        },
+        {
+          label: 'Despesas',
+          data: chartData.despesas,
+          borderColor: '#dc2626',
+          backgroundColor: 'rgba(220,38,38,0.15)',
+          tension: 0.2,
+          fill: false,
+          ...shared
+        }
+      ];
+    }
+    return [
+      {
+        label: 'Receitas',
+        data: chartData.receitas,
+        borderColor: '#16a34a',
+        backgroundColor: 'rgba(22,163,74,0.2)',
+        ...shared
+      },
+      {
+        label: 'Despesas',
+        data: chartData.despesas,
+        borderColor: '#dc2626',
+        backgroundColor: 'rgba(220,38,38,0.2)',
+        ...shared
+      }
+    ];
+  }
+
+  function renderMainChart(type) {
+    if (mainChart) {
+      mainChart.destroy();
+    }
+    mainChart = new Chart(ctx, {
+      type: type,
+      data: {
+        labels: chartData.labels,
+        datasets: buildMainDataset(type)
+      },
+      options: {
+        responsive: true,
+        scales: {
+          x: {
+            stacked: false
+          },
+          y: {
+            beginAtZero: true
+          }
+        }
+      },
+    });
+    updateMainChartButtons(type);
+    localStorage.setItem(chartTypeStorageKey, type);
+  }
+
+  const initialMainChartType = localStorage.getItem(chartTypeStorageKey) || 'bar';
+  renderMainChart(initialMainChartType);
+  btnChartBar.addEventListener('click', () => renderMainChart('bar'));
+  btnChartLine.addEventListener('click', () => renderMainChart('line'));
+
+  const saldoCtx = document.getElementById('chart-saldo');
+  new Chart(saldoCtx, {
+    type: 'line',
+    data: {
+      labels: chartData.labels,
+      datasets: [
+        {
+          label: 'Saldo acumulado',
+          data: chartData.saldo_acumulado,
+          borderColor: '#2563eb',
+          backgroundColor: 'rgba(37,99,235,0.15)',
+          tension: 0.2,
+          fill: true
+        }
+      ]
+    }
+  });
+</script>
+{% endblock %}

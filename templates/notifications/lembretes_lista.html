@@ -1,0 +1,167 @@
+{% extends "layout/base.html" %}
+{% load static %}
+
+{% block title %}Lembretes - {{ sistema_config.nome_sistema|default:"Eventa" }}{% endblock %}
+
+{% block page_header %}
+<div class="page-header d-print-none mb-3">
+  <div class="row align-items-center">
+    <div class="col">
+      <h2 class="page-title">
+        <i class="ti ti-bell me-2" aria-hidden="true"></i>Lembretes de WhatsApp
+      </h2>
+      <p class="text-muted">Gerencie alertas automáticos para seus participantes</p>
+    </div>
+    <div class="col-auto">
+      <a href="{% url 'notifications:lembrete_criar' %}" class="btn btn-primary">
+        <i class="ti ti-plus me-2" aria-hidden="true"></i>Novo Lembrete
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+  <!-- RESUMO -->
+  <div class="col-12">
+    <div class="row row-deck row-cards mb-4">
+      <div class="col-md-4">
+        <div class="card">
+          <div class="card-body">
+            <div class="text-truncate">
+              <h3 class="card-title">{{ total_lembretes }}</h3>
+              <div class="text-muted">Total de Lembretes</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card">
+          <div class="card-body">
+            <div class="text-truncate">
+              <h3 class="card-title text-success">{{ lembretes_ativos }}</h3>
+              <div class="text-muted">Lembretes Ativos</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card">
+          <div class="card-body">
+            <div class="text-truncate">
+              <h3 class="card-title text-primary">{{ lembretes_enviados }}</h3>
+              <div class="text-muted">Lembretes Enviados</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LISTA DE LEMBRETES -->
+  <div class="col-12">
+    <div class="card">
+      <div class="table-responsive">
+        {% if lembretes %}
+          <table class="table card-table table-vcenter">
+            <thead>
+              <tr>
+                <th>{{ rotulo_evento_singular }}</th>
+                <th>Envio agendado</th>
+                <th>Telefone</th>
+                <th>Mensagem</th>
+                <th>Mídia</th>
+                <th>Status</th>
+                <th>Data de Criação</th>
+                <th class="text-end">Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for lembrete in lembretes %}
+              <tr>
+                <td>
+                  <strong>{{ lembrete.evento.nome }}</strong>
+                </td>
+                <td>
+                  {% if lembrete.data_hora_envio %}
+                    <span class="badge bg-info-lt">{{ lembrete.data_hora_envio|date:"d/m/Y H:i" }}</span>
+                  {% else %}
+                    <span class="badge bg-warning-lt">Sem data/hora</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <code>{{ lembrete.telefone }}</code>
+                </td>
+                <td>
+                  {% if lembrete.mensagem %}
+                    <small>{{ lembrete.mensagem|truncatechars:80 }}</small>
+                  {% else %}
+                    <span class="text-muted">Padrao</span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if lembrete.midia or lembrete.midia_url %}
+                    <span class="badge bg-info-lt">Com midia</span>
+                  {% else %}
+                    <span class="text-muted">Sem</span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if lembrete.enviado %}
+                    <span class="badge bg-success-lt">✓ Enviado</span>
+                  {% elif not lembrete.ativo %}
+                    <span class="badge bg-secondary-lt">Inativo</span>
+                  {% else %}
+                    <span class="badge bg-warning-lt">Pendente</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <small class="text-muted">{{ lembrete.criado_em|date:"d/m/Y H:i" }}</small>
+                </td>
+                <td class="text-end">
+                  <div class="btn-list flex-nowrap">
+                    <a href="{% url 'notifications:lembrete_editar' lembrete.id %}" class="btn btn-ghost-primary btn-icon" title="Editar">
+                      <i class="ti ti-edit"></i>
+                    </a>
+                    {% if lembrete.enviado %}
+                    <form method="post" action="{% url 'notifications:lembrete_resetar' lembrete.id %}" style="display: inline;">
+                      {% csrf_token %}
+                      <button type="submit" class="btn btn-ghost-warning btn-icon" title="Resetar para reenvio" onclick="return confirm('Resetar este lembrete?');">
+                        <i class="ti ti-refresh"></i>
+                      </button>
+                    </form>
+                    {% endif %}
+                    <form method="post" action="{% url 'notifications:lembrete_excluir' lembrete.id %}" style="display: inline;">
+                      {% csrf_token %}
+                      <button type="submit" class="btn btn-ghost-danger btn-icon" title="Excluir" onclick="return confirm('Tem certeza que deseja excluir?');">
+                        <i class="ti ti-trash"></i>
+                      </button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        {% else %}
+          <div class="empty">
+            <div class="empty-header">
+              <i class="ti ti-bell-off" aria-hidden="true"></i>
+            </div>
+            <p class="empty-title">Nenhum lembrete criado</p>
+            <p class="empty-subtitle text-muted">
+              Crie um novo lembrete para começar a enviar alertas automáticos via WhatsApp.
+            </p>
+            <div class="empty-action">
+              <a href="{% url 'notifications:lembrete_criar' %}" class="btn btn-primary">
+                <i class="ti ti-plus me-2" aria-hidden="true"></i>Criar Novo Lembrete
+              </a>
+            </div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

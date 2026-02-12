@@ -1,0 +1,110 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Maanaim Manager</title>
+  <link href="{% static 'tabler/tabler.min.css' %}" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.46.0/tabler-icons.min.css" rel="stylesheet">
+  <link href="{% static 'app.css' %}?v=20260207-01" rel="stylesheet">
+</head>
+<body class="app">
+  <div class="page">
+    <aside class="navbar navbar-vertical navbar-expand-lg" data-bs-theme="light">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="/">
+          <span class="avatar avatar-sm rounded bg-primary text-white me-2">MM</span>
+          Maanaim Manager
+        </a>
+        <div class="collapse navbar-collapse">
+          <ul class="navbar-nav pt-lg-3">
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="ti ti-chart-bar"></i></span>
+                <span class="nav-link-title">Dashboard</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'finance:lancamentos_lista' %}">
+                <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="ti ti-wallet"></i></span>
+                <span class="nav-link-title">Financeiro</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'finance:relatorios_index' %}">
+                <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="ti ti-report-analytics"></i></span>
+                <span class="nav-link-title">Relatorios</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'core:eventos_lista' %}">
+                <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="ti ti-calendar-event"></i></span>
+                <span class="nav-link-title">Eventos</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'lodging:chales_lista' %}">
+                <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="ti ti-home"></i></span>
+                <span class="nav-link-title">Chales</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'lodging:reservas_lista' %}">
+                <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="ti ti-bed"></i></span>
+                <span class="nav-link-title">Reservas</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'lodging:mapa_chales' %}">
+                <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="ti ti-map"></i></span>
+                <span class="nav-link-title">Mapa de Chales</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </aside>
+    <div class="page-wrapper">
+      <header class="navbar navbar-expand-md d-print-none">
+        <div class="container-fluid">
+          <div class="navbar-nav flex-row order-md-last">
+            {% if user.is_authenticated %}
+              <form method="post" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button class="nav-link btn btn-link p-0" type="submit">
+                  <i class="ti ti-logout me-1"></i>Sair
+                </button>
+              </form>
+            {% endif %}
+          </div>
+          <div class="navbar-text">
+            {% if evento_atual %}
+              <span class="badge bg-primary-lt me-2">Evento atual</span>
+              <strong>{{ evento_atual.nome }}</strong> - <a href="{% url 'core:selecionar_evento' %}">Trocar evento</a>
+            {% else %}
+              Nenhum evento selecionado
+            {% endif %}
+          </div>
+        </div>
+      </header>
+
+      <div class="page-body">
+        <div class="container-fluid">
+          {% if messages %}
+            <div class="mb-3">
+              {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+              {% endfor %}
+            </div>
+          {% endif %}
+          {% block content %}{% endblock %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="{% static 'tabler/tabler.min.js' %}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

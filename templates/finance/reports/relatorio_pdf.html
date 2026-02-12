@@ -1,0 +1,187 @@
+{% extends "layout/base.html" %}
+{% load finance_extras %}
+{% block content %}
+<div class="d-flex align-items-center mb-3 no-print">
+  <div>
+    <h2 class="page-title">Relatorio PDF</h2>
+    <div class="text-muted">Formato oficial de prestacao de contas</div>
+  </div>
+  <div class="ms-auto">
+    <button class="btn btn-outline" type="button" onclick="window.print()">Imprimir</button>
+  </div>
+</div>
+
+<div class="card mb-3 no-print">
+  <div class="card-body">
+    <form method="get" class="row g-3">
+      <div class="col-md-3">
+        <label class="form-label">Data inicio</label>
+        <input class="form-control" type="date" name="data_inicio" value="{{ data_inicio }}">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Data fim</label>
+        <input class="form-control" type="date" name="data_fim" value="{{ data_fim }}">
+      </div>
+      <div class="col-md-6 text-end" style="margin-top: 28px;">
+        <button class="btn btn-secondary" type="submit">Filtrar</button>
+        <a class="btn btn-outline" href="{% url 'finance:relatorio_pdf' %}">Limpar</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="relatorio-pdf">
+  <div class="relatorio-header">
+    <h1>RELATORIO PDF</h1>
+    <h2>{{ evento.nome }}</h2>
+    <div class="sub">SELECIONE EVENTO E DATA</div>
+  </div>
+
+  <div class="relatorio-section">
+    <div class="titulo">RECEITAS</div>
+    <table>
+      <thead>
+        <tr>
+          <th>Descricao</th>
+          <th class="text-end">Valores (R$)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in receitas %}
+          <tr>
+            <td>{{ item.descricao }}</td>
+            <td class="text-end">{{ item.valor|brl }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="2">Sem registros</td></tr>
+        {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr>
+          <td class="total-label">TOTAL DAS RECEITAS</td>
+          <td class="text-end total-value">{{ total_receitas|brl }}</td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+
+  <div class="relatorio-section">
+    <div class="titulo">DESPESAS GERAIS</div>
+    <table>
+      <thead>
+        <tr>
+          <th>Descricao</th>
+          <th class="text-end">Valores (R$)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in despesas %}
+          <tr>
+            <td>{{ item.descricao }}</td>
+            <td class="text-end">{{ item.valor|brl }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="2">Sem registros</td></tr>
+        {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr>
+          <td class="total-label">TOTAL DE DESPESAS</td>
+          <td class="text-end total-value">{{ total_despesas|brl }}</td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+
+  <div class="resultado">
+    <div>RESULTADO (RECEITA - DESPESAS): <strong>{{ saldo|brl }}</strong></div>
+  </div>
+
+  <div class="assinaturas">
+    <div>
+      <span>COORDENADOR DO MAANAIM</span>
+    </div>
+    <div>
+      <span>CONSELHO FISCAL</span>
+    </div>
+    <div>
+      <span>COMISSAO DO MAANAIM</span>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<style>
+  .relatorio-pdf {
+    background: #fff;
+    padding: 24px;
+    border: 1px solid #e5e7eb;
+  }
+  .relatorio-header {
+    text-align: center;
+    margin-bottom: 16px;
+  }
+  .relatorio-header h1 {
+    font-size: 18px;
+    margin: 0;
+  }
+  .relatorio-header h2 {
+    font-size: 16px;
+    margin: 6px 0 0;
+  }
+  .relatorio-header .sub {
+    font-size: 12px;
+    margin-top: 4px;
+  }
+  .relatorio-section {
+    margin-top: 16px;
+    border-top: 2px solid #111827;
+    padding-top: 8px;
+  }
+  .relatorio-section .titulo {
+    text-align: center;
+    font-weight: bold;
+    font-size: 13px;
+    margin-bottom: 6px;
+  }
+  .relatorio-section table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+  .relatorio-section th,
+  .relatorio-section td {
+    border: 1px solid #9ca3af;
+    padding: 6px 8px;
+  }
+  .resultado {
+    margin-top: 12px;
+    border: 2px solid #111827;
+    padding: 8px;
+    text-align: right;
+    font-size: 13px;
+    font-weight: bold;
+  }
+  .assinaturas {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin-top: 24px;
+    text-align: center;
+    font-size: 10px;
+  }
+  .assinaturas span {
+    display: block;
+    border-top: 1px solid #9ca3af;
+    padding-top: 6px;
+  }
+
+  @media print {
+    .navbar, .navbar-vertical, .page-body .no-print, .btn { display: none !important; }
+    .page-wrapper { margin: 0; }
+    .page-body { padding: 0; }
+    .relatorio-pdf { border: none; }
+  }
+</style>
+{% endblock %}

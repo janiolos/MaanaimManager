@@ -1,0 +1,78 @@
+{% extends "layout/base.html" %}
+{% load finance_extras %}
+{% block content %}
+<div class="d-flex align-items-center mb-3">
+  <div>
+    <h2 class="page-title">Conciliacao por Forma de Pagamento</h2>
+    <div class="text-muted">Resumo de receitas e despesas por forma</div>
+  </div>
+  <div class="ms-auto">
+    <button class="btn btn-outline" type="button" onclick="window.print()">Imprimir</button>
+  </div>
+</div>
+
+<div class="card mb-3">
+  <div class="card-body">
+    <form method="get" class="row g-3">
+      <div class="col-md-3">
+        <label class="form-label">Data inicio</label>
+        <input class="form-control" type="date" name="data_inicio" value="{{ data_inicio }}">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Data fim</label>
+        <input class="form-control" type="date" name="data_fim" value="{{ data_fim }}">
+      </div>
+      <div class="col-md-6 text-end" style="margin-top: 28px;">
+        <button class="btn btn-secondary" type="submit">Filtrar</button>
+        <a class="btn btn-outline" href="{% url 'finance:relatorio_conciliacao' %}">Limpar</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <p class="text-muted">Este relatorio ajuda a conciliar os valores recebidos e pagos por forma de pagamento, destacando PIX e Dinheiro.</p>
+  </div>
+  <div class="table-responsive">
+    <table class="table card-table table-vcenter">
+      <thead>
+        <tr>
+          <th>Forma</th>
+          <th class="text-end">Receitas</th>
+          <th class="text-end">Despesas</th>
+          <th class="text-end">Saldo</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for linha in linhas %}
+          <tr>
+            <td>
+              {{ linha.forma_label }}
+              {% if linha.forma_pagamento == 'PIX' %}
+                <span class="badge bg-info ms-2">PIX</span>
+              {% elif linha.forma_pagamento == 'DINHEIRO' %}
+                <span class="badge bg-warning ms-2">DINHEIRO</span>
+              {% endif %}
+            </td>
+            <td class="text-end">{{ linha.receitas|brl }}</td>
+            <td class="text-end">{{ linha.despesas|brl }}</td>
+            <td class="text-end">{{ linha.saldo|brl }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="4">Nenhum lancamento encontrado.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<style>
+  @media print {
+    .navbar, .navbar-vertical, .card.mb-3, .btn { display: none !important; }
+    .page-wrapper { margin: 0; }
+  }
+</style>
+{% endblock %}

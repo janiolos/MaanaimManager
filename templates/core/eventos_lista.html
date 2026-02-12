@@ -1,0 +1,92 @@
+{% extends "layout/base.html" %}
+{% block content %}
+<div class="d-flex align-items-center mb-3">
+  <div>
+    <h2 class="page-title">{{ rotulo_evento_plural }}</h2>
+    <div class="text-muted">Gerencie os ciclos do sistema</div>
+  </div>
+  <div class="ms-auto">
+    <a class="btn btn-primary" href="{% url 'core:evento_criar' %}">Novo {{ rotulo_evento_singular|lower }}</a>
+  </div>
+</div>
+
+<div class="card mb-3">
+  <div class="card-header">
+    <h3 class="card-title">Calendario de {{ rotulo_evento_plural|lower }}</h3>
+  </div>
+  <div class="card-body">
+    <div id="eventos-calendario"></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="table-responsive">
+    <table class="table card-table table-vcenter">
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>Inicio</th>
+          <th>Fim</th>
+          <th>Status</th>
+          <th>Fechado</th>
+          <th>Centro de custo</th>
+          <th>Responsavel</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for evento in eventos %}
+          <tr>
+            <td>{{ evento.nome }}</td>
+            <td>{{ evento.data_inicio }}</td>
+            <td>{{ evento.data_fim }}</td>
+            <td>{{ evento.get_status_display }}</td>
+            <td>{{ evento.fechado|yesno:"Sim,Nao" }}</td>
+            <td>{{ evento.centro_custo|default:"-" }}</td>
+            <td>{{ evento.responsavel_geral|default:"-" }}</td>
+            <td class="text-end">
+              {% if not evento.fechado %}
+                <a class="btn btn-sm" href="{% url 'core:evento_editar' evento.id %}">Editar</a>
+              {% else %}
+                <span class="text-muted">Bloqueado</span>
+              {% endif %}
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="8">Nenhum ciclo cadastrado.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css">
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+<script>
+  (function () {
+    const calendarEl = document.getElementById('eventos-calendario');
+    if (!calendarEl) return;
+    const eventos = {{ eventos_calendario|safe }};
+    const calendar = new FullCalendar.Calendar(calendarEl, {
+      initialView: 'dayGridMonth',
+      locale: 'pt-br',
+      height: 'auto',
+      headerToolbar: {
+        left: 'prev,next today',
+        center: 'title',
+        right: 'multiMonthYear,dayGridMonth,timeGridWeek,listWeek'
+      },
+      views: {
+        multiMonthYear: {
+          type: 'multiMonth',
+          duration: { months: 12 }
+        }
+      },
+      events: eventos
+    });
+    calendar.render();
+  })();
+</script>
+{% endblock %}

@@ -1,0 +1,47 @@
+{% extends "layout/base.html" %}
+{% block content %}
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title">{{ acao }} chale</h3>
+  </div>
+  <div class="card-body">
+    <form method="post">
+      {% csrf_token %}
+      {{ form.non_field_errors }}
+      <div class="row">
+        <div class="col-md-4">
+          <label class="form-label">Codigo</label>
+          {{ form.codigo }}
+          {{ form.codigo.errors }}
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Capacidade</label>
+          {{ form.capacidade }}
+          {{ form.capacidade.errors }}
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Status</label>
+          {{ form.status }}
+          {{ form.status.errors }}
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-4">
+          <label class="form-label">Acessivel</label>
+          {{ form.acessivel_cadeirante }}
+          {{ form.acessivel_cadeirante.errors }}
+        </div>
+        <div class="col-md-8">
+          <label class="form-label">Observacoes</label>
+          {{ form.observacoes }}
+          {{ form.observacoes.errors }}
+        </div>
+      </div>
+      <div class="text-end" style="margin-top: 12px;">
+        <button class="btn btn-primary" type="submit">Salvar</button>
+        <a class="btn btn-outline" href="{% url 'lodging:chales_lista' %}">Cancelar</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

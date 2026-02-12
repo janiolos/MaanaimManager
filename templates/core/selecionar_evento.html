@@ -1,0 +1,29 @@
+{% extends "layout/base.html" %}
+{% block content %}
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Selecionar {{ rotulo_evento_singular|lower }} ativo</h3>
+        </div>
+        <div class="card-body">
+          <form method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+              <label class="form-label" for="evento_id">{{ rotulo_evento_singular }}</label>
+              <select class="form-select" id="evento_id" name="evento_id" required>
+                <option value="">Selecione...</option>
+                {% for evento in eventos %}
+                  <option value="{{ evento.id }}">{{ evento.nome }} ({{ evento.data_inicio }} - {{ evento.data_fim }})</option>
+                {% endfor %}
+              </select>
+            </div>
+            <button class="btn btn-primary" type="submit">Confirmar</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,56 @@
+{% extends "layout/base.html" %}
+{% block content %}
+<div class="row row-cards">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Relatorios financeiros</h3>
+      </div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <a class="card card-link" href="{% url 'finance:relatorio_evento' %}">
+              <div class="card-body">
+                <h4 class="card-title">Demonstrativo do {{ rotulo_evento_singular }}</h4>
+                <p class="text-muted">Resumo geral com KPIs e categorias.</p>
+              </div>
+            </a>
+          </div>
+          <div class="col-md-6">
+            <a class="card card-link" href="{% url 'finance:relatorio_detalhado' %}">
+              <div class="card-body">
+                <h4 class="card-title">Detalhamento de Lancamentos</h4>
+                <p class="text-muted">Auditoria com filtros e anexos.</p>
+              </div>
+            </a>
+          </div>
+          <div class="col-md-6">
+            <a class="card card-link" href="{% url 'finance:relatorio_conciliacao' %}">
+              <div class="card-body">
+                <h4 class="card-title">Conciliacao por Forma</h4>
+                <p class="text-muted">Receitas e despesas por forma de pagamento.</p>
+              </div>
+            </a>
+          </div>
+          <div class="col-md-6">
+            <a class="card card-link" href="{% url 'finance:relatorio_fluxo_caixa' %}">
+              <div class="card-body">
+                <h4 class="card-title">Fluxo de Caixa por Dia</h4>
+                <p class="text-muted">Entradas, saidas e saldo acumulado.</p>
+              </div>
+            </a>
+          </div>
+          <div class="col-md-6">
+            <a class="card card-link" href="{% url 'finance:relatorio_pdf' %}">
+              <div class="card-body">
+                <h4 class="card-title">Relatorio PDF (Modelo)</h4>
+                <p class="text-muted">Formato oficial com receitas e despesas.</p>
+              </div>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

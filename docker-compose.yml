@@ -1,0 +1,74 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: ${PROJECT_NAME:-eventa}_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      TZ: ${TIMEZONE:-America/Sao_Paulo}
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ${PROJECT_NAME:-eventa}_app
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      APP_PORT: ${APP_PORT:-8000}
+      APP_ENV: ${APP_ENV:-prod}
+      APP_SECRET_KEY: ${APP_SECRET_KEY}
+      APP_ALLOWED_HOSTS: ${APP_ALLOWED_HOSTS}
+      TIMEZONE: ${TIMEZONE:-America/Sao_Paulo}
+      DB_NAME: ${POSTGRES_DB}
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_HOST: db
+      DB_PORT: 5432
+      DJANGO_DEBUG: 0
+    expose:
+      - "${APP_PORT:-8000}"
+    volumes:
+      - ./media:/app/media
+      - ./data/static:/app/staticfiles
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:${APP_PORT:-8000}/login/ >/dev/null || exit 1"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: ${PROJECT_NAME:-eventa}_caddy
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      app:
+        condition: service_healthy
+
+volumes:
+  caddy_data:
+  caddy_config:

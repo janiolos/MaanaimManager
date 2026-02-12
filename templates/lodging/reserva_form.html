@@ -1,0 +1,129 @@
+{% extends "layout/base.html" %}
+{% block content %}
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title">{{ acao }} reserva</h3>
+  </div>
+  <div class="card-body">
+    <form method="post">
+      {% csrf_token %}
+      {{ form.non_field_errors }}
+      <div class="row">
+        <div class="col-md-6">
+          <label class="form-label">Chale</label>
+          <select class="form-select" name="chale" id="id_chale" required>
+            <option value="">Selecione...</option>
+            {% for chale in chales_disponiveis %}
+              <option value="{{ chale.id }}" data-capacidade="{{ chale.capacidade }}" data-acessivel="{{ chale.acessivel_cadeirante|yesno:'sim,nao' }}" {% if form.chale.value|stringformat:'s' == chale.id|stringformat:'s' %}selected{% endif %}>
+                {{ chale.codigo }} (cap: {{ chale.capacidade }}){% if chale.acessivel_cadeirante %} - acessivel{% endif %}
+              </option>
+            {% empty %}
+              <option value="" disabled>Nenhum chale disponivel para reserva</option>
+            {% endfor %}
+          </select>
+          {{ form.chale.errors }}
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Responsavel</label>
+          {{ form.responsavel_nome }}
+          {{ form.responsavel_nome.errors }}
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-3">
+          <label class="form-label">Qtd adultos</label>
+          {{ form.qtd_pessoas }}
+          {{ form.qtd_pessoas.errors }}
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Qtd criancas</label>
+          {{ form.qtd_criancas }}
+          {{ form.qtd_criancas.errors }}
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Idades criancas</label>
+          {{ form.idades_criancas }}
+          {{ form.idades_criancas.errors }}
+          <small class="text-muted">Separar por virgula. Ex: 4, 7, 10</small>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-3">
+          <label class="form-label">Valor adicional</label>
+          {{ form.valor_adicional }}
+          {{ form.valor_adicional.errors }}
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Status</label>
+          {{ form.status }}
+          {{ form.status.errors }}
+        </div>
+        <div class="col-md-3">
+          <div class="form-label">Pago</div>
+          <label class="form-check">
+            {{ form.pago }}
+            <span class="form-check-label">Pago</span>
+          </label>
+          {{ form.pago.errors }}
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-6">
+          <label class="form-label">Forma de pagamento</label>
+          {{ form.forma_pagamento }}
+          {{ form.forma_pagamento.errors }}
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Conta</label>
+          {{ form.conta }}
+          {{ form.conta.errors }}
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-12">
+          <label class="form-label">Observacoes</label>
+          {{ form.observacoes }}
+          {{ form.observacoes.errors }}
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6">
+          <div class="alert alert-info" id="chale-capacidade">Capacidade: -</div>
+        </div>
+        <div class="col-md-6">
+          <div class="alert alert-info" id="chale-acessivel">Acessivel: -</div>
+        </div>
+      </div>
+
+      <div class="text-end" style="margin-top: 12px;">
+        <button class="btn btn-primary" type="submit">Salvar</button>
+        <a class="btn btn-outline" href="{% url 'lodging:reservas_lista' %}">Cancelar</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  (function () {
+    const chaleSelect = document.getElementById('id_chale');
+    const capacidadeBox = document.getElementById('chale-capacidade');
+    const acessivelBox = document.getElementById('chale-acessivel');
+
+    function atualizarInfo() {
+      const option = chaleSelect.options[chaleSelect.selectedIndex];
+      const capacidade = option?.dataset?.capacidade || '-';
+      const acessivel = option?.dataset?.acessivel || '-';
+      capacidadeBox.textContent = `Capacidade: ${capacidade}`;
+      acessivelBox.textContent = `Acessivel: ${acessivel}`;
+    }
+
+    if (chaleSelect) {
+      chaleSelect.addEventListener('change', atualizarInfo);
+    }
+    atualizarInfo();
+  })();
+</script>
+{% endblock %}

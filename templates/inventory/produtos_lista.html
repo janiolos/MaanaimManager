@@ -1,0 +1,94 @@
+{% extends "layout/base.html" %}
+
+{% block title %}Estoque{% endblock %}
+
+{% block page_header %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h2 class="page-title">Estoque</h2>
+    <div class="text-muted">Gestao de produtos, entradas e alertas de minimo/maximo</div>
+  </div>
+  {% if pode_editar %}
+  <div class="d-flex gap-2">
+    <a class="btn btn-secondary" href="{% url 'inventory:entrada_criar' %}">Nova entrada</a>
+    <a class="btn btn-primary" href="{% url 'inventory:produto_criar' %}">Novo produto</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row mb-3">
+  <div class="col-md-4"><div class="card"><div class="card-body"><div class="text-muted">Produtos</div><div class="h2">{{ totais.total }}</div></div></div></div>
+  <div class="col-md-4"><div class="card"><div class="card-body"><div class="text-muted">Estoque baixo</div><div class="h2 text-danger">{{ totais.baixo }}</div></div></div></div>
+  <div class="col-md-4"><div class="card"><div class="card-body"><div class="text-muted">Acima do maximo</div><div class="h2 text-warning">{{ totais.acima }}</div></div></div></div>
+</div>
+
+<div class="card mb-3">
+  <div class="card-body">
+    <form class="row g-2" method="get">
+      <div class="col-md-5"><input class="form-control" type="text" name="busca" value="{{ filtros.busca }}" placeholder="Buscar por nome"></div>
+      <div class="col-md-3">
+        <select class="form-select" name="status">
+          <option value="">Todos os status</option>
+          <option value="baixo" {% if filtros.status == 'baixo' %}selected{% endif %}>Abaixo do minimo</option>
+          <option value="acima" {% if filtros.status == 'acima' %}selected{% endif %}>Acima do maximo</option>
+        </select>
+      </div>
+      <div class="col-md-2"><button class="btn btn-secondary w-100" type="submit">Filtrar</button></div>
+      <div class="col-md-2"><a class="btn btn-outline w-100" href="{% url 'inventory:produtos_lista' %}">Limpar</a></div>
+    </form>
+  </div>
+</div>
+
+<div class="card">
+  <div class="table-responsive">
+    <table class="table card-table table-vcenter">
+      <thead>
+        <tr>
+          <th>Produto</th>
+          <th>SKU</th>
+          <th>Unid.</th>
+          <th class="text-end">Atual</th>
+          <th class="text-end">Min.</th>
+          <th class="text-end">Max.</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for produto in page_obj %}
+          <tr>
+            <td>{{ produto.nome }}</td>
+            <td>{{ produto.sku }}</td>
+            <td>{{ produto.unidade }}</td>
+            <td class="text-end">{{ produto.estoque_atual }}</td>
+            <td class="text-end">{{ produto.estoque_minimo }}</td>
+            <td class="text-end">{{ produto.estoque_maximo }}</td>
+            <td>
+              {% if produto.status_estoque == 'BAIXO' %}
+                <span class="badge bg-danger">Baixo</span>
+              {% elif produto.status_estoque == 'ACIMA' %}
+                <span class="badge bg-warning">Acima</span>
+              {% else %}
+                <span class="badge bg-success">OK</span>
+              {% endif %}
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="7">Nenhum produto encontrado.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="card-footer d-flex justify-content-between align-items-center">
+    <a class="btn btn-secondary" href="{% url 'inventory:movimentos_lista' %}">Ver saidas/devolucoes</a>
+    {% if page_obj.paginator.num_pages > 1 %}
+      <div>
+        {% if page_obj.has_previous %}<a class="btn btn-outline" href="?{{ querystring }}&page={{ page_obj.previous_page_number }}">Anterior</a>{% endif %}
+        <span class="mx-2">Pagina {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}<a class="btn btn-outline" href="?{{ querystring }}&page={{ page_obj.next_page_number }}">Proxima</a>{% endif %}
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

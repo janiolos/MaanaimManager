@@ -1,0 +1,53 @@
+{% extends "layout/base.html" %}
+{% block content %}
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title">Anexos - {{ lancamento.descricao }}</h3>
+  </div>
+  <div class="card-body">
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div class="row">
+        <div class="col-md-6">
+          <label class="form-label">Arquivo</label>
+          {{ form.arquivo }}
+          {{ form.arquivo.errors }}
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Descricao</label>
+          {{ form.descricao }}
+          {{ form.descricao.errors }}
+        </div>
+      </div>
+      <div class="text-end" style="margin-top: 12px;">
+        <button class="btn btn-primary" type="submit">Enviar</button>
+        <a class="btn btn-outline" href="{{ return_url|default:'/finance/lancamentos/' }}">Voltar</a>
+      </div>
+    </form>
+  </div>
+  <div class="table-responsive">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Arquivo</th>
+          <th>Descricao</th>
+          <th>Enviado em</th>
+          <th>Enviado por</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for anexo in anexos %}
+          <tr>
+            <td><a href="{{ anexo.arquivo.url }}" target="_blank">{{ anexo.arquivo.name }}</a></td>
+            <td>{{ anexo.descricao }}</td>
+            <td>{{ anexo.enviado_em }}</td>
+            <td>{{ anexo.enviado_por }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="4">Nenhum anexo enviado.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maanaim - Gestão V32 (Obs + %)</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+
+    <style>
+        :root {
+            --bg-dark: #1a202e;
+            --card-bg: #242b3b;
+            --input-bg: #161b25;
+            --accent-orange: #ff9f1c;
+            --text-white: #ffffff;
+            --text-gray: #a0aec0;
+            --chart-red: #e63946;
+            --chart-green: #2a9d8f;
+            --chart-blue: #4cc9f0;
+            --sidebar-width: 240px;
+            --border-color: rgba(255, 255, 255, 0.08);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Roboto', sans-serif; }
+        
+        body { 
+            background-color: var(--bg-dark); 
+            color: var(--text-gray); 
+            height: 100vh; 
+            width: 100vw;
+            overflow: hidden; 
+        }
+
+        .app-container { display: flex; height: 100%; width: 100%; }
+
+        /* --- SIDEBAR --- */
+        .sidebar { 
+            width: var(--sidebar-width);
+            background-color: var(--card-bg); 
+            padding: 15px; 
+            display: flex; 
+            flex-direction: column; 
+            border-right: 1px solid rgba(255,255,255,0.05);
+            flex-shrink: 0; 
+        }
+        .logo { color: var(--text-white); font-size: 20px; font-weight: 700; margin-bottom: 25px; display: flex; align-items: center; gap: 10px; }
+        .logo img { height: 24px; width: auto; }
+        .nav-menu { list-style: none; flex-grow: 1; }
+        .nav-item { padding: 10px 12px; margin-bottom: 5px; border-radius: 6px; cursor: pointer; transition: 0.2s; font-weight: 500; display: flex; align-items: center; gap: 10px; font-size: 13px; }
+        .nav-item:hover { background-color: rgba(255, 255, 255, 0.05); }
+        .nav-item.active { background-color: rgba(255, 159, 28, 0.15); color: var(--accent-orange); border-left: 3px solid var(--accent-orange); }
+
+        /* --- CONTEÚDO PRINCIPAL --- */
+        .main-content {
+            flex-grow: 1;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden; 
+        }
+
+        .view-section { 
+            display: none; 
+            height: 100%; 
+            flex-direction: column; 
+            padding: 10px 15px; 
+            overflow: hidden; 
+        }
+        .view-section.active-view { display: flex; }
+
+        #lancamentos-view { overflow-y: auto; }
+        #relatorio-view { overflow-y: auto; }
+
+        header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 8px; 
+            flex-shrink: 0; 
+            height: 40px;
+        }
+        header h1 { color: var(--text-white); font-size: 18px; font-weight: 500; }
+        .header-controls { display: flex; gap: 8px; }
+
+        /* --- DASHBOARD GRID --- */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 3fr 1fr; 
+            gap: 10px;
+            flex-grow: 1; 
+            min-height: 0; 
+            padding-bottom: 5px;
+        }
+
+        .left-panel, .right-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            height: 100%;
+            min-height: 0;
+        }
+
+        .card { 
+            background-color: var(--card-bg); 
+            border-radius: 8px; 
+            padding: 10px; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2); 
+            display: flex;
+            flex-direction: column;
+        }
+
+        .kpi-row { 
+            display: grid; 
+            grid-template-columns: repeat(3, 1fr); 
+            gap: 10px; 
+            flex-shrink: 0; 
+            height: 70px;
+        }
+        .kpi-card { 
+            flex-direction: row; align-items: center; justify-content: space-between; padding: 0 15px; 
+        }
+        .kpi-info h3 { font-size: 10px; text-transform: uppercase; margin-bottom: 2px; color: var(--text-gray); }
+        .kpi-info .value { font-size: 18px; font-weight: 700; color: var(--text-white); }
+        .kpi-icon { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+        .icon-green { background: rgba(42, 157, 143, 0.15); color: var(--chart-green); }
+        .icon-red { background: rgba(230, 57, 70, 0.15); color: var(--chart-red); }
+        .icon-orange { background: rgba(255, 159, 28, 0.15); color: var(--accent-orange); }
+
+        .chart-box { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+        .chart-wrapper { flex-grow: 1; position: relative; width: 100%; min-height: 0; }
+        .chart-wrapper canvas { position: absolute; left: 0; top: 0; width: 100% !important; height: 100% !important; }
+        .chart-title { color: var(--text-white); font-size: 11px; font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 3px; margin-bottom: 5px; flex-shrink: 0; }
+
+        .unit-stats-container { display: flex; justify-content: space-between; margin-bottom: 5px; text-align: center; }
+        .unit-stat-item { flex: 1; border-right: 1px solid rgba(255,255,255,0.05); }
+        .unit-stat-item:last-child { border-right: none; }
+        .unit-label { font-size: 9px; color: var(--text-gray); display: block; }
+        .unit-val { font-size: 16px; font-weight: bold; color: white; }
+        
+        .people-row { display: flex; align-items: center; justify-content: space-between; margin-top: 5px; background: rgba(0,0,0,0.2); padding: 5px; border-radius: 4px; }
+        .people-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: white; font-weight: bold; }
+
+        /* --- FORMULÁRIO --- */
+        .form-container { width: 100%; max-width: 900px; margin: 0 auto; flex-shrink: 0; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+        .form-label { display: block; margin-bottom: 2px; color: var(--text-white); font-size: 12px; }
+        .form-input, .form-select { width: 100%; padding: 8px; background-color: var(--input-bg); border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; color: white; font-size: 13px; outline: none; height: 35px; }
+        
+        .buttons-row { display: flex; gap: 10px; margin-top: 5px; }
+        .btn-submit { background-color: var(--accent-orange); color: white; border: none; padding: 8px 20px; border-radius: 4px; font-weight: bold; cursor: pointer; width: auto; min-width: 120px; font-size: 12px; text-transform: uppercase; }
+        .btn-cancel { background-color: var(--chart-red); color: white; border: none; padding: 8px 15px; border-radius: 4px; font-weight: bold; cursor: pointer; width: auto; font-size: 12px; text-transform: uppercase; display: none; }
+
+        input[type="file"] { font-size: 12px; color: #a0aec0; padding: 5px; }
+        input[type="file"]::-webkit-file-upload-button { background: var(--input-bg); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 5px 10px; border-radius: 4px; cursor: pointer; margin-right: 10px; }
+
+        /* Tabela */
+        .table-wrapper { flex-grow: 1; overflow: auto; margin-top: 15px; border: 1px solid var(--border-color); border-radius: 6px; min-height: 200px; }
+        .transactions-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        .transactions-table th { position: sticky; top: 0; background: var(--card-bg); z-index: 1; }
+        .transactions-table th, .transactions-table td { border: 1px solid var(--border-color); padding: 8px; }
+        .transactions-table th { text-align: left; color: var(--text-gray); font-weight: bold; }
+        .transactions-table td { color: var(--text-white); }
+        
+        .badge { padding: 2px 5px; border-radius: 3px; font-size: 9px; font-weight: bold; text-transform: uppercase; display: inline-block; min-width: 50px; text-align: center; }
+        .badge-pix { background: rgba(50, 215, 75, 0.2); color: #32d74b; }
+        .badge-money { background: rgba(255, 159, 28, 0.2); color: var(--accent-orange); }
+        .badge-public { background: rgba(76, 201, 240, 0.2); color: var(--chart-blue); }
+        .action-btn { border: none; width: 24px; height: 24px; border-radius: 3px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; margin: 0 1px; font-size: 10px; }
+        .btn-delete { background: rgba(230, 57, 70, 0.2); color: var(--chart-red); }
+        .btn-edit { background: rgba(255, 159, 28, 0.2); color: var(--accent-orange); }
+        .btn-view-file { background: rgba(76, 201, 240, 0.2); color: var(--chart-blue); }
+
+        /* Modal de Anexos */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 999; display: none; justify-content: center; align-items: center; }
+        .modal-box { background: var(--card-bg); padding: 20px; border-radius: 8px; width: 90%; max-width: 400px; border: 1px solid var(--border-color); }
+        .modal-header { display: flex; justify-content: space-between; margin-bottom: 15px; color: white; font-weight: bold; }
+        .attachment-list { list-style: none; padding: 0; margin: 0; }
+        .attachment-item { display: flex; justify-content: space-between; padding: 10px; background: rgba(255,255,255,0.05); margin-bottom: 5px; border-radius: 4px; color: #ccc; font-size: 13px; }
+        .attachment-link { color: var(--chart-blue); text-decoration: none; font-weight: bold; }
+        .attachment-link:hover { text-decoration: underline; }
+
+        /* Relatório */
+        .report-paper { background: white; color: black; padding: 40px; border-radius: 4px; max-width: 800px; margin: 0 auto; font-family: 'Times New Roman', serif; display: block; }
+        .report-header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #000; padding-bottom: 10px; }
+        .report-header h2 { font-size: 16px; margin: 0; }
+        .report-header p { margin: 5px 0; font-size: 12px; }
+        .report-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 11px; }
+        .report-table th, .report-table td { border: 1px solid #000; padding: 4px; }
+        .report-table th { background-color: #eee; font-weight: bold; text-align: left; }
+        .col-desc { width: 80%; } .col-val { width: 20%; text-align: right; }
+        .section-title { background-color: #ddd; font-weight: bold; padding: 4px; margin-top: 15px; border: 1px solid #000; text-align: center; font-size: 12px; }
+        .signatures { margin-top: 40px; display: flex; justify-content: space-between; font-size: 10px; text-align: center; }
+        .sig-line { border-top: 1px solid #000; width: 30%; padding-top: 5px; }
+        .dash-filter-select { padding: 4px 8px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2); background: var(--input-bg); color: white; min-width: 160px; font-size: 12px; }
+
+        @media print {
+            body { background: white; overflow: visible; height: auto; }
+            .sidebar, .header-controls, .form-container, .dashboard-grid, .table-wrapper, .modal-overlay { display: none !important; }
+            .app-container { display: block; height: auto; }
+            .view-section { display: none; overflow: visible; height: auto; padding: 0; }
+            #relatorio-view { display: block !important; padding: 0; overflow: visible; }
+            .report-paper { box-shadow: none; padding: 0; width: 100%; margin: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="logo"><img src="image_2.png" alt="Logo"> MAANAIM</div>
+            <ul class="nav-menu">
+                <li class="nav-item active" onclick="switchView('dashboard', this)"><i class="fas fa-chart-pie"></i> Dashboard</li>
+                <li class="nav-item" onclick="switchView('lancamentos', this)"><i class="fas fa-plus-circle"></i> Lançamentos</li>
+                <li class="nav-item" onclick="switchView('relatorio', this)"><i class="fas fa-file-invoice-dollar"></i> Relatório Oficial</li>
+            </ul>
+        </aside>
+
+        <main class="main-content">
+            
+            <section id="dashboard-view" class="view-section active-view" style="overflow: hidden;">
+                <header>
+                    <h1>DASHBOARD FINANCEIRO</h1>
+                    <div class="header-controls">
+                        <select id="dashEventFilter" class="dash-filter-select" onchange="updateDashDateFilter(); updateDashboard()"><option value="">1. Todos os Eventos</option></select>
+                        <select id="dashDateFilter" class="dash-filter-select" onchange="updateDashboard()"><option value="">2. Todas as Datas</option></select>
+                    </div>
+                </header>
+
+                <div class="dashboard-grid">
+                    <div class="left-panel">
+                        <div class="card kpi-row" style="padding:0; background: transparent; box-shadow: none; border-radius:0; gap:10px;">
+                            <div class="card kpi-card">
+                                <div class="kpi-info"><h3>Receita</h3><div class="value" id="kpi-receita">R$ 0</div></div>
+                                <div class="kpi-icon icon-green"><i class="fas fa-arrow-up"></i></div>
+                            </div>
+                            <div class="card kpi-card">
+                                <div class="kpi-info"><h3>Despesa</h3><div class="value" id="kpi-despesa">R$ 0</div></div>
+                                <div class="kpi-icon icon-red"><i class="fas fa-arrow-down"></i></div>
+                            </div>
+                            <div class="card kpi-card">
+                                <div class="kpi-info"><h3>Saldo</h3><div class="value" id="kpi-saldo">R$ 0</div></div>
+                                <div class="kpi-icon icon-orange"><i class="fas fa-wallet"></i></div>
+                            </div>
+                        </div>
+                        <div class="card chart-box">
+                            <div class="chart-title">Evolução Mensal</div>
+                            <div class="chart-wrapper"><canvas id="chartReceitaMensal"></canvas></div>
+                        </div>
+                        <div class="card chart-box">
+                            <div class="chart-title">Eficiência (Unitário)</div>
+                            <div class="chart-wrapper"><canvas id="chartLineUnit"></canvas></div>
+                        </div>
+                        <div class="card chart-box">
+                            <div class="chart-title">Top Receitas (Valores)</div>
+                            <div class="chart-wrapper"><canvas id="chartBarReceitas"></canvas></div>
+                        </div>
+                    </div>
+
+                    <div class="right-panel">
+                        <div class="card" style="flex-shrink: 0;">
+                            <div class="chart-title">Métricas / Pessoa</div>
+                            <div class="unit-stats-container">
+                                <div class="unit-stat-item"><span class="unit-label">Bruta</span><span class="unit-val" id="val-rec-bruta" style="color:var(--chart-green)">0</span></div>
+                                <div class="unit-stat-item"><span class="unit-label">Líq.</span><span class="unit-val" id="val-rec-liq" style="color:white">0</span></div>
+                                <div class="unit-stat-item"><span class="unit-label">Custo</span><span class="unit-val" id="val-custo-unit" style="color:var(--chart-red)">0</span></div>
+                            </div>
+                            <div class="people-row">
+                                <div class="people-item" style="color:var(--chart-blue)"><i class="fas fa-user"></i> <span id="count-part">0</span></div>
+                                <div class="people-item" style="color:var(--accent-orange)"><i class="fas fa-user-tie"></i> <span id="count-trab">0</span></div>
+                            </div>
+                        </div>
+                        <div class="card chart-box">
+                            <div class="chart-title">Público</div>
+                            <div class="chart-wrapper"><canvas id="chartPizza"></canvas></div>
+                        </div>
+                        <div class="card chart-box">
+                            <div class="chart-title">Top Despesas</div>
+                            <div class="chart-wrapper"><canvas id="chartBarDespesas"></canvas></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="lancamentos-view" class="view-section">
+                <header><h1>REGISTRO DE MOVIMENTOS</h1></header>
+                <div class="card form-container">
+                    <form id="financeForm">
+                        <input type="hidden" id="editIdInput">
+                        <div class="form-row">
+                            <div><label class="form-label">Evento</label><select id="eventInput" class="form-select" required><option value="" disabled selected>Selecione...</option><option value="Jovens">Jovens</option><option value="Principiantes">Principiantes</option><option value="Acessibilidade">Acessibilidade</option><option value="Unidos em Família">Unidos em Família</option><option value="Trombetas e Festas">Trombetas e Festas</option><option value="GL e Instrumentistas">GL e Instrumentistas</option><option value="GI, Varões e Esposas">GI, Varões e Esposas</option><option value="Pais, Professores e Senhoras">Pais, Professores e Senhoras</option><option value="Preparo para Trombetas e Festas">Preparo para Trombetas e Festas</option><option value="GI, Senhoras e Obreiros Resp Grupo">GI, Senhoras e Obreiros Resp Grupo</option></select></div>
+                            <div><label class="form-label">Tipo</label><select id="typeInput" class="form-select" onchange="updateFormMode()" required><option value="receita">Receita (+)</option><option value="despesa">Despesa (-)</option><option value="publico" style="color:var(--chart-blue); font-weight:bold;">Registro de Público</option></select></div>
+                        </div>
+                        <div id="financeRow" class="form-row">
+                            <div><label class="form-label">Categoria</label><select id="categoryInput" class="form-select"></select></div>
+                            <div><label class="form-label">Pagamento</label><select id="paymentInput" class="form-select"><option value="PIX">PIX</option><option value="Dinheiro">Dinheiro</option></select></div>
+                        </div>
+                        <div id="publicRow" class="form-row" style="display: none;">
+                            <div><label class="form-label" style="color:var(--chart-blue); font-weight:bold;">Perfil</label><select id="publicProfileInput" class="form-select" style="border-color:var(--chart-blue);"><option value="Participantes">Participantes</option><option value="Trabalhadores">Trabalhadores</option></select></div>
+                            <div></div>
+                        </div>
+                        
+                        <div id="attachmentRow" class="form-row" style="display: none;">
+                            <div style="grid-column: span 2;">
+                                <label class="form-label" style="color:var(--accent-orange);">Anexar Comprovante / Nota Fiscal</label>
+                                <input type="file" id="attachmentInput" multiple accept="image/*,application/pdf" class="form-input">
+                            </div>
+                        </div>
+
+                        <div class="form-row" style="margin-bottom: 0;">
+                            <div><label class="form-label">Data</label><input type="date" id="dateInput" class="form-input" required></div>
+                            <div><label class="form-label" id="valueLabel">Valor (R$)</label><input type="number" id="valueInput" class="form-input" placeholder="0.00" step="0.01" required></div>
+                        </div>
+
+                        <div class="form-row" style="margin-top: 10px;">
+                            <div style="grid-column: span 2;">
+                                <label class="form-label">Observações</label>
+                                <input type="text" id="obsInput" class="form-input" placeholder="Informações adicionais (opcional)...">
+                            </div>
+                        </div>
+
+                        <div class="buttons-row">
+                            <button type="submit" id="submitBtn" class="btn-submit">CONFIRMAR</button>
+                            <button type="button" id="cancelBtn" class="btn-cancel" onclick="cancelEdit()">CANCELAR</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="table-wrapper">
+                    <table class="transactions-table">
+                        <thead><tr><th>Data</th><th>Evento</th><th>Descrição</th><th>Info</th><th style="text-align:right">Valor/Qtd</th><th style="text-align:center">Anexo</th><th style="text-align:center">Ações</th></tr></thead>
+                        <tbody id="full-history-list"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="relatorio-view" class="view-section">
+                <header>
+                    <h1>RELATÓRIO PDF</h1>
+                    <div class="header-controls">
+                        <select id="reportEventFilter" class="dash-filter-select" onchange="updateDateFilter(); generateReport()"><option value="">1. Selecione o Evento...</option></select>
+                        <select id="reportDateFilter" class="dash-filter-select" onchange="generateReport()"><option value="">2. Selecione a Data...</option></select>
+                        <button class="btn-submit" onclick="window.print()"><i class="fas fa-print"></i></button>
+                    </div>
+                </header>
+                <div class="report-paper">
+                    <div class="report-header"><h2>MAANAIM DE PEDRO DO RIO</h2><p id="report-subtitle">SELECIONE EVENTO E DATA</p></div>
+                    <div class="section-title">RECEITAS</div>
+                    <table class="report-table"><thead><tr><th class="col-desc">Descrição</th><th class="col-val">Valores (R$)</th></tr></thead><tbody id="report-receitas-body"></tbody><tfoot><tr><td style="text-align:right; font-weight:bold;">TOTAL DAS RECEITAS</td><td style="text-align:right; font-weight:bold;" id="report-total-receitas">R$ 0,00</td></tr></tfoot></table>
+                    <div class="section-title">DESPESAS GERAIS</div>
+                    <table class="report-table"><thead><tr><th class="col-desc">Descrição</th><th class="col-val">Valores (R$)</th></tr></thead><tbody id="report-despesas-body"></tbody><tfoot><tr><td style="text-align:right; font-weight:bold;">TOTAL DE DESPESAS</td><td style="text-align:right; font-weight:bold;" id="report-total-despesas">R$ 0,00</td></tr></tfoot></table>
+                    <div style="margin-top: 20px; font-weight: bold; border: 2px solid #000; padding: 10px; text-align: right;">RESULTADO (RECEITA - DESPESAS): <span id="report-saldo">R$ 0,00</span></div>
+                    <div class="signatures"><div class="sig-line">COORDENADOR DO MAANAIM</div><div class="sig-line">CONSELHO FISCAL</div><div class="sig-line">COMISSÃO DO MAANAIM</div></div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div id="attachmentsModal" class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-header">
+                <span>Anexos do Lançamento</span>
+                <span style="cursor:pointer;" onclick="closeAttachmentModal()">&times;</span>
+            </div>
+            <ul id="attachmentList" class="attachment-list"></ul>
+        </div>
+    </div>
+
+    <script>
+        // --- CONFIG ---
+        Chart.register(ChartDataLabels);
+        Chart.defaults.color = '#a0aec0';
+        Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.05)';
+        Chart.defaults.font.family = "'Roboto', sans-serif";
+        Chart.defaults.maintainAspectRatio = false;
+        
+        // Padrão Geral (Valores)
+        Chart.defaults.set('plugins.datalabels', {
+            color: '#fff', font: { weight: 'bold', size: 10 },
+            formatter: (value) => value >= 1000 ? (value/1000).toFixed(1)+'k' : value,
+            anchor: 'end', align: 'top', offset: -2
+        });
+
+        const catRec = ["Inscrições", "Checkin", "Hospedagem", "Livraria", "Secretaria", "Cantina", "Quiosque", "Receita Extra", "Doações"];
+        const catDesp = ["Água", "Energia Elétrica", "Gás Glp","Copa", "Copa Pastores", "Telefonia e Internet", "Combustíveis Máquinas", "Combustíveis Veículos", "Manutenção Veículos", "Seguro", "Tarifas Bancárias", "Materiais De Limpeza", "Lavanderia", "Medicamentos", "Ambulância", "Material Descartável", "Livraria", "Materiais Escritório", "Cantina", "Cozinha", "Multirão", "Manutenção Maanaim", "Despesas Extras"];
+
+        let transactions = JSON.parse(localStorage.getItem('maanaim_db_v32')) || [];
+        if(transactions.length === 0) {
+            const old = localStorage.getItem('maanaim_db_v31');
+            if(old) transactions = JSON.parse(old);
+        }
+
+        let charts = {};
+        let editingId = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('dateInput').valueAsDate = new Date();
+            document.getElementById('typeInput').value = "receita";
+            updateFormMode();
+            populateDashFilter();
+            initCharts();
+            updateDashboard();
+        });
+
+        function switchView(viewName, element) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active-view'));
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            document.getElementById(`${viewName}-view`).classList.add('active-view');
+            if(element) element.classList.add('active');
+            if(viewName === 'relatorio') { populateReportFilter(); generateReport(); }
+            if(viewName === 'dashboard') { populateDashFilter(); updateDashboard(); }
+        }
+
+        function updateFormMode() {
+            const type = document.getElementById('typeInput').value;
+            const financeRow = document.getElementById('financeRow');
+            const publicRow = document.getElementById('publicRow');
+            const attachmentRow = document.getElementById('attachmentRow');
+            const labelValue = document.getElementById('valueLabel');
+            const valueInput = document.getElementById('valueInput');
+
+            financeRow.style.display = 'none';
+            publicRow.style.display = 'none';
+            attachmentRow.style.display = 'none';
+
+            if (type === 'publico') {
+                publicRow.style.display = 'grid';
+                labelValue.innerText = "Quantidade";
+                valueInput.placeholder = "0";
+                document.getElementById('categoryInput').required = false;
+                document.getElementById('paymentInput').required = false;
+            } else {
+                financeRow.style.display = 'grid';
+                labelValue.innerText = "Valor (R$)";
+                valueInput.placeholder = "0.00";
+                document.getElementById('categoryInput').required = true;
+                document.getElementById('paymentInput').required = true;
+                updateCategories(type);
+                if(type === 'despesa') attachmentRow.style.display = 'grid';
+            }
+        }
+
+        function updateCategories(type) {
+            const select = document.getElementById('categoryInput');
+            const currentVal = select.value;
+            select.innerHTML = '';
+            const list = type === 'receita' ? catRec : catDesp;
+            list.forEach(c => { const o = document.createElement('option'); o.value = c; o.innerText = c; select.appendChild(o); });
+            if(currentVal && list.includes(currentVal)) select.value = currentVal;
+        }
+
+        // --- ARQUIVOS ---
+        function readFiles(inputElement) {
+            return new Promise((resolve, reject) => {
+                const files = inputElement.files;
+                if (!files || files.length === 0) return resolve([]);
+                const promises = Array.from(files).map(file => {
+                    return new Promise((res, rej) => {
+                        const reader = new FileReader();
+                        reader.onload = e => res({ name: file.name, type: file.type, data: e.target.result });
+                        reader.onerror = err => rej(err);
+                        reader.readAsDataURL(file);
+                    });
+                });
+                Promise.all(promises).then(results => resolve(results)).catch(err => reject(err));
+            });
+        }
+
+        const form = document.getElementById('financeForm');
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const type = document.getElementById('typeInput').value;
+            let attachments = [];
+            const fileInput = document.getElementById('attachmentInput');
+            
+            try {
+                if(type === 'despesa' && fileInput.files.length > 0) attachments = await readFiles(fileInput);
+            } catch (err) { alert("Erro ao processar arquivos."); return; }
+
+            const newData = {
+                id: editingId ? editingId : (Date.now() + Math.random()),
+                eventName: document.getElementById('eventInput').value,
+                type: type,
+                date: document.getElementById('dateInput').value,
+                value: parseFloat(document.getElementById('valueInput').value),
+                attachments: attachments,
+                obs: document.getElementById('obsInput').value // CAMPO OBSERVAÇÕES
+            };
+
+            if(editingId) {
+                const old = transactions.find(t => t.id === editingId);
+                if(attachments.length === 0 && old.attachments) newData.attachments = old.attachments;
+            }
+
+            if(type === 'publico') {
+                newData.category = document.getElementById('publicProfileInput').value;
+                newData.payment = '-';
+            } else {
+                newData.category = document.getElementById('categoryInput').value;
+                newData.payment = document.getElementById('paymentInput').value;
+            }
+
+            try {
+                if(editingId) {
+                    const index = transactions.findIndex(t => t.id === editingId);
+                    if(index !== -1) transactions[index] = newData;
+                    alert('Atualizado!');
+                } else {
+                    transactions.push(newData);
+                    alert('Salvo!');
+                }
+                saveData();
+            } catch (e) {
+                alert("Erro: Armazenamento cheio!");
+                if(!editingId) transactions.pop();
+                return;
+            }
+
+            cancelEdit();
+            populateDashFilter();
+            updateDashboard();
+        });
+
+        function editTransaction(id) {
+            const t = transactions.find(x => x.id === id);
+            if(!t) return;
+            document.getElementById('eventInput').value = t.eventName;
+            document.getElementById('typeInput').value = t.type;
+            document.getElementById('dateInput').value = t.date;
+            document.getElementById('valueInput').value = t.value;
+            document.getElementById('obsInput').value = t.obs || ''; // Carrega OBS
+            updateFormMode();
+            if(t.type === 'publico') document.getElementById('publicProfileInput').value = t.category;
+            else { document.getElementById('categoryInput').value = t.category; document.getElementById('paymentInput').value = t.payment; }
+            editingId = id;
+            document.getElementById('submitBtn').innerText = "SALVAR";
+            document.getElementById('submitBtn').style.background = "#e68e19";
+            document.getElementById('cancelBtn').style.display = "block";
+        }
+
+        function cancelEdit() {
+            editingId = null;
+            form.reset();
+            document.getElementById('attachmentInput').value = "";
+            document.getElementById('dateInput').valueAsDate = new Date();
+            document.getElementById('typeInput').value = "receita";
+            updateFormMode();
+            document.getElementById('submitBtn').innerText = "CONFIRMAR";
+            document.getElementById('submitBtn').style.background = "var(--accent-orange)";
+            document.getElementById('cancelBtn').style.display = "none";
+        }
+
+        function deleteTransaction(id) {
+            if(confirm('Apagar?')) {
+                transactions = transactions.filter(t => t.id !== id);
+                if(editingId === id) cancelEdit();
+                saveData();
+                updateDashboard();
+            }
+        }
+
+        function viewAttachments(id) {
+            const t = transactions.find(x => x.id === id);
+            if(!t || !t.attachments || t.attachments.length === 0) return;
+            const list = document.getElementById('attachmentList');
+            list.innerHTML = '';
+            t.attachments.forEach(file => {
+                const li = document.createElement('li');
+                li.className = 'attachment-item';
+                li.innerHTML = `<span>${file.name}</span> <a href="${file.data}" download="${file.name}" class="attachment-link" target="_blank">Baixar</a>`;
+                list.appendChild(li);
+            });
+            document.getElementById('attachmentsModal').style.display = 'flex';
+        }
+        function closeAttachmentModal() { document.getElementById('attachmentsModal').style.display = 'none'; }
+
+        // --- DASHBOARD ---
+        function populateDashFilter() {
+            const s = document.getElementById('dashEventFilter');
+            const cur = s.value;
+            const evs = [...new Set(transactions.map(t => t.eventName))].sort();
+            s.innerHTML = '<option value="">1. Todos os Eventos</option>';
+            evs.forEach(e => { if(e) { const o = document.createElement('option'); o.value = e; o.innerText = e; s.appendChild(o); }});
+            if(evs.includes(cur)) s.value = cur;
+            updateDashDateFilter();
+        }
+
+        function updateDashDateFilter() {
+            const evt = document.getElementById('dashEventFilter').value;
+            const dateSel = document.getElementById('dashDateFilter');
+            dateSel.innerHTML = '<option value="">2. Todas as Datas</option>';
+            if(evt) {
+                const dates = [...new Set(transactions.filter(t => t.eventName === evt).map(t => t.date))].sort().reverse();
+                dates.forEach(d => { const o = document.createElement('option'); o.value = d; o.innerText = formatDate(d); dateSel.appendChild(o); });
+            }
+        }
+
+        function updateDashboard() {
+            const evtFilter = document.getElementById('dashEventFilter').value;
+            const dateFilter = document.getElementById('dashDateFilter').value;
+            let data = transactions;
+            if(evtFilter) data = data.filter(t => t.eventName === evtFilter);
+            if(dateFilter) data = data.filter(t => t.date === dateFilter);
+
+            let rec=0, desp=0, part=0, trab=0;
+            const catRecData = {}, catDespData = {};
+
+            data.forEach(t => {
+                if(t.type==='receita') { rec+=t.value; catRecData[t.category] = (catRecData[t.category]||0)+t.value; }
+                if(t.type==='despesa') { desp+=t.value; catDespData[t.category] = (catDespData[t.category]||0)+t.value; }
+                if(t.type==='publico') { if(t.category==='Participantes') part+=t.value; if(t.category==='Trabalhadores') trab+=t.value; }
+            });
+            const pes = part + trab; const res = rec - desp;
+
+            document.getElementById('kpi-receita').innerText = formatCurrency(rec);
+            document.getElementById('kpi-despesa').innerText = formatCurrency(desp);
+            document.getElementById('kpi-saldo').innerText = formatCurrency(res);
+            document.getElementById('kpi-saldo').style.color = res >= 0 ? 'var(--chart-green)' : 'var(--chart-red)';
+
+            document.getElementById('val-rec-bruta').innerText = pes > 0 ? (rec/pes).toFixed(2) : "0,00";
+            document.getElementById('val-custo-unit').innerText = pes > 0 ? (desp/pes).toFixed(2) : "0,00";
+            document.getElementById('val-rec-liq').innerText = pes > 0 ? (res/pes).toFixed(2) : "0,00";
+            document.getElementById('count-part').innerText = part;
+            document.getElementById('count-trab').innerText = trab;
+
+            updateHistoryTable(data.slice().reverse().slice(0,50));
+            updateCharts(data, part, trab, catRecData, catDespData);
+        }
+
+        function updateHistoryTable(list) {
+            document.getElementById('full-history-list').innerHTML = list.map(t => {
+                let cls = t.type==='receita'?'row-receita':(t.type==='despesa'?'row-despesa':'row-publico');
+                let badge = t.type==='receita'?'badge-money':(t.type==='despesa'?'badge-money':'badge-public');
+                let val = t.type==='publico' ? `<strong>${t.value}</strong>` : formatCurrency(t.value);
+                let info = t.type==='publico' ? 'PRESENÇA' : t.payment;
+                
+                let clipBtn = '';
+                if(t.attachments && t.attachments.length > 0) clipBtn = `<button class="action-btn btn-view-file" onclick="viewAttachments(${t.id})"><i class="fas fa-paperclip"></i></button>`;
+                else clipBtn = `<span style="width:24px; display:inline-block;"></span>`;
+
+                return `<tr class="${cls}">
+                    <td>${formatDate(t.date)}</td>
+                    <td>${t.eventName}</td>
+                    <td title="${t.obs||''}">${t.category} ${t.obs ? '<i class="fas fa-info-circle" style="font-size:10px; opacity:0.5"></i>' : ''}</td>
+                    <td><span class="badge ${t.payment==='PIX'?'badge-pix':badge}">${info}</span></td>
+                    <td style="text-align:right">${val}</td>
+                    <td style="text-align:center">${clipBtn}</td>
+                    <td style="text-align:center">
+                        <button class="action-btn btn-edit" onclick="editTransaction(${t.id})"><i class="fas fa-pen"></i></button>
+                        <button class="action-btn btn-delete" onclick="deleteTransaction(${t.id})"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>`;
+            }).join('');
+        }
+
+        function initCharts() {
+            const commonOpt = { plugins: { legend: {display: false}, datalabels: { display: true, color: 'white' } }, scales: { y: { beginAtZero:true, grid:{color:'rgba(255,255,255,0.05)'} } } };
+            charts.monthly = new Chart(document.getElementById('chartReceitaMensal'), { type: 'bar', data: { labels: [], datasets: [{ label: 'Receita', data: [], backgroundColor: '#2a9d8f', borderRadius:3 }] }, options: commonOpt });
+            charts.lineUnit = new Chart(document.getElementById('chartLineUnit'), { type: 'line', data: { labels: [], datasets: [{ label: 'Rec.', data: [], borderColor: '#2a9d8f' }, { label: 'Custo', data: [], borderColor: '#e63946' }] }, options: { plugins: { legend: {position:'top', labels:{boxWidth:8, font:{size:9}}}, datalabels: { align: 'top', formatter: v => v.toFixed(1) } } } });
+            
+            // PIZZA COM PORCENTAGEM
+            charts.pizza = new Chart(document.getElementById('chartPizza'), { 
+                type: 'doughnut', 
+                data: { labels: ['Part.', 'Trab.'], datasets: [{ data: [0, 0], backgroundColor: ['#4cc9f0', '#ff9f1c'], borderWidth:0 }] }, 
+                options: { 
+                    plugins: { 
+                        legend: {position:'right', labels:{boxWidth:8, font:{size:9}}}, 
+                        datalabels: { 
+                            color: '#fff',
+                            font: { weight: 'bold' },
+                            formatter: (value, ctx) => {
+                                let sum = 0;
+                                let dataArr = ctx.chart.data.datasets[0].data;
+                                dataArr.map(data => { sum += data; });
+                                if (sum === 0) return '0%';
+                                let percentage = (value*100 / sum).toFixed(0)+"%";
+                                return percentage;
+                            }
+                        } 
+                    }, 
+                    cutout:'60%' 
+                } 
+            });
+
+            charts.barRec = new Chart(document.getElementById('chartBarReceitas'), { type: 'bar', data: { labels: [], datasets: [{ data: [], backgroundColor: '#2a9d8f', borderRadius:3 }] }, options: { indexAxis: 'y', plugins: { legend: {display:false}, datalabels: { anchor: 'end', align: 'end' } }, scales: { x: {display:false}, y: {grid:{display:false}} } } });
+            charts.barDesp = new Chart(document.getElementById('chartBarDespesas'), { type: 'bar', data: { labels: [], datasets: [{ data: [], backgroundColor: '#e63946', borderRadius:3 }] }, options: { indexAxis: 'y', plugins: { legend: {display:false}, datalabels: { anchor: 'end', align: 'end' } }, scales: { x: {display:false}, y: {grid:{display:false}} } } });
+        }
+
+        function updateCharts(data, part, trab, catRec, catDesp) {
+            charts.pizza.data.datasets[0].data = [part, trab]; charts.pizza.update();
+            const months = {};
+            data.forEach(t => {
+                if(t.date) {
+                    const mKey = t.date.substring(0,7);
+                    if(!months[mKey]) months[mKey] = { r:0, d:0, p:0 };
+                    if(t.type==='receita') months[mKey].r+=t.value; 
+                    if(t.type==='despesa') months[mKey].d+=t.value; 
+                    if(t.type==='publico') months[mKey].p+=t.value;
+                }
+            });
+            const mSorted = Object.keys(months).sort();
+            charts.monthly.data.labels = mSorted.map(m=>m.split('-')[1]+'/'+m.split('-')[0]);
+            charts.monthly.data.datasets[0].data = mSorted.map(m=>months[m].r);
+            charts.monthly.update();
+            charts.lineUnit.data.labels = mSorted.map(m=>m.split('-')[1]+'/'+m.split('-')[0]);
+            charts.lineUnit.data.datasets[0].data = mSorted.map(m=>months[m].p>0 ? months[m].r/months[m].p : 0);
+            charts.lineUnit.data.datasets[1].data = mSorted.map(m=>months[m].p>0 ? months[m].d/months[m].p : 0);
+            charts.lineUnit.update();
+            const sortTop = (o) => Object.entries(o).sort((a,b)=>b[1]-a[1]).slice(0,5);
+            const topR = sortTop(catRec);
+            charts.barRec.data.labels = topR.map(i=>i[0]); charts.barRec.data.datasets[0].data = topR.map(i=>i[1]); charts.barRec.update();
+            const topD = sortTop(catDesp);
+            charts.barDesp.data.labels = topD.map(i=>i[0]); charts.barDesp.data.datasets[0].data = topD.map(i=>i[1]); charts.barDesp.update();
+        }
+
+        function populateReportFilter() {
+            const s = document.getElementById('reportEventFilter');
+            const evs = [...new Set(transactions.map(t => t.eventName))].sort();
+            s.innerHTML = '<option value="">1. Selecione o Evento...</option>';
+            evs.forEach(e => { if(e) { const o = document.createElement('option'); o.value = e; o.innerText = e; s.appendChild(o); }});
+        }
+        function updateDateFilter() {
+            const evt = document.getElementById('reportEventFilter').value;
+            const s = document.getElementById('reportDateFilter');
+            s.innerHTML = '<option value="">2. Selecione a Data...</option>';
+            if(evt) {
+                const dates = [...new Set(transactions.filter(t=>t.eventName===evt).map(t=>t.date))].sort().reverse();
+                dates.forEach(d => { if(d) { const o = document.createElement('option'); o.value = d; o.innerText = formatDate(d); s.appendChild(o); }});
+            }
+        }
+        function generateReport() {
+            const evt = document.getElementById('reportEventFilter').value;
+            const dt = document.getElementById('reportDateFilter').value;
+            let list = [];
+            if(evt && dt) {
+                list = transactions.filter(t => t.eventName === evt && t.date === dt && t.type !== 'publico');
+                document.getElementById('report-subtitle').innerText = `RELATÓRIO - ${evt.toUpperCase()} - ${formatDate(dt)}`;
+            } else {
+                document.getElementById('report-subtitle').innerText = "SELECIONE EVENTO E DATA";
+            }
+            const renderRows = (arr, idBody, idTotal) => {
+                const grp = {}; let tot = 0;
+                arr.forEach(t => { const k = `${t.category} - ${t.payment}`; grp[k] = (grp[k]||0)+t.value; tot+=t.value; });
+                const rows = Object.keys(grp).sort().map(k => `<tr><td class="col-desc">${k}</td><td class="col-val">${formatCurrency(grp[k])}</td></tr>`).join('');
+                document.getElementById(idBody).innerHTML = rows || "<tr><td colspan='2'>Sem registros</td></tr>";
+                document.getElementById(idTotal).innerText = formatCurrency(tot);
+                return tot;
+            };
+            const tr = renderRows(list.filter(t=>t.type==='receita'), 'report-receitas-body', 'report-total-receitas');
+            const td = renderRows(list.filter(t=>t.type==='despesa'), 'report-despesas-body', 'report-total-despesas');
+            document.getElementById('report-saldo').innerText = formatCurrency(tr - td);
+        }
+
+        function saveData() { localStorage.setItem('maanaim_db_v32', JSON.stringify(transactions)); }
+        function formatCurrency(v) { return v.toLocaleString('pt-BR', {style:'currency', currency:'BRL'}); }
+        function formatDate(d) { if(!d) return "-"; const [y,m,x] = d.split('-'); return `${x}/${m}/${y}`; }
+    </script>
+</body>
+</html>

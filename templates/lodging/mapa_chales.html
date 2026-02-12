@@ -1,0 +1,38 @@
+{% extends "layout/base.html" %}
+{% block content %}
+<div class="d-flex align-items-center mb-3">
+  <div>
+    <h2 class="page-title">Mapa de chales</h2>
+    <div class="text-muted">Visao rapida das ocupacoes</div>
+  </div>
+</div>
+
+<div class="row row-cards">
+  {% for card in cards %}
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">{{ card.chale.codigo }}</h3>
+        </div>
+        <div class="card-body">
+          <p>Capacidade: {{ card.chale.capacidade }}</p>
+          {% if card.chale.acessivel_cadeirante %}
+            <span class="badge bg-info">Acessivel</span>
+          {% endif %}
+          <div class="mt-2">
+            {% if card.estado == 'indisponivel' %}
+              <span class="badge bg-danger">Indisponivel</span>
+              <div class="text-muted">{{ card.chale.get_status_display }}</div>
+            {% elif card.estado == 'ocupado' %}
+              <span class="badge bg-success">Confirmada</span>
+              <div>{{ card.reserva.responsavel_nome }} ({{ card.reserva.qtd_pessoas }})</div>
+            {% else %}
+              <span class="badge bg-warning">Livre</span>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+{% endblock %}

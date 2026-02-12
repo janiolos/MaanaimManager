@@ -1,0 +1,164 @@
+{% extends "layout/base.html" %}
+{% block page_header %}
+<div class="page-header d-print-none">
+  <div class="row align-items-center">
+    <div class="col">
+      <div class="page-pretitle">Financeiro</div>
+      <h2 class="page-title">Lancamentos financeiros</h2>
+      <ol class="breadcrumb breadcrumb-arrows mt-2">
+        <li class="breadcrumb-item"><a href="/">Inicio</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Lancamentos</li>
+      </ol>
+    </div>
+    <div class="col-auto ms-auto d-print-none">
+      <a class="btn btn-primary" href="{% url 'finance:lancamento_criar' %}">
+        <i class="ti ti-plus me-1" aria-hidden="true"></i>Novo lancamento
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title">Filtros</h3>
+  </div>
+  <div class="card-body">
+    <form method="get" class="row">
+      <div class="col-md-2">
+        <label class="form-label">Data inicio</label>
+        <input class="form-control" type="date" name="data_inicio" value="{{ filtros.data_inicio }}">
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">Data fim</label>
+        <input class="form-control" type="date" name="data_fim" value="{{ filtros.data_fim }}">
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">Tipo</label>
+        <select class="form-select" name="tipo" id="filtro_tipo">
+          <option value="">Todos</option>
+          <option value="RECEITA" {% if filtros.tipo == 'RECEITA' %}selected{% endif %}>Receita</option>
+          <option value="DESPESA" {% if filtros.tipo == 'DESPESA' %}selected{% endif %}>Despesa</option>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">Categoria</label>
+        <select class="form-select" name="categoria" id="filtro_categoria">
+          <option value="">Todas</option>
+          {% for categoria in categorias %}
+            <option value="{{ categoria.id }}" {% if filtros.categoria == categoria.id|stringformat:'s' %}selected{% endif %}>{{ categoria.nome }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">Conta</label>
+        <select class="form-select" name="conta">
+          <option value="">Todas</option>
+          {% for conta in contas %}
+            <option value="{{ conta.id }}" {% if filtros.conta == conta.id|stringformat:'s' %}selected{% endif %}>{{ conta.nome }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">Texto</label>
+        <div class="input-icon">
+          <input class="form-control" type="text" name="texto" placeholder="Descricao" value="{{ filtros.texto }}">
+          <span class="input-icon-addon">
+            <i class="ti ti-search" aria-hidden="true"></i>
+          </span>
+        </div>
+      </div>
+      <div class="col-md-12 text-end" style="margin-top: 12px;">
+        <button class="btn btn-secondary" type="submit">Filtrar</button>
+        <a class="btn btn-outline" href="{% url 'finance:lancamentos_lista' %}">Limpar</a>
+      </div>
+    </form>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Data</th>
+          <th>Descricao</th>
+          <th>Tipo</th>
+          <th>Categoria</th>
+          <th>Conta</th>
+          <th class="text-end">Valor</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for lancamento in page_obj %}
+          <tr>
+            <td>{{ lancamento.data }}</td>
+            <td>{{ lancamento.descricao }}</td>
+            <td>{{ lancamento.get_tipo_display }}</td>
+            <td>{{ lancamento.categoria.nome }}</td>
+            <td>{{ lancamento.conta.nome }}</td>
+            <td class="text-end">R$ {{ lancamento.valor|floatformat:2 }}</td>
+            <td class="text-end">
+              <a class="btn btn-sm" href="{% url 'finance:lancamento_editar' lancamento.id %}?next={{ request.get_full_path|urlencode }}">Editar</a>
+              <a class="btn btn-sm" href="{% url 'finance:lancamento_excluir' lancamento.id %}?next={{ request.get_full_path|urlencode }}">Excluir</a>
+              <a class="btn btn-sm" href="{% url 'finance:anexos' lancamento.id %}?next={{ request.get_full_path|urlencode }}">Anexos</a>
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="7">Nenhum lancamento encontrado.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card-body">
+    <ul class="pagination">
+      {% if page_obj.has_previous %}
+        <li><a href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page_obj.previous_page_number }}">Anterior</a></li>
+      {% endif %}
+      {% for page in page_obj.paginator.page_range %}
+        <li class="{% if page_obj.number == page %}active{% endif %}">
+          <a href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page }}">{{ page }}</a>
+        </li>
+      {% endfor %}
+      {% if page_obj.has_next %}
+        <li><a href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page_obj.next_page_number }}">Proxima</a></li>
+      {% endif %}
+    </ul>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  (function () {
+    const tipoSelect = document.getElementById('filtro_tipo');
+    const categoriaSelect = document.getElementById('filtro_categoria');
+
+    if (!tipoSelect || !categoriaSelect) return;
+
+    async function filtrarCategorias() {
+      const tipo = tipoSelect.value;
+      const selected = categoriaSelect.value;
+      try {
+        const response = await fetch(`{% url 'finance:categorias_por_tipo' %}?tipo=${encodeURIComponent(tipo)}`);
+        const data = await response.json();
+        categoriaSelect.innerHTML = '<option value=\"\">Todas</option>';
+        data.categorias.forEach((categoria) => {
+          const opt = document.createElement('option');
+          opt.value = categoria.id;
+          opt.textContent = categoria.nome;
+          if (String(categoria.id) === String(selected)) {
+            opt.selected = true;
+          }
+          categoriaSelect.appendChild(opt);
+        });
+      } catch (err) {
+        // fallback: keep current options on error
+      }
+    }
+
+    tipoSelect.addEventListener('change', filtrarCategorias);
+    filtrarCategorias();
+  })();
+</script>
+{% endblock %}

@@ -1,0 +1,105 @@
+{% extends "layout/base.html" %}
+{% block content %}
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title">{{ acao }} lancamento</h3>
+  </div>
+  <div class="card-body">
+    <form method="post">
+      {% csrf_token %}
+      {{ form.non_field_errors }}
+      <div class="row">
+        <div class="col-md-3">
+          <label class="form-label">Tipo</label>
+          {{ form.tipo }}
+          {{ form.tipo.errors }}
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Categoria</label>
+          <select name="categoria" id="id_categoria" class="form-select" required>
+            <option value="">Selecione...</option>
+            {% for categoria in categorias %}
+              <option value="{{ categoria.id }}"
+                      data-tipo="{{ categoria.tipo }}"
+                      {% if form.categoria.value|stringformat:'s' == categoria.id|stringformat:'s' %}selected{% endif %}>
+                {{ categoria.nome }}
+              </option>
+            {% endfor %}
+          </select>
+          {{ form.categoria.errors }}
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Conta</label>
+          {{ form.conta }}
+          {{ form.conta.errors }}
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Data</label>
+          {{ form.data }}
+          {{ form.data.errors }}
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-6">
+          <label class="form-label">Descricao</label>
+          {{ form.descricao }}
+          {{ form.descricao.errors }}
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Valor</label>
+          {{ form.valor }}
+          {{ form.valor.errors }}
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Forma de pagamento</label>
+          {{ form.forma_pagamento }}
+          {{ form.forma_pagamento.errors }}
+        </div>
+      </div>
+      <div class="text-end" style="margin-top: 12px;">
+        <button class="btn btn-primary" type="submit">Salvar</button>
+        <a class="btn btn-outline" href="{{ return_url|default:'/finance/lancamentos/' }}">Cancelar</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  (function () {
+    const tipoSelect = document.getElementById('id_tipo');
+    const categoriaSelect = document.getElementById('id_categoria');
+
+    if (!tipoSelect || !categoriaSelect) return;
+
+    async function filtrarCategorias() {
+      const tipo = tipoSelect.value;
+      const selected = categoriaSelect.value;
+
+      try {
+        const response = await fetch(`{% url 'finance:categorias_por_tipo' %}?tipo=${encodeURIComponent(tipo)}`);
+        const data = await response.json();
+        categoriaSelect.innerHTML = '<option value=\"\">Selecione...</option>';
+        data.categorias.forEach((categoria) => {
+          const opt = document.createElement('option');
+          opt.value = categoria.id;
+          opt.textContent = categoria.nome;
+          if (String(categoria.id) === String(selected)) {
+            opt.selected = true;
+          }
+          categoriaSelect.appendChild(opt);
+        });
+        if (!categoriaSelect.value) {
+          categoriaSelect.value = '';
+        }
+      } catch (err) {
+        // fallback: keep current options on error
+      }
+    }
+
+    tipoSelect.addEventListener('change', filtrarCategorias);
+    filtrarCategorias();
+  })();
+</script>
+{% endblock %}

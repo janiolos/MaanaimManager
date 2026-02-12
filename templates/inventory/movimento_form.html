@@ -1,0 +1,24 @@
+{% extends "layout/base.html" %}
+
+{% block title %}Saida / Devolucao{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card-header"><h3 class="card-title">Nova movimentacao de estoque</h3></div>
+  <div class="card-body">
+    <p class="text-muted">Ciclo atual: <strong>{{ evento.nome }}</strong></p>
+    <form method="post" class="row g-3">
+      {% csrf_token %}
+      <div class="col-md-4">{{ form.tipo.label_tag }}{{ form.tipo }}</div>
+      <div class="col-md-4">{{ form.produto.label_tag }}{{ form.produto }}</div>
+      <div class="col-md-4">{{ form.data.label_tag }}{{ form.data }}</div>
+      <div class="col-md-4">{{ form.quantidade.label_tag }}{{ form.quantidade }}</div>
+      <div class="col-md-12">{{ form.observacao.label_tag }}{{ form.observacao }}</div>
+      <div class="col-12 d-flex justify-content-end gap-2">
+        <a class="btn btn-outline" href="{% url 'inventory:movimentos_lista' %}">Cancelar</a>
+        <button class="btn btn-primary" type="submit">Registrar movimentacao</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

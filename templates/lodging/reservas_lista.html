@@ -1,0 +1,118 @@
+{% extends "layout/base.html" %}
+{% load finance_extras %}
+{% block content %}
+<div class="d-flex align-items-center mb-3">
+  <div>
+    <h2 class="page-title">Reservas de chales</h2>
+    <div class="text-muted">{{ rotulo_evento_singular }} atual</div>
+  </div>
+  <div class="ms-auto">
+    <a class="btn btn-primary" href="{% url 'lodging:reserva_criar' %}">Nova reserva</a>
+  </div>
+</div>
+
+<div class="card mb-3">
+  <div class="card-body">
+    <form method="get" class="row g-3">
+      <div class="col-md-3">
+        <label class="form-label">Status</label>
+        <select class="form-select" name="status">
+          <option value="">Todos</option>
+          {% for code, label in status_choices %}
+            <option value="{{ code }}" {% if filtros.status == code %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Chale</label>
+        <select class="form-select" name="chale">
+          <option value="">Todos</option>
+          {% for chale in chales %}
+            <option value="{{ chale.id }}" {% if filtros.chale == chale.id|stringformat:'s' %}selected{% endif %}>{{ chale.codigo }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Acessivel</label>
+        <select class="form-select" name="acessivel">
+          <option value="">Todos</option>
+          <option value="sim" {% if filtros.acessivel == 'sim' %}selected{% endif %}>Sim</option>
+          <option value="nao" {% if filtros.acessivel == 'nao' %}selected{% endif %}>Nao</option>
+        </select>
+      </div>
+      <div class="col-md-3 text-end" style="margin-top: 28px;">
+        <button class="btn btn-secondary" type="submit">Filtrar</button>
+        <a class="btn btn-outline" href="{% url 'lodging:reservas_lista' %}">Limpar</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="card">
+  <div class="table-responsive">
+    <table class="table card-table table-vcenter">
+      <thead>
+        <tr>
+          <th>Chale</th>
+          <th>Responsavel</th>
+          <th>Adultos</th>
+          <th>Criancas</th>
+          <th>Idades</th>
+          <th>Status</th>
+          <th>Pago</th>
+          <th>Forma</th>
+          <th class="text-end">Valor adicional</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for reserva in page_obj %}
+          <tr>
+            <td>
+              {{ reserva.chale.codigo }}
+              {% if reserva.chale.acessivel_cadeirante %}
+                <span class="badge bg-info">Acessivel</span>
+              {% endif %}
+            </td>
+            <td>{{ reserva.responsavel_nome }}</td>
+            <td>{{ reserva.qtd_pessoas }}</td>
+            <td>{{ reserva.qtd_criancas }}</td>
+            <td>{{ reserva.idades_criancas|default:"-" }}</td>
+            <td>{{ reserva.get_status_display }}</td>
+            <td>
+              {% if reserva.pago %}
+                <span class="badge bg-success">Pago</span>
+              {% else %}
+                <span class="badge bg-warning">Pendente</span>
+              {% endif %}
+            </td>
+            <td>{{ reserva.get_forma_pagamento_display|default:"-" }}</td>
+            <td class="text-end">{{ reserva.valor_adicional|brl }}</td>
+            <td class="text-end">
+              <a class="btn btn-sm" href="{% url 'lodging:reserva_editar' reserva.id %}">Editar</a>
+              <a class="btn btn-sm btn-outline-danger" href="{% url 'lodging:reserva_excluir' reserva.id %}">Excluir</a>
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="10">Nenhuma reserva encontrada.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="card-body">
+    <ul class="pagination">
+      {% if page_obj.has_previous %}
+        <li><a href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page_obj.previous_page_number }}">Anterior</a></li>
+      {% endif %}
+      {% for page in page_obj.paginator.page_range %}
+        <li class="{% if page_obj.number == page %}active{% endif %}">
+          <a href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page }}">{{ page }}</a>
+        </li>
+      {% endfor %}
+      {% if page_obj.has_next %}
+        <li><a href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page_obj.next_page_number }}">Proxima</a></li>
+      {% endif %}
+    </ul>
+  </div>
+</div>
+{% endblock %}

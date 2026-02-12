@@ -1,0 +1,238 @@
+{% extends "layout/base.html" %}
+{% load static %}
+
+{% block title %}{{ titulo }} - {{ sistema_config.nome_sistema|default:"Eventa" }}{% endblock %}
+
+{% block page_header %}
+<div class="page-header d-print-none mb-3">
+  <div class="row align-items-center">
+    <div class="col">
+      <h2 class="page-title">
+        <i class="ti ti-bell me-2" aria-hidden="true"></i>{{ titulo }}
+      </h2>
+      <p class="text-muted">{{ rotulo_evento_singular }}: <strong>{{ evento.nome }}</strong></p>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-md-8">
+    {% if form.non_field_errors %}
+    <div class="alert alert-danger" role="alert">
+      <div class="d-flex">
+        <div>
+          <i class="ti ti-alert-circle me-2" aria-hidden="true"></i>
+          <strong>Erro ao salvar:</strong>
+        </div>
+      </div>
+      <ul class="mb-0 mt-2">
+        {% for error in form.non_field_errors %}
+          <li>{{ error }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+
+    <div class="card">
+      <div class="card-body">
+        <form method="post" enctype="multipart/form-data" novalidate>
+          {% csrf_token %}
+
+          <!-- Ciclo (Read-only) -->
+          <div class="mb-3">
+            <label class="form-label">{{ rotulo_evento_singular }}</label>
+            <input type="text" class="form-control" value="{{ evento.nome }}" disabled>
+            <small class="text-muted">
+              Início: {{ evento.data_inicio|date:"d/m/Y H:i" }}
+            </small>
+          </div>
+
+          <!-- Data e hora de envio -->
+          <div class="mb-3">
+            <label class="form-label" for="{{ form.data_hora_envio.id_for_label }}">
+              {{ form.data_hora_envio.label }} <span class="text-danger">*</span>
+            </label>
+            {{ form.data_hora_envio }}
+            {% if form.data_hora_envio.errors %}
+            <div class="alert alert-danger mt-2">
+              <i class="ti ti-alert-circle me-2"></i>
+              {% for error in form.data_hora_envio.errors %}
+                <strong>{{ error }}</strong>
+              {% endfor %}
+            </div>
+            {% endif %}
+            <small class="text-muted d-block mt-2">
+              <i class="ti ti-info-circle me-1"></i>
+              Defina o dia e a hora exatos do envio da mensagem.
+            </small>
+          </div>
+
+          <!-- Telefone -->
+          <div class="mb-3">
+            <label class="form-label" for="{{ form.telefone.id_for_label }}">
+              {{ form.telefone.label }} <span class="text-danger">*</span>
+            </label>
+            {{ form.telefone }}
+            {% if form.telefone.errors %}
+            <div class="alert alert-danger mt-2">
+              <i class="ti ti-alert-circle me-2"></i>
+              {% for error in form.telefone.errors %}
+                <strong>{{ error }}</strong><br>
+              {% endfor %}
+            </div>
+            {% endif %}
+            <small class="text-muted d-block mt-2">
+              <i class="ti ti-info-circle me-1"></i>
+              Formato: <code>+55xxxxxxxxxx</code> (ex: +5511999999999)
+            </small>
+          </div>
+
+          <!-- Mensagem -->
+          <div class="mb-3">
+            <label class="form-label" for="{{ form.mensagem.id_for_label }}">
+              {{ form.mensagem.label }}
+            </label>
+            {{ form.mensagem }}
+            {% if form.mensagem.errors %}
+            <div class="alert alert-danger mt-2">
+              <i class="ti ti-alert-circle me-2"></i>
+              {% for error in form.mensagem.errors %}
+                <strong>{{ error }}</strong><br>
+              {% endfor %}
+            </div>
+            {% endif %}
+            <small class="text-muted d-block mt-2">
+              Placeholders: <code>{evento_nome}</code>, <code>{data_evento}</code>, <code>{intervalo}</code>.
+              Emojis e quebras de linha sao permitidos.
+            </small>
+          </div>
+
+          <!-- Midia -->
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label" for="{{ form.midia.id_for_label }}">
+                {{ form.midia.label }}
+              </label>
+              {{ form.midia }}
+              {% if form.midia.errors %}
+              <div class="alert alert-danger mt-2">
+                {% for error in form.midia.errors %}
+                  <strong>{{ error }}</strong><br>
+                {% endfor %}
+              </div>
+              {% endif %}
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label" for="{{ form.midia_url.id_for_label }}">
+                {{ form.midia_url.label }}
+              </label>
+              {{ form.midia_url }}
+              {% if form.midia_url.errors %}
+              <div class="alert alert-danger mt-2">
+                {% for error in form.midia_url.errors %}
+                  <strong>{{ error }}</strong><br>
+                {% endfor %}
+              </div>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Ativo -->
+          <div class="mb-3">
+            <label class="form-check">
+              {{ form.ativo }}
+              <span class="form-check-label">{{ form.ativo.label }}</span>
+            </label>
+            {% if form.ativo.errors %}
+            <div class="alert alert-danger mt-2">
+              <i class="ti ti-alert-circle me-2"></i>
+              {% for error in form.ativo.errors %}
+                <strong>{{ error }}</strong>
+              {% endfor %}
+            </div>
+            {% endif %}
+          </div>
+
+          <!-- Info adicional -->
+          <div class="alert alert-info">
+            <i class="ti ti-info-circle me-2"></i>
+            <strong>Como funciona:</strong>
+            <ul class="mb-0 mt-2">
+              <li>O sistema verifica a cada 5 minutos se há lembretes a enviar</li>
+              <li>A mensagem será enviada no dia e hora configurados</li>
+              <li>Você pode enviar texto personalizado e também mídia (imagem/figurinha)</li>
+              <li>Apenas lembretes marcados como "Ativo" serão processados</li>
+              <li>Não é possível enviar a mesma mensagem duas vezes (use "Resetar" se necessário)</li>
+            </ul>
+          </div>
+
+          <!-- Botões -->
+          <div class="form-footer">
+            <button type="submit" class="btn btn-primary">
+              <i class="ti ti-check me-2" aria-hidden="true"></i>
+              {% if lembrete %}Atualizar{% else %}Criar{% endif %} Lembrete
+            </button>
+            <a href="{% url 'notifications:lembretes_lista' %}" class="btn btn-secondary">
+              <i class="ti ti-x me-2" aria-hidden="true"></i>Cancelar
+            </a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sidebar com dicas -->
+  <div class="col-md-4">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">
+          <i class="ti ti-lightbulb me-2" aria-hidden="true"></i>Dicas
+        </h3>
+      </div>
+      <div class="card-body">
+        <div class="space-y-2">
+          <div class="text-sm">
+            <strong>📱 Teste de Telefone:</strong><br>
+            <small>
+              Você pode testar com qualquer número. Se não tiver credenciais Twilio, 
+              a mensagem será registrada nos logs sem erros.
+            </small>
+          </div>
+          <hr>
+          <div class="text-sm">
+            <strong>⏰ Agendamento:</strong><br>
+            <small>
+              Exemplo: <strong>12/02 às 19:30</strong> para envio pontual.<br>
+              Você pode editar o agendamento quando precisar.
+            </small>
+          </div>
+          <hr>
+          <div class="text-sm">
+            <strong>✋ Múltiplos Lembretes:</strong><br>
+            <small>
+              Você pode criar vários lembretes para o mesmo {{ rotulo_evento_singular|lower }} e telefone, 
+              com horários de envio diferentes.
+            </small>
+          </div>
+          <hr>
+          <div class="text-sm">
+            <strong>🔄 Resetar Lembrete:</strong><br>
+            <small>
+              Se precisar reenviar um lembrete que já foi enviado, vá para a lista 
+              e clique em "Resetar".
+            </small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .space-y-2 > * + * {
+    margin-top: 1rem;
+  }
+</style>
+{% endblock %}
