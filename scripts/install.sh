@@ -45,6 +45,8 @@ fi
 mkdir -p ./data/postgres ./data/static ./backups ./media
 chmod 700 ./data/postgres
 chmod 755 ./backups ./media ./data/static
+$SUDO chown -R 999:999 ./data/postgres || true
+chmod 644 ./caddy/Caddyfile || true
 
 if [[ ! -f .env ]]; then
   cp .env.example .env
