@@ -4,6 +4,7 @@ from . import views
 app_name = "notifications"
 
 urlpatterns = [
+    path("notifications/dashboard/", views.dashboard, name="dashboard"),
     path("notifications/", views.lembretes_lista, name="lembretes_lista"),
     path("notifications/novo/", views.lembrete_criar, name="lembrete_criar"),
     path("notifications/<int:lembrete_id>/editar/",

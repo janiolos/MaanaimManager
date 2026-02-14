@@ -31,6 +31,18 @@
       </div>
       <div class="row">
         <div class="col-md-3">
+          <label class="form-label">Data entrada</label>
+          {{ form.data_entrada }}
+          {{ form.data_entrada.errors }}
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Data saida</label>
+          {{ form.data_saida }}
+          {{ form.data_saida.errors }}
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-3">
           <label class="form-label">Qtd adultos</label>
           {{ form.qtd_pessoas }}
           {{ form.qtd_pessoas.errors }}

@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.paginator import Paginator
 from django.db import transaction
-from django.db.models import F
+from django.db.models import F, Sum
 from django.shortcuts import redirect, render
 from django.urls import reverse
 
@@ -13,6 +13,26 @@ from apps.core.utils import get_evento_atual
 
 from .forms import EntradaEstoqueForm, MovimentoEstoqueForm, ProdutoForm
 from .models import EntradaEstoque, MovimentoEstoque, Produto
+
+
+@login_required
+@user_passes_test(can_read_inventory)
+def dashboard(request):
+    evento = get_evento_atual(request)
+    produtos = Produto.objects.all()
+    movimentos_evento = MovimentoEstoque.objects.filter(evento=evento) if evento else MovimentoEstoque.objects.none()
+
+    total_estoque = produtos.aggregate(total=Sum("estoque_atual"))["total"] or 0
+    contexto = {
+        "evento": evento,
+        "produtos_total": produtos.count(),
+        "alerta_baixo": produtos.filter(estoque_atual__lt=F("estoque_minimo")).count(),
+        "alerta_acima": produtos.filter(estoque_maximo__gt=0, estoque_atual__gt=F("estoque_maximo")).count(),
+        "total_estoque": total_estoque,
+        "movimentos_evento": movimentos_evento.count(),
+        "pode_editar": can_write_inventory(request.user),
+    }
+    return render(request, "inventory/dashboard.html", contexto)
 
 
 @login_required

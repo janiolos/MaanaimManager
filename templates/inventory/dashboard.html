@@ -1,0 +1,32 @@
+{% extends "layout/base.html" %}
+{% block page_header %}
+<div class="page-header d-print-none">
+  <div class="row align-items-center">
+    <div class="col">
+      <div class="page-pretitle">Estoque</div>
+      <h2 class="page-title">Dashboard de Estoque</h2>
+    </div>
+    {% if pode_editar %}
+    <div class="col-auto ms-auto">
+      <a class="btn btn-primary" href="{% url 'inventory:produto_criar' %}"><i class="ti ti-plus me-1"></i>Novo produto</a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+{% block content %}
+<div class="row row-cards">
+  <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="text-muted">Produtos</div><div class="h2 mb-0">{{ produtos_total }}</div></div></div></div>
+  <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="text-muted">Abaixo do minimo</div><div class="h2 mb-0 text-danger">{{ alerta_baixo }}</div></div></div></div>
+  <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="text-muted">Acima do maximo</div><div class="h2 mb-0 text-warning">{{ alerta_acima }}</div></div></div></div>
+  <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="text-muted">Itens em estoque</div><div class="h2 mb-0">{{ total_estoque }}</div></div></div></div>
+</div>
+<div class="card mt-2">
+  <div class="card-header"><h3 class="card-title">Acessos rapidos</h3></div>
+  <div class="card-body">
+    <a class="btn btn-outline-primary me-2" href="{% url 'inventory:produtos_lista' %}">Produtos</a>
+    <a class="btn btn-outline-primary me-2" href="{% url 'inventory:movimentos_lista' %}">Movimentos</a>
+    {% if pode_editar %}<a class="btn btn-outline-primary" href="{% url 'inventory:entrada_criar' %}">Nova entrada</a>{% endif %}
+  </div>
+</div>
+{% endblock %}

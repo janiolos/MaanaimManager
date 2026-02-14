@@ -1,0 +1,32 @@
+{% extends "layout/base.html" %}
+{% block page_header %}
+<div class="page-header d-print-none">
+  <div class="row align-items-center">
+    <div class="col">
+      <div class="page-pretitle">Hospedagem</div>
+      <h2 class="page-title">Dashboard de Hospedagem</h2>
+    </div>
+    {% if pode_editar %}
+    <div class="col-auto ms-auto">
+      <a class="btn btn-primary" href="{% url 'lodging:reserva_criar' %}"><i class="ti ti-plus me-1"></i>Nova reserva</a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+{% block content %}
+<div class="row row-cards">
+  <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="text-muted">Chales totais</div><div class="h2 mb-0">{{ chales_total }}</div></div></div></div>
+  <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="text-muted">Disponiveis</div><div class="h2 mb-0 text-success">{{ chales_disponiveis }}</div></div></div></div>
+  <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="text-muted">Indisponiveis</div><div class="h2 mb-0 text-secondary">{{ chales_indisponiveis }}</div></div></div></div>
+  <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="text-muted">Reservas no ciclo</div><div class="h2 mb-0">{{ reservas_total }}</div></div></div></div>
+</div>
+<div class="card mt-2">
+  <div class="card-header"><h3 class="card-title">Acessos rapidos</h3></div>
+  <div class="card-body">
+    <a class="btn btn-outline-primary me-2" href="{% url 'lodging:chales_lista' %}">Chales</a>
+    <a class="btn btn-outline-primary me-2" href="{% url 'lodging:reservas_lista' %}">Reservas</a>
+    <a class="btn btn-outline-primary" href="{% url 'lodging:mapa_chales' %}">Mapa de chales</a>
+  </div>
+</div>
+{% endblock %}

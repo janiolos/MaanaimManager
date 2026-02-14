@@ -2,37 +2,294 @@
 {% block content %}
 <div class="d-flex align-items-center mb-3">
   <div>
-    <h2 class="page-title">Mapa de chales</h2>
-    <div class="text-muted">Visao rapida das ocupacoes</div>
+    <h2 class="page-title">Mapa de chalés</h2>
+    <div class="text-muted">Visao operacional em grade para identificar disponibilidade rapidamente.</div>
+  </div>
+  {% if pode_editar %}
+  <div class="ms-auto d-flex gap-2">
+    <a class="btn btn-outline" href="{% url 'lodging:reservas_lista' %}">Reservas</a>
+    <a class="btn btn-primary" href="{% url 'lodging:reserva_criar' %}">Nova reserva</a>
+  </div>
+  {% endif %}
+</div>
+
+<div class="map-legend card mb-3">
+  <div class="card-body d-flex flex-wrap gap-3 align-items-center">
+    <span><span class="status-dot status-disponivel"></span> Disponivel ({{ totais.disponivel }})</span>
+    <span><span class="status-dot status-reservado"></span> Reservado ({{ totais.reservado }})</span>
+    <span><span class="status-dot status-ocupado"></span> Ocupado ({{ totais.ocupado }})</span>
+    <span><span class="status-dot status-indisponivel"></span> Indisponivel ({{ totais.indisponivel }})</span>
   </div>
 </div>
 
-<div class="row row-cards">
-  {% for card in cards %}
-    <div class="col-md-4">
-      <div class="card">
-        <div class="card-header">
-          <h3 class="card-title">{{ card.chale.codigo }}</h3>
+<div class="map-board card">
+  <div class="card-header">
+    <h3 class="card-title">Timeline semanal</h3>
+    <div class="card-actions d-flex align-items-center gap-2">
+      <a class="btn btn-sm btn-outline" href="?week_start={{ prev_week|date:'Y-m-d' }}">Semana anterior</a>
+      <span class="text-muted small">{{ week_start|date:"d/m/Y" }} - {{ week_end|date:"d/m/Y" }}</span>
+      <a class="btn btn-sm btn-outline" href="?week_start={{ next_week|date:'Y-m-d' }}">Proxima semana</a>
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="table-responsive mb-4">
+      <table class="table table-vcenter timeline-table">
+        <thead>
+          <tr>
+            <th class="timeline-col-chale">Chale</th>
+            {% for dia in dias_semana %}
+            <th class="text-center">
+              <div>{{ dia|date:"D" }}</div>
+              <small class="text-muted">{{ dia|date:"d/m" }}</small>
+            </th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in timeline_rows %}
+          <tr>
+            <td class="timeline-col-chale">
+              <strong>{{ row.chale.codigo }}</strong>
+              <div class="text-muted small">Cap. {{ row.chale.capacidade }}</div>
+            </td>
+            {% for cell in row.cells %}
+            <td>
+              {% if pode_editar %}
+              <button
+                class="timeline-cell timeline-{{ cell.estado }}"
+                type="button"
+                data-bs-toggle="modal"
+                data-bs-target="#acaoModal{{ row.chale.id }}"
+                title="{{ cell.estado_label }}"
+              >
+                {{ cell.label|truncatechars:14 }}
+              </button>
+              {% else %}
+              <div class="timeline-cell timeline-{{ cell.estado }}">{{ cell.label|truncatechars:14 }}</div>
+              {% endif %}
+            </td>
+            {% endfor %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <h4 class="mb-3">Tabuleiro de ocupacao</h4>
+    <div class="chale-grid">
+      {% for item in cards %}
+      <button
+        class="chale-tile tile-{{ item.estado }}"
+        type="button"
+        {% if pode_editar %}data-bs-toggle="modal" data-bs-target="#acaoModal{{ item.chale.id }}"{% endif %}
+      >
+        <div class="tile-header">
+          <strong>{{ item.chale.codigo }}</strong>
+          <span class="tile-status">{{ item.estado_label }}</span>
         </div>
-        <div class="card-body">
-          <p>Capacidade: {{ card.chale.capacidade }}</p>
-          {% if card.chale.acessivel_cadeirante %}
-            <span class="badge bg-info">Acessivel</span>
+        <div class="tile-body">
+          <div>Cap: {{ item.chale.capacidade }}</div>
+          {% if item.chale.acessivel_cadeirante %}<div>Acessivel</div>{% endif %}
+          {% if item.reserva %}
+            <div class="tile-responsavel">{{ item.reserva.responsavel_nome }}</div>
+          {% else %}
+            <div class="tile-responsavel">Sem reserva</div>
           {% endif %}
-          <div class="mt-2">
-            {% if card.estado == 'indisponivel' %}
-              <span class="badge bg-danger">Indisponivel</span>
-              <div class="text-muted">{{ card.chale.get_status_display }}</div>
-            {% elif card.estado == 'ocupado' %}
-              <span class="badge bg-success">Confirmada</span>
-              <div>{{ card.reserva.responsavel_nome }} ({{ card.reserva.qtd_pessoas }})</div>
-            {% else %}
-              <span class="badge bg-warning">Livre</span>
-            {% endif %}
+        </div>
+      </button>
+
+      {% if pode_editar %}
+      <div class="modal modal-blur fade" id="acaoModal{{ item.chale.id }}" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Acoes - {{ item.chale.codigo }}</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+              <div class="text-muted mb-3">Escolha a acao para o chale.</div>
+              <div class="d-grid gap-2">
+                {% if item.action_reserva_url %}
+                  <a class="btn btn-primary" href="{{ item.action_reserva_url }}">
+                    {% if item.reserva %}Editar reserva{% else %}Nova reserva{% endif %}
+                  </a>
+                {% else %}
+                  <button class="btn btn-primary" type="button" disabled>Nova reserva</button>
+                {% endif %}
+
+                <a
+                  class="btn btn-warning"
+                  href="{% url 'lodging:acao_criar' %}?chale_id={{ item.chale.id }}&tipo=MANUTENCAO&data_inicio={{ week_start|date:'Y-m-d' }}&data_fim={{ next_week|date:'Y-m-d' }}&next={{ mapa_return|urlencode }}"
+                >
+                  Nova manutencao
+                </a>
+
+                <a
+                  class="btn btn-secondary"
+                  href="{% url 'lodging:acao_criar' %}?chale_id={{ item.chale.id }}&tipo=BLOQUEIO&data_inicio={{ week_start|date:'Y-m-d' }}&data_fim={{ next_week|date:'Y-m-d' }}&next={{ mapa_return|urlencode }}"
+                >
+                  Novo bloqueio
+                </a>
+
+                {% if item.acoes %}
+                <div class="acao-lista mt-2">
+                  <div class="text-muted small mb-2">Acoes ativas deste chale</div>
+                  {% for acao in item.acoes %}
+                  <div class="acao-item">
+                    <div class="acao-info">
+                      <strong>{{ acao.get_tipo_display }}</strong> - {{ acao.titulo }}
+                      <div class="small text-muted">{{ acao.data_inicio|date:"d/m/Y" }} a {{ acao.data_fim|date:"d/m/Y" }}</div>
+                    </div>
+                    <div class="acao-botoes">
+                      <a class="btn btn-sm btn-outline-primary" href="{% url 'lodging:acao_editar' acao.id %}?next={{ mapa_return|urlencode }}">Editar</a>
+                      <form method="post" action="{% url 'lodging:acao_excluir' acao.id %}" onsubmit="return confirm('Excluir esta acao?');">
+                        {% csrf_token %}
+                        <input type="hidden" name="next" value="{{ mapa_return }}">
+                        <button class="btn btn-sm btn-outline-danger" type="submit">Excluir</button>
+                      </form>
+                    </div>
+                  </div>
+                  {% endfor %}
+                </div>
+                {% endif %}
+
+                <form method="post" action="{% url 'lodging:chale_status_rapido' item.chale.id %}">
+                  {% csrf_token %}
+                  <input type="hidden" name="acao" value="liberar">
+                  <button class="btn btn-success w-100" type="submit">Liberar chale</button>
+                </form>
+
+                {% if item.reserva %}
+                <form method="post" action="{% url 'lodging:chale_status_rapido' item.chale.id %}">
+                  {% csrf_token %}
+                  <input type="hidden" name="acao" value="cancelar_reserva">
+                  <button class="btn btn-danger w-100" type="submit">Cancelar reserva ativa</button>
+                </form>
+                {% endif %}
+              </div>
+            </div>
           </div>
         </div>
       </div>
+      {% endif %}
+      {% empty %}
+      <div class="text-muted">Nenhum chale cadastrado.</div>
+      {% endfor %}
     </div>
-  {% endfor %}
+  </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<style>
+  .status-dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+  .status-disponivel { background: #16a34a; }
+  .status-reservado { background: #d97706; }
+  .status-ocupado { background: #dc2626; }
+  .status-indisponivel { background: #64748b; }
+
+  .chale-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 14px;
+  }
+
+  .timeline-table th,
+  .timeline-table td {
+    vertical-align: middle;
+  }
+  .timeline-col-chale {
+    min-width: 145px;
+    background: rgba(var(--mm-primary-rgb), 0.03);
+  }
+  .timeline-cell {
+    width: 100%;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    min-height: 34px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 6px 8px;
+  }
+  .timeline-disponivel { background: rgba(22, 163, 74, 0.12); color: #166534; border-color: rgba(22, 163, 74, 0.28); }
+  .timeline-reservado { background: rgba(217, 119, 6, 0.16); color: #9a3412; border-color: rgba(217, 119, 6, 0.28); }
+  .timeline-ocupado { background: rgba(220, 38, 38, 0.14); color: #991b1b; border-color: rgba(220, 38, 38, 0.28); }
+  .timeline-indisponivel { background: rgba(100, 116, 139, 0.16); color: #334155; border-color: rgba(100, 116, 139, 0.28); }
+
+  .chale-tile {
+    border: 1px solid var(--mm-border);
+    border-left: 6px solid transparent;
+    border-radius: 10px;
+    padding: 12px;
+    text-align: left;
+    background: #fff;
+    transition: all .18s ease;
+  }
+  .chale-tile:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 14px rgba(15, 23, 42, .08);
+  }
+
+  .tile-disponivel { border-left-color: #16a34a; background: rgba(22, 163, 74, 0.05); }
+  .tile-reservado { border-left-color: #d97706; background: rgba(217, 119, 6, 0.08); }
+  .tile-ocupado { border-left-color: #dc2626; background: rgba(220, 38, 38, 0.08); }
+  .tile-indisponivel { border-left-color: #64748b; background: rgba(100, 116, 139, 0.1); }
+
+  .tile-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+  .tile-status {
+    font-size: 12px;
+    color: var(--mm-muted);
+    font-weight: 600;
+  }
+  .tile-body {
+    font-size: 13px;
+    color: var(--mm-ink);
+    line-height: 1.35;
+  }
+  .tile-responsavel {
+    margin-top: 8px;
+    font-weight: 600;
+    color: var(--mm-primary-dark);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .acao-lista {
+    border-top: 1px solid var(--mm-border);
+    padding-top: 10px;
+  }
+  .acao-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid var(--mm-border);
+    border-radius: 8px;
+    padding: 8px;
+    margin-bottom: 8px;
+  }
+  .acao-botoes {
+    display: flex;
+    gap: 6px;
+  }
+  .acao-botoes form {
+    margin: 0;
+  }
+</style>
 {% endblock %}

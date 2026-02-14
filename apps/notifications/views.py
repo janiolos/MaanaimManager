@@ -2,10 +2,37 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
 from django.views.decorators.http import require_http_methods
+from django.utils import timezone
 from .models import ReminderConfig
 from .forms import ReminderConfigForm
 from apps.core.models import Evento
 from apps.core.permissions import can_read_notifications, can_write_notifications
+
+
+@login_required
+@user_passes_test(can_read_notifications)
+def dashboard(request):
+    evento_atual = request.session.get('evento_id')
+    evento = None
+    lembretes = ReminderConfig.objects.none()
+    if evento_atual:
+        evento = Evento.objects.filter(id=evento_atual).first()
+        if evento:
+            lembretes = ReminderConfig.objects.filter(evento=evento)
+
+    now = timezone.now()
+    contexto = {
+        "evento": evento,
+        "total_lembretes": lembretes.count(),
+        "lembretes_ativos": lembretes.filter(ativo=True).count(),
+        "lembretes_enviados": lembretes.filter(enviado=True).count(),
+        "lembretes_pendentes": lembretes.filter(ativo=True, enviado=False).count(),
+        "proximos_envios": lembretes.filter(
+            ativo=True, enviado=False, data_hora_envio__gte=now
+        ).order_by("data_hora_envio")[:5],
+        "pode_editar": can_write_notifications(request.user),
+    }
+    return render(request, "notifications/dashboard.html", contexto)
 
 
 @login_required

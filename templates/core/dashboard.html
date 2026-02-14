@@ -1,0 +1,30 @@
+{% extends "layout/base.html" %}
+{% block page_header %}
+<div class="page-header d-print-none">
+  <div class="row align-items-center">
+    <div class="col">
+      <div class="page-pretitle">Core</div>
+      <h2 class="page-title">Dashboard Core</h2>
+    </div>
+    {% if pode_gerenciar %}
+    <div class="col-auto ms-auto">
+      <a class="btn btn-primary" href="{% url 'core:evento_criar' %}"><i class="ti ti-plus me-1"></i>Novo ciclo</a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+{% block content %}
+<div class="row row-cards">
+  <div class="col-sm-4"><div class="card"><div class="card-body"><div class="text-muted">Total de ciclos</div><div class="h2 mb-0">{{ total_eventos }}</div></div></div></div>
+  <div class="col-sm-4"><div class="card"><div class="card-body"><div class="text-muted">Ciclos ativos</div><div class="h2 mb-0">{{ eventos_ativos }}</div></div></div></div>
+  <div class="col-sm-4"><div class="card"><div class="card-body"><div class="text-muted">Ciclos encerrados</div><div class="h2 mb-0">{{ eventos_encerrados }}</div></div></div></div>
+</div>
+<div class="card mt-2">
+  <div class="card-header"><h3 class="card-title">Acessos rapidos</h3></div>
+  <div class="card-body">
+    <a class="btn btn-outline-primary me-2" href="{% url 'core:eventos_lista' %}">Lista de ciclos</a>
+    <a class="btn btn-outline-primary" href="{% url 'core:selecionar_evento' %}">Selecionar ciclo</a>
+  </div>
+</div>
+{% endblock %}

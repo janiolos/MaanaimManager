@@ -4,6 +4,7 @@ from . import views
 app_name = "core"
 
 urlpatterns = [
+    path("core/dashboard/", views.dashboard, name="dashboard"),
     path("core/evento/", views.selecionar_evento, name="selecionar_evento"),
     path("core/eventos/", views.eventos_lista, name="eventos_lista"),
     path("core/eventos/novo/", views.evento_criar, name="evento_criar"),

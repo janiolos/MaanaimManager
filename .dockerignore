@@ -1,0 +1,26 @@
+.git
+.gitignore
+.venv
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+*.sqlite3
+
+# Dados e volumes locais
+data/postgres
+data/static
+backups
+media
+
+# Arquivos grandes/locais
+*.log
+*.pdf
+*.png
+*.jpg
+*.jpeg
+*.webp
+
+# Cache e build
+node_modules
+staticfiles

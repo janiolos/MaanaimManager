@@ -1,0 +1,50 @@
+{% extends "layout/base.html" %}
+{% block page_header %}
+<div class="page-header d-print-none">
+  <div class="row align-items-center">
+    <div class="col">
+      <div class="page-pretitle">Lembretes</div>
+      <h2 class="page-title">Dashboard de Notificacoes</h2>
+    </div>
+    {% if pode_editar %}
+    <div class="col-auto ms-auto">
+      <a class="btn btn-primary" href="{% url 'notifications:lembrete_criar' %}"><i class="ti ti-plus me-1"></i>Novo lembrete</a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+{% block content %}
+<div class="row row-cards">
+  <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="text-muted">Total de lembretes</div><div class="h2 mb-0">{{ total_lembretes }}</div></div></div></div>
+  <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="text-muted">Ativos</div><div class="h2 mb-0 text-success">{{ lembretes_ativos }}</div></div></div></div>
+  <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="text-muted">Pendentes</div><div class="h2 mb-0 text-warning">{{ lembretes_pendentes }}</div></div></div></div>
+  <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="text-muted">Enviados</div><div class="h2 mb-0">{{ lembretes_enviados }}</div></div></div></div>
+</div>
+<div class="card mt-2">
+  <div class="card-header"><h3 class="card-title">Proximos envios</h3></div>
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-vcenter mb-0">
+        <thead>
+          <tr><th>Quando</th><th>Telefone</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+          {% for lembrete in proximos_envios %}
+          <tr>
+            <td>{{ lembrete.data_hora_envio|date:"d/m/Y H:i" }}</td>
+            <td>{{ lembrete.telefone }}</td>
+            <td><span class="badge bg-warning-lt">Pendente</span></td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="3" class="text-muted">Nenhum envio futuro pendente.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<div class="mt-2">
+  <a class="btn btn-outline-primary" href="{% url 'notifications:lembretes_lista' %}">Gerenciar lembretes</a>
+</div>
+{% endblock %}

@@ -1,0 +1,3 @@
+docker compose exec app python manage.py createsuperuser
+user:root
+pass:eventa0101

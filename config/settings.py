@@ -23,6 +23,20 @@ DEBUG = os.environ.get("APP_ENV", "dev").lower() not in ("prod", "production") a
 allowed_hosts_raw = os.environ.get("APP_ALLOWED_HOSTS", "*")
 ALLOWED_HOSTS = [host.strip() for host in allowed_hosts_raw.split(",") if host.strip()]
 
+# Proxy reverso (Caddy/Nginx): necessario para CSRF/sessao em HTTPS.
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+USE_X_FORWARDED_HOST = True
+
+csrf_origins_raw = os.environ.get("APP_CSRF_TRUSTED_ORIGINS", "")
+if csrf_origins_raw.strip():
+    CSRF_TRUSTED_ORIGINS = [item.strip() for item in csrf_origins_raw.split(",") if item.strip()]
+else:
+    CSRF_TRUSTED_ORIGINS = []
+    for host in ALLOWED_HOSTS:
+        if host and host != "*":
+            CSRF_TRUSTED_ORIGINS.append(f"http://{host}")
+            CSRF_TRUSTED_ORIGINS.append(f"https://{host}")
+
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",

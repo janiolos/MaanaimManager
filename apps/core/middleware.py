@@ -64,6 +64,8 @@ class EventoSelecionadoMiddleware:
         return self.get_response(request)
 
     def _is_public_path(self, path):
+        if path == "/":
+            return True
         public_prefixes = [
             "/login/",
             "/logout/",
@@ -98,6 +100,8 @@ class InatividadeLogoutMiddleware:
         return self.get_response(request)
 
     def _is_public_path(self, path):
+        if path == "/":
+            return True
         public_prefixes = [
             "/login/",
             "/logout/",

@@ -55,6 +55,7 @@
         <tr>
           <th>Chale</th>
           <th>Responsavel</th>
+          <th>Periodo</th>
           <th>Adultos</th>
           <th>Criancas</th>
           <th>Idades</th>
@@ -75,6 +76,7 @@
               {% endif %}
             </td>
             <td>{{ reserva.responsavel_nome }}</td>
+            <td>{{ reserva.data_entrada|date:"d/m/Y" }} - {{ reserva.data_saida|date:"d/m/Y" }}</td>
             <td>{{ reserva.qtd_pessoas }}</td>
             <td>{{ reserva.qtd_criancas }}</td>
             <td>{{ reserva.idades_criancas|default:"-" }}</td>
@@ -94,7 +96,7 @@
             </td>
           </tr>
         {% empty %}
-          <tr><td colspan="10">Nenhuma reserva encontrada.</td></tr>
+          <tr><td colspan="11">Nenhuma reserva encontrada.</td></tr>
         {% endfor %}
       </tbody>
     </table>

@@ -37,7 +37,7 @@
             <ul class="navbar-nav pt-lg-3">
 
               <li class="nav-item">
-                <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="/">
+                <a class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}" href="/">
                   <span class="nav-link-icon d-md-none d-lg-inline-block">
                     <i class="ti ti-chart-bar" aria-hidden="true"></i>
                   </span>
@@ -48,7 +48,7 @@
               {% if modulos_ativos.financeiro and acesso_modulos.financeiro %}
               <li class="nav-item">
                 <a class="nav-link {% if request.resolver_match.namespace == 'finance' %}active{% endif %}"
-                   href="{% url 'finance:lancamentos_lista' %}"
+                   href="{% url 'finance:dashboard' %}"
                    data-bs-toggle="collapse"
                    data-bs-target="#menu-finance"
                    aria-expanded="{% if request.resolver_match.namespace == 'finance' %}true{% else %}false{% endif %}"
@@ -60,6 +60,12 @@
                 </a>
                 <div class="collapse {% if request.resolver_match.namespace == 'finance' %}show{% endif %}" id="menu-finance">
                   <ul class="nav nav-sm flex-column">
+                    <li class="nav-item">
+                      <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' and request.resolver_match.namespace == 'finance' %}active{% endif %}"
+                         href="{% url 'finance:dashboard' %}">
+                        Dashboard
+                      </a>
+                    </li>
                     <li class="nav-item">
                       <a class="nav-link {% if request.resolver_match.url_name == 'lancamentos_lista' %}active{% endif %}"
                          href="{% url 'finance:lancamentos_lista' %}">
@@ -78,19 +84,19 @@
               {% endif %}
 
               <li class="nav-item">
-                <a class="nav-link {% if request.resolver_match.namespace == 'core' and request.resolver_match.url_name == 'eventos_lista' %}active{% endif %}"
-                   href="{% url 'core:eventos_lista' %}">
+                <a class="nav-link {% if request.resolver_match.namespace == 'core' and request.resolver_match.url_name == 'dashboard' %}active{% endif %}"
+                   href="{% url 'core:dashboard' %}">
                   <span class="nav-link-icon d-md-none d-lg-inline-block">
                     <i class="ti ti-calendar-event" aria-hidden="true"></i>
                   </span>
-                  <span class="nav-link-title">{{ rotulo_evento_plural|default:"Eventos" }}</span>
+                  <span class="nav-link-title">Core</span>
                 </a>
               </li>
 
               {% if modulos_ativos.estoque and acesso_modulos.estoque %}
               <li class="nav-item">
                 <a class="nav-link {% if request.resolver_match.namespace == 'inventory' %}active{% endif %}"
-                   href="{% url 'inventory:produtos_lista' %}"
+                   href="{% url 'inventory:dashboard' %}"
                    data-bs-toggle="collapse"
                    data-bs-target="#menu-inventory"
                    aria-expanded="{% if request.resolver_match.namespace == 'inventory' %}true{% else %}false{% endif %}"
@@ -102,6 +108,12 @@
                 </a>
                 <div class="collapse {% if request.resolver_match.namespace == 'inventory' %}show{% endif %}" id="menu-inventory">
                   <ul class="nav nav-sm flex-column">
+                    <li class="nav-item">
+                      <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' and request.resolver_match.namespace == 'inventory' %}active{% endif %}"
+                         href="{% url 'inventory:dashboard' %}">
+                        Dashboard
+                      </a>
+                    </li>
                     <li class="nav-item">
                       <a class="nav-link {% if request.resolver_match.url_name == 'produtos_lista' %}active{% endif %}"
                          href="{% url 'inventory:produtos_lista' %}">
@@ -122,7 +134,7 @@
               {% if modulos_ativos.notificacoes and acesso_modulos.notificacoes %}
               <li class="nav-item">
                 <a class="nav-link {% if request.resolver_match.namespace == 'notifications' %}active{% endif %}"
-                   href="{% url 'notifications:lembretes_lista' %}">
+                   href="{% url 'notifications:dashboard' %}">
                   <span class="nav-link-icon d-md-none d-lg-inline-block">
                     <i class="ti ti-bell" aria-hidden="true"></i>
                   </span>
@@ -134,7 +146,7 @@
               {% if modulos_ativos.hospedagem and acesso_modulos.hospedagem %}
               <li class="nav-item">
                 <a class="nav-link {% if request.resolver_match.namespace == 'lodging' %}active{% endif %}"
-                   href="{% url 'lodging:chales_lista' %}"
+                   href="{% url 'lodging:dashboard' %}"
                    data-bs-toggle="collapse"
                    data-bs-target="#menu-lodging"
                    aria-expanded="{% if request.resolver_match.namespace == 'lodging' %}true{% else %}false{% endif %}"
@@ -146,6 +158,12 @@
                 </a>
                 <div class="collapse {% if request.resolver_match.namespace == 'lodging' %}show{% endif %}" id="menu-lodging">
                   <ul class="nav nav-sm flex-column">
+                    <li class="nav-item">
+                      <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' and request.resolver_match.namespace == 'lodging' %}active{% endif %}"
+                         href="{% url 'lodging:dashboard' %}">
+                        Dashboard
+                      </a>
+                    </li>
                     <li class="nav-item">
                       <a class="nav-link {% if request.resolver_match.url_name == 'chales_lista' %}active{% endif %}"
                          href="{% url 'lodging:chales_lista' %}">

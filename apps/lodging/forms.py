@@ -1,7 +1,8 @@
 from django import forms
+from django.db.models import Q
 
 from apps.finance.models import ContaCaixa
-from .models import Chale, ReservaChale
+from .models import AcaoChale, Chale, ReservaChale
 
 
 class ChaleForm(forms.ModelForm):
@@ -31,6 +32,8 @@ class ReservaChaleForm(forms.ModelForm):
         model = ReservaChale
         fields = [
             "chale",
+            "data_entrada",
+            "data_saida",
             "responsavel_nome",
             "qtd_pessoas",
             "qtd_criancas",
@@ -57,28 +60,70 @@ class ReservaChaleForm(forms.ModelForm):
                 field.widget.attrs["class"] = "form-check-input"
             else:
                 field.widget.attrs["class"] = "form-control"
+        if "data_entrada" in self.fields:
+            self.fields["data_entrada"].widget = forms.DateInput(
+                attrs={"class": "form-control", "type": "date"}
+            )
+            self.fields["data_entrada"].required = True
+        if "data_saida" in self.fields:
+            self.fields["data_saida"].widget = forms.DateInput(
+                attrs={"class": "form-control", "type": "date"}
+            )
+            self.fields["data_saida"].required = True
         self.fields["valor_adicional"].widget.attrs["step"] = "0.01"
         if "conta" in self.fields:
             self.fields["conta"].queryset = ContaCaixa.objects.filter(ativo=True)
         if evento and "chale" in self.fields:
-            bloqueados = ReservaChale.objects.filter(
-                evento=evento,
-                status__in=[ReservaChale.PRE_RESERVA, ReservaChale.CONFIRMADA],
-            ).exclude(pk=self.instance.pk)
-            self.fields["chale"].queryset = Chale.objects.filter(status=Chale.ATIVO).exclude(
-                id__in=bloqueados.values_list("chale_id", flat=True)
-            )
+            entrada_inicial = self.initial.get("data_entrada") or getattr(self.instance, "data_entrada", None)
+            saida_inicial = self.initial.get("data_saida") or getattr(self.instance, "data_saida", None)
+
+            qs_chales = Chale.objects.filter(status=Chale.ATIVO)
+            if entrada_inicial and saida_inicial:
+                conflitos_reserva = ReservaChale.objects.filter(
+                    evento=evento,
+                    status__in=[ReservaChale.PRE_RESERVA, ReservaChale.CONFIRMADA],
+                    data_entrada__lt=saida_inicial,
+                    data_saida__gt=entrada_inicial,
+                ).exclude(pk=self.instance.pk)
+
+                conflitos_acao = AcaoChale.objects.filter(
+                    evento=evento,
+                    ativo=True,
+                    data_inicio__lt=saida_inicial,
+                    data_fim__gt=entrada_inicial,
+                )
+
+                qs_chales = qs_chales.exclude(
+                    id__in=conflitos_reserva.values_list("chale_id", flat=True)
+                ).exclude(
+                    id__in=conflitos_acao.values_list("chale_id", flat=True)
+                )
+
+            if self.instance.pk and self.instance.chale_id:
+                qs_chales = Chale.objects.filter(
+                    Q(id=self.instance.chale_id) | Q(id__in=qs_chales.values_list("id", flat=True))
+                )
+
+            self.fields["chale"].queryset = qs_chales
 
     def clean(self):
         cleaned_data = super().clean()
         chale = cleaned_data.get("chale")
         evento = getattr(self.instance, "evento", None)
-        if chale and evento:
+        data_entrada = cleaned_data.get("data_entrada")
+        data_saida = cleaned_data.get("data_saida")
+
+        if data_entrada and data_saida and data_saida <= data_entrada:
+            self.add_error("data_saida", "A data de saida deve ser maior que a data de entrada.")
+
+        if chale and evento and data_entrada and data_saida:
             exists = (
                 ReservaChale.objects.filter(
                     evento=evento,
                     chale=chale,
                     status__in=[ReservaChale.PRE_RESERVA, ReservaChale.CONFIRMADA],
+                    data_entrada__lt=data_saida,
+                    data_saida__gt=data_entrada,
                 )
                 .exclude(pk=self.instance.pk)
                 .exists()
@@ -87,6 +132,15 @@ class ReservaChaleForm(forms.ModelForm):
                 self.add_error("chale", "Este chale nao esta disponivel para reserva.")
             if chale.status != Chale.ATIVO:
                 self.add_error("chale", "Somente chales disponiveis podem receber reserva.")
+
+            if AcaoChale.objects.filter(
+                evento=evento,
+                chale=chale,
+                ativo=True,
+                data_inicio__lt=data_saida,
+                data_fim__gt=data_entrada,
+            ).exists():
+                self.add_error("chale", "Existe bloqueio/manutencao para o periodo informado.")
 
         qtd_pessoas = cleaned_data.get("qtd_pessoas") or 0
         qtd_criancas = cleaned_data.get("qtd_criancas") or 0
@@ -114,3 +168,23 @@ class ReservaChaleForm(forms.ModelForm):
             if not cleaned_data.get("conta"):
                 self.add_error("conta", "Informe a conta.")
         return cleaned_data
+
+
+class AcaoChaleForm(forms.ModelForm):
+    class Meta:
+        model = AcaoChale
+        fields = ["chale", "tipo", "titulo", "data_inicio", "data_fim", "descricao", "ativo"]
+        widgets = {
+            "data_inicio": forms.DateInput(attrs={"class": "form-control", "type": "date"}),
+            "data_fim": forms.DateInput(attrs={"class": "form-control", "type": "date"}),
+            "descricao": forms.Textarea(attrs={"class": "form-control", "rows": 3}),
+            "ativo": forms.CheckboxInput(attrs={"class": "form-check-input"}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for name, field in self.fields.items():
+            if name in {"chale", "tipo"}:
+                field.widget.attrs["class"] = "form-select"
+            elif name not in {"data_inicio", "data_fim", "descricao", "ativo"}:
+                field.widget.attrs["class"] = "form-control"
