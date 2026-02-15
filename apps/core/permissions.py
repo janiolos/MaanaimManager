@@ -3,7 +3,13 @@ from django.contrib.auth.models import Group
 
 ROLE_ADMIN = "ADMINISTRADOR"
 ROLE_FINANCEIRO = "FINANCEIRO"
+ROLE_FINANCEIRO_LEITURA = "FINANCEIRO_LEITURA"
 ROLE_ESTOQUE = "ESTOQUE"
+ROLE_ESTOQUE_LEITURA = "ESTOQUE_LEITURA"
+ROLE_HOSPEDAGEM = "HOSPEDAGEM"
+ROLE_HOSPEDAGEM_LEITURA = "HOSPEDAGEM_LEITURA"
+ROLE_MENSAGENS = "MENSAGENS"
+ROLE_MENSAGENS_LEITURA = "MENSAGENS_LEITURA"
 ROLE_COORDENADOR = "COORDENADOR"
 ROLE_VISUALIZACAO = "VISUALIZACAO"
 
@@ -45,11 +51,10 @@ def can_read_finance(user):
         [
             ROLE_ADMIN,
             ROLE_FINANCEIRO,
+            ROLE_FINANCEIRO_LEITURA,
             ROLE_COORDENADOR,
-            ROLE_VISUALIZACAO,
             LEGACY_ADMIN,
             LEGACY_FINANCEIRO,
-            LEGACY_VISUALIZACAO,
         ],
     )
 
@@ -61,27 +66,39 @@ def can_write_inventory(user):
 def can_read_inventory(user):
     return user_in_groups(
         user,
-        [ROLE_ADMIN, ROLE_ESTOQUE, ROLE_COORDENADOR, ROLE_VISUALIZACAO, LEGACY_ADMIN, LEGACY_VISUALIZACAO],
+        [ROLE_ADMIN, ROLE_ESTOQUE, ROLE_ESTOQUE_LEITURA, ROLE_COORDENADOR, LEGACY_ADMIN],
     )
 
 
 def can_write_lodging(user):
-    return user_in_groups(user, [ROLE_ADMIN, ROLE_COORDENADOR, LEGACY_ADMIN])
+    return user_in_groups(user, [ROLE_ADMIN, ROLE_HOSPEDAGEM, ROLE_COORDENADOR, LEGACY_ADMIN])
 
 
 def can_read_lodging(user):
     return user_in_groups(
         user,
-        [ROLE_ADMIN, ROLE_COORDENADOR, ROLE_VISUALIZACAO, LEGACY_ADMIN, LEGACY_VISUALIZACAO],
+        [
+            ROLE_ADMIN,
+            ROLE_HOSPEDAGEM,
+            ROLE_HOSPEDAGEM_LEITURA,
+            ROLE_COORDENADOR,
+            LEGACY_ADMIN,
+        ],
     )
 
 
 def can_write_notifications(user):
-    return user_in_groups(user, [ROLE_ADMIN, ROLE_COORDENADOR, LEGACY_ADMIN])
+    return user_in_groups(user, [ROLE_ADMIN, ROLE_MENSAGENS, ROLE_COORDENADOR, LEGACY_ADMIN])
 
 
 def can_read_notifications(user):
     return user_in_groups(
         user,
-        [ROLE_ADMIN, ROLE_COORDENADOR, ROLE_VISUALIZACAO, LEGACY_ADMIN, LEGACY_VISUALIZACAO],
+        [
+            ROLE_ADMIN,
+            ROLE_MENSAGENS,
+            ROLE_MENSAGENS_LEITURA,
+            ROLE_COORDENADOR,
+            LEGACY_ADMIN,
+        ],
     )

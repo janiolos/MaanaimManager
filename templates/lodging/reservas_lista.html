@@ -59,6 +59,7 @@
           <th>Adultos</th>
           <th>Criancas</th>
           <th>Idades</th>
+          <th>Necessidade especial</th>
           <th>Status</th>
           <th>Pago</th>
           <th>Forma</th>
@@ -80,6 +81,14 @@
             <td>{{ reserva.qtd_pessoas }}</td>
             <td>{{ reserva.qtd_criancas }}</td>
             <td>{{ reserva.idades_criancas|default:"-" }}</td>
+            <td>
+              {% if reserva.possui_necessidade_especial %}
+                <span class="badge bg-orange">Sim</span>
+                <div class="small text-muted">{{ reserva.detalhes_necessidade_especial|truncatechars:80 }}</div>
+              {% else %}
+                <span class="text-muted">Nao</span>
+              {% endif %}
+            </td>
             <td>{{ reserva.get_status_display }}</td>
             <td>
               {% if reserva.pago %}
@@ -96,7 +105,7 @@
             </td>
           </tr>
         {% empty %}
-          <tr><td colspan="11">Nenhuma reserva encontrada.</td></tr>
+          <tr><td colspan="12">Nenhuma reserva encontrada.</td></tr>
         {% endfor %}
       </tbody>
     </table>

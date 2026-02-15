@@ -49,6 +49,8 @@ class ReservaChale(models.Model):
     qtd_pessoas = models.PositiveIntegerField()
     qtd_criancas = models.PositiveIntegerField(default=0)
     idades_criancas = models.CharField(max_length=120, blank=True)
+    possui_necessidade_especial = models.BooleanField(default=False)
+    detalhes_necessidade_especial = models.TextField(blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=PRE_RESERVA)
     valor_adicional = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     pago = models.BooleanField(default=False)
@@ -105,6 +107,10 @@ class ReservaChale(models.Model):
             raise ValidationError({"data_entrada": "Informe periodo da reserva."})
         if data_saida <= data_entrada:
             raise ValidationError({"data_saida": "A data de saida deve ser maior que a de entrada."})
+        if self.possui_necessidade_especial and not (self.detalhes_necessidade_especial or "").strip():
+            raise ValidationError(
+                {"detalhes_necessidade_especial": "Detalhe as necessidades especiais para suporte da equipe."}
+            )
 
         if total_hospedes and chale and total_hospedes > chale.capacidade:
             raise ValidationError({"qtd_pessoas": "Total de hospedes excede a capacidade do chale."})

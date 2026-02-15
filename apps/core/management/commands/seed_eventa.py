@@ -11,7 +11,13 @@ from apps.core.permissions import (
     ROLE_ADMIN,
     ROLE_COORDENADOR,
     ROLE_ESTOQUE,
+    ROLE_ESTOQUE_LEITURA,
     ROLE_FINANCEIRO,
+    ROLE_FINANCEIRO_LEITURA,
+    ROLE_HOSPEDAGEM,
+    ROLE_HOSPEDAGEM_LEITURA,
+    ROLE_MENSAGENS,
+    ROLE_MENSAGENS_LEITURA,
     ROLE_VISUALIZACAO,
 )
 from apps.finance.models import CategoriaFinanceira, ContaCaixa, LancamentoFinanceiro
@@ -145,7 +151,19 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS("Seed Eventa aplicada com sucesso."))
 
     def _seed_groups(self):
-        for group_name in [ROLE_ADMIN, ROLE_FINANCEIRO, ROLE_ESTOQUE, ROLE_COORDENADOR, ROLE_VISUALIZACAO]:
+        for group_name in [
+            ROLE_ADMIN,
+            ROLE_FINANCEIRO,
+            ROLE_FINANCEIRO_LEITURA,
+            ROLE_ESTOQUE,
+            ROLE_ESTOQUE_LEITURA,
+            ROLE_HOSPEDAGEM,
+            ROLE_HOSPEDAGEM_LEITURA,
+            ROLE_MENSAGENS,
+            ROLE_MENSAGENS_LEITURA,
+            ROLE_COORDENADOR,
+            ROLE_VISUALIZACAO,
+        ]:
             Group.objects.get_or_create(name=group_name)
 
     def _seed_users(self):

@@ -28,6 +28,12 @@ class ChaleForm(forms.ModelForm):
 
 
 class ReservaChaleForm(forms.ModelForm):
+    possui_necessidade_especial = forms.TypedChoiceField(
+        choices=(("0", "Nao"), ("1", "Sim")),
+        coerce=lambda value: value == "1",
+        empty_value=False,
+    )
+
     class Meta:
         model = ReservaChale
         fields = [
@@ -38,6 +44,8 @@ class ReservaChaleForm(forms.ModelForm):
             "qtd_pessoas",
             "qtd_criancas",
             "idades_criancas",
+            "possui_necessidade_especial",
+            "detalhes_necessidade_especial",
             "valor_adicional",
             "status",
             "pago",
@@ -50,8 +58,12 @@ class ReservaChaleForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         evento = kwargs.pop("evento", None)
         super().__init__(*args, **kwargs)
+        if "possui_necessidade_especial" in self.fields:
+            self.initial["possui_necessidade_especial"] = (
+                "1" if self.instance and self.instance.possui_necessidade_especial else "0"
+            )
         for name, field in self.fields.items():
-            if name in {"chale", "status"}:
+            if name in {"chale", "status", "possui_necessidade_especial"}:
                 field.widget.attrs["class"] = "form-select"
             elif name in {"forma_pagamento", "conta"}:
                 field.widget.attrs["class"] = "form-select"
@@ -161,6 +173,14 @@ class ReservaChaleForm(forms.ModelForm):
                 self.add_error("idades_criancas", "Use apenas numeros separados por virgula. Ex: 5, 8")
             elif qtd_criancas > 0 and len(partes) != qtd_criancas:
                 self.add_error("idades_criancas", "Quantidade de idades deve ser igual ao numero de criancas.")
+
+        possui_necessidade_especial = cleaned_data.get("possui_necessidade_especial")
+        detalhes_necessidade = (cleaned_data.get("detalhes_necessidade_especial") or "").strip()
+        if possui_necessidade_especial and not detalhes_necessidade:
+            self.add_error(
+                "detalhes_necessidade_especial",
+                "Descreva a necessidade especial para suporte da equipe.",
+            )
 
         if cleaned_data.get("pago"):
             if not cleaned_data.get("forma_pagamento"):

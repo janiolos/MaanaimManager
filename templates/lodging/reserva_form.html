@@ -60,6 +60,19 @@
         </div>
       </div>
       <div class="row">
+        <div class="col-md-4">
+          <label class="form-label">Possui necessidade especial?</label>
+          {{ form.possui_necessidade_especial }}
+          {{ form.possui_necessidade_especial.errors }}
+        </div>
+        <div class="col-md-8" id="necessidade-especial-box">
+          <label class="form-label">Detalhes da necessidade especial</label>
+          {{ form.detalhes_necessidade_especial }}
+          {{ form.detalhes_necessidade_especial.errors }}
+          <small class="text-muted">Campo obrigatorio quando houver necessidade especial.</small>
+        </div>
+      </div>
+      <div class="row">
         <div class="col-md-3">
           <label class="form-label">Valor adicional</label>
           {{ form.valor_adicional }}
@@ -123,6 +136,9 @@
     const chaleSelect = document.getElementById('id_chale');
     const capacidadeBox = document.getElementById('chale-capacidade');
     const acessivelBox = document.getElementById('chale-acessivel');
+    const necessidadeSelect = document.getElementById('id_possui_necessidade_especial');
+    const necessidadeBox = document.getElementById('necessidade-especial-box');
+    const necessidadeDetalhes = document.getElementById('id_detalhes_necessidade_especial');
 
     function atualizarInfo() {
       const option = chaleSelect.options[chaleSelect.selectedIndex];
@@ -136,6 +152,21 @@
       chaleSelect.addEventListener('change', atualizarInfo);
     }
     atualizarInfo();
+
+    function atualizarNecessidadeEspecial() {
+      if (!necessidadeSelect || !necessidadeBox || !necessidadeDetalhes) return;
+      const possui = necessidadeSelect.value === '1';
+      necessidadeBox.style.display = possui ? '' : 'none';
+      necessidadeDetalhes.required = possui;
+      if (!possui) {
+        necessidadeDetalhes.value = '';
+      }
+    }
+
+    if (necessidadeSelect) {
+      necessidadeSelect.addEventListener('change', atualizarNecessidadeEspecial);
+    }
+    atualizarNecessidadeEspecial();
   })();
 </script>
 {% endblock %}
