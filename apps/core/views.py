@@ -131,6 +131,16 @@ def home(request):
 @user_passes_test(can_read_core)
 def dashboard(request):
     eventos = Evento.objects.all()
+    eventos_calendario = json.dumps(
+        [
+            {
+                "title": evento.nome,
+                "start": evento.data_inicio.isoformat(),
+                "end": evento.data_fim.isoformat(),
+            }
+            for evento in eventos
+        ]
+    )
     contexto = {
         "total_eventos": eventos.count(),
         "eventos_ativos": eventos.filter(ativo=True).count(),
@@ -138,6 +148,7 @@ def dashboard(request):
         "distribuicao_status": list(
             eventos.values("status").annotate(total=Count("id")).order_by("status")
         ),
+        "eventos_calendario": eventos_calendario,
         "pode_gerenciar": can_manage_core(request.user),
     }
     return render(request, "core/dashboard.html", contexto)

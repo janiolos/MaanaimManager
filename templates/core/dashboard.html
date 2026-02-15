@@ -27,4 +27,46 @@
     <a class="btn btn-outline-primary" href="{% url 'core:selecionar_evento' %}">Selecionar ciclo</a>
   </div>
 </div>
+
+<div class="card mt-3">
+  <div class="card-header d-flex align-items-center">
+    <h3 class="card-title">Calendario de {{ rotulo_evento_plural|lower }}</h3>
+    <div class="ms-auto">
+      <a class="btn btn-sm btn-outline-primary" href="{% url 'core:eventos_lista' %}">Abrir lista completa</a>
+    </div>
+  </div>
+  <div class="card-body">
+    <div id="eventos-calendario-dashboard"></div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css">
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+<script>
+  (function () {
+    const calendarEl = document.getElementById('eventos-calendario-dashboard');
+    if (!calendarEl) return;
+    const eventos = {{ eventos_calendario|safe }};
+    const calendar = new FullCalendar.Calendar(calendarEl, {
+      initialView: 'dayGridMonth',
+      locale: 'pt-br',
+      height: 'auto',
+      headerToolbar: {
+        left: 'prev,next today',
+        center: 'title',
+        right: 'multiMonthYear,dayGridMonth,timeGridWeek,listWeek'
+      },
+      views: {
+        multiMonthYear: {
+          type: 'multiMonth',
+          duration: { months: 12 }
+        }
+      },
+      events: eventos
+    });
+    calendar.render();
+  })();
+</script>
 {% endblock %}
