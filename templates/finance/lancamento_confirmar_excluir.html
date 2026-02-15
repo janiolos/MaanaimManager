@@ -8,6 +8,7 @@
     <p>Deseja excluir o lancamento <strong>{{ lancamento.descricao }}</strong>?</p>
     <form method="post">
       {% csrf_token %}
+      <input type="hidden" name="next" value="{{ return_url }}">
       <button class="btn btn-danger" type="submit">Excluir</button>
       <a class="btn btn-outline" href="{{ return_url|default:'/finance/lancamentos/' }}">Cancelar</a>
     </form>

@@ -1,20 +1,59 @@
+import logging
 import json
 from datetime import date
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.paginator import Paginator
+from django.db.models.deletion import ProtectedError
 from django.db.models import Sum, Count, Case, When, Value, DecimalField, F
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 
-from apps.core.models import ConfiguracaoSistema
+from apps.core.models import AuditLog, ConfiguracaoSistema
 from apps.core.permissions import can_read_inventory, can_read_lodging, can_read_notifications
 from apps.core.utils import get_evento_atual
 from .forms import LancamentoFinanceiroForm, AnexoLancamentoForm
 from .models import CategoriaFinanceira, ContaCaixa, LancamentoFinanceiro, AnexoLancamento
 from .permissions import can_read_finance, can_write_finance
+
+logger = logging.getLogger(__name__)
+
+
+def _registrar_auditoria_exclusao_lancamento(request, lancamento, status_code, resultado, motivo=""):
+    try:
+        detalhes = {
+            "acao": "excluir_lancamento",
+            "resultado": resultado,
+            "motivo": motivo,
+            "lancamento": {
+                "id": lancamento.id,
+                "evento_id": lancamento.evento_id,
+                "tipo": lancamento.tipo,
+                "data": str(lancamento.data),
+                "valor": str(lancamento.valor),
+                "descricao": lancamento.descricao,
+                "categoria_id": lancamento.categoria_id,
+                "conta_id": lancamento.conta_id,
+            },
+        }
+        AuditLog.objects.create(
+            user=request.user if request.user.is_authenticated else None,
+            method="DELETE",
+            path=f"{request.path}?audit={json.dumps(detalhes, ensure_ascii=True, separators=(',', ':'))}",
+            view_name="finance:lancamento_excluir",
+            status_code=status_code,
+            ip_address=request.META.get("REMOTE_ADDR"),
+            user_agent=request.META.get("HTTP_USER_AGENT", ""),
+        )
+    except Exception:
+        logger.exception(
+            "Falha ao registrar auditoria de exclusao de lancamento. "
+            "lancamento_id=%s user_id=%s",
+            getattr(lancamento, "id", None),
+            getattr(request.user, "id", None),
+        )
 
 
 @login_required
@@ -265,11 +304,50 @@ def lancamento_editar(request, lancamento_id):
 def lancamento_excluir(request, lancamento_id):
     evento = get_evento_atual(request)
     lancamento = get_object_or_404(LancamentoFinanceiro, id=lancamento_id, evento=evento)
-    return_url = request.GET.get("next")
+    return_url = request.GET.get("next") or request.POST.get("next")
     if request.method == "POST":
-        lancamento.delete()
-        messages.success(request, "Lancamento excluido com sucesso.")
-        next_url = request.GET.get("next") or return_url
+        try:
+            lancamento.delete()
+            _registrar_auditoria_exclusao_lancamento(
+                request,
+                lancamento,
+                status_code=200,
+                resultado="sucesso",
+            )
+            messages.success(request, "Lancamento excluido com sucesso.")
+        except ProtectedError:
+            logger.exception(
+                "Falha ao excluir lancamento protegido. lancamento_id=%s user_id=%s",
+                lancamento.id,
+                request.user.id,
+            )
+            _registrar_auditoria_exclusao_lancamento(
+                request,
+                lancamento,
+                status_code=409,
+                resultado="falha",
+                motivo="protegido_por_relacionamento",
+            )
+            messages.error(
+                request,
+                "Nao foi possivel excluir este lancamento porque ele esta vinculado a outro registro "
+                "(ex.: reserva de chale). Remova o vinculo antes de excluir.",
+            )
+        except Exception:
+            logger.exception(
+                "Erro inesperado ao excluir lancamento. lancamento_id=%s user_id=%s",
+                lancamento.id,
+                request.user.id,
+            )
+            _registrar_auditoria_exclusao_lancamento(
+                request,
+                lancamento,
+                status_code=500,
+                resultado="falha",
+                motivo="erro_inesperado",
+            )
+            messages.error(request, "Ocorreu um erro inesperado ao excluir o lancamento.")
+        next_url = request.GET.get("next") or request.POST.get("next") or return_url
         return redirect(next_url or reverse("finance:lancamentos_lista"))
     return render(
         request,
@@ -289,13 +367,27 @@ def anexos(request, lancamento_id):
     if request.method == "POST":
         form = AnexoLancamentoForm(request.POST, request.FILES)
         if form.is_valid():
-            anexo = form.save(commit=False)
-            anexo.lancamento = lancamento
-            anexo.enviado_por = request.user
-            anexo.save()
-            messages.success(request, "Anexo enviado com sucesso.")
-            next_url = request.GET.get("next") or return_url
-            return redirect(next_url or reverse("finance:anexos", args=[lancamento.id]))
+            try:
+                anexo = form.save(commit=False)
+                anexo.lancamento = lancamento
+                anexo.enviado_por = request.user
+                anexo.save()
+                messages.success(request, "Anexo enviado com sucesso.")
+                next_url = request.GET.get("next") or return_url
+                return redirect(next_url or reverse("finance:anexos", args=[lancamento.id]))
+            except OSError:
+                logger.exception(
+                    "Falha ao salvar anexo de lancamento. "
+                    "lancamento_id=%s user_id=%s arquivo=%s",
+                    lancamento.id,
+                    request.user.id,
+                    request.FILES.get("arquivo"),
+                )
+                messages.error(
+                    request,
+                    "Nao foi possivel salvar o anexo no servidor. "
+                    "Verifique permissoes da pasta media e tente novamente.",
+                )
         messages.error(request, "Corrija os erros do formulario.")
     else:
         form = AnexoLancamentoForm()

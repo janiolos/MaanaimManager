@@ -42,7 +42,7 @@ services:
     expose:
       - "${APP_PORT:-8000}"
     volumes:
-      - ./media:/app/media:Z
+      - ./media:/app/media:z
       - static_data:/app/staticfiles
     depends_on:
       db:
@@ -65,7 +65,7 @@ services:
     volumes:
       - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro,Z
       - static_data:/srv/static:ro
-      - ./media:/srv/media:ro,Z
+      - ./media:/srv/media:ro,z
       - caddy_data:/data
       - caddy_config:/config
     depends_on:
