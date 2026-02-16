@@ -1,0 +1,20 @@
+# Arquivos de IDE (PyCharm/IntelliJ)
+.idea/
+*.iml
+
+# Caches e arquivos temporários do Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.hypothesis/
+
+# Arquivos de ambiente virtual
+venv/
+.venv/
+env/
+.env
+
+data/postgres
+
+staticfiles
