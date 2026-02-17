@@ -128,6 +128,8 @@ class ReservaChaleForm(forms.ModelForm):
         if data_entrada and data_saida and data_saida <= data_entrada:
             self.add_error("data_saida", "A data de saida deve ser maior que a data de entrada.")
 
+
+
         if chale and evento and data_entrada and data_saida:
             exists = (
                 ReservaChale.objects.filter(
