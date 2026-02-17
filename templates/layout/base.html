@@ -239,7 +239,13 @@
   <div class="modal-dialog modal-sm modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header bg-danger text-white">
-        <h5 class="modal-title">Erro</h5>
+        <h5 class="modal-title">
+          {% if form.errors %}
+            Erro
+          {% else %}
+            Sucesso!
+          {% endif %}
+        </h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
       </div>
       <div class="modal-body">
