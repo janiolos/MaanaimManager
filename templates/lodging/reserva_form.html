@@ -30,16 +30,29 @@
         </div>
       </div>
       <div class="row">
+
         <div class="col-md-3">
           <label class="form-label">Data entrada</label>
-          {{ form.data_entrada }}
-          {{ form.data_entrada.errors }}
+          <input type="date"
+                 name="{{ form.data_entrada.html_name }}"
+                 class="form-control"
+                 value="{{ form.data_entrada.value|date:'Y-m-d' }}">
+          {% if form.data_entrada.errors %}
+            <div class="text-danger small">{{ form.data_entrada.errors }}</div>
+          {% endif %}
         </div>
+
         <div class="col-md-3">
           <label class="form-label">Data saida</label>
-          {{ form.data_saida }}
-          {{ form.data_saida.errors }}
+          <input type="date"
+                 name="{{ form.data_saida.html_name }}"
+                 class="form-control"
+                 value="{{ form.data_saida.value|date:'Y-m-d' }}">
+          {% if form.data_saida.errors %}
+            <div class="text-danger small">{{ form.data_saida.errors }}</div>
+          {% endif %}
         </div>
+
       </div>
       <div class="row">
         <div class="col-md-3">
