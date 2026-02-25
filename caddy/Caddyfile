@@ -15,7 +15,7 @@
         file_server
     }
 
-    reverse_proxy app:{$APP_PORT}
+    reverse_proxy app:8000
 
     header {
         X-Content-Type-Options "nosniff"
