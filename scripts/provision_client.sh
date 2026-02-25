@@ -62,7 +62,8 @@ mkdir -p "${BASE_DIR}/data/postgres" "${BASE_DIR}/media"
 # 5. Subir a stack
 echo "🐳 Subindo containers para ${CLIENT_NAME} na porta ${HOST_PORT}..."
 cd "${BASE_DIR}"
-docker compose up -d --build
+# Garantir que o docker compose veja o .env local
+docker compose --env-file .env up -d --build
 
 echo "✅ Cliente ${CLIENT_NAME} provisionado com sucesso!"
 echo "🔗 Acesso via: http://${DOMAIN} (Porta exposta: ${HOST_PORT})"
