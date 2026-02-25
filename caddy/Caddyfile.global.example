@@ -1,0 +1,21 @@
+{
+    email {$ADMIN_EMAIL}
+}
+
+# Exemplo de configuração centralizada para o Caddy "Mestre"
+# Este arquivo deve ficar no host, fora das pastas dos clientes.
+
+# Cliente Maanaim
+maanaim.eventa.com.br {
+    reverse_proxy localhost:8001
+}
+
+# Cliente Faculdade
+faculdade.eventa.com.br {
+    reverse_proxy localhost:8002
+}
+
+# Cliente Nipponflex
+nipponflex.eventa.com.br {
+    reverse_proxy localhost:8003
+}

@@ -88,7 +88,7 @@ class AuditLog(models.Model):
 
 
 class ConfiguracaoSistema(models.Model):
-    nome_sistema = models.CharField(max_length=80, default="Eventa")
+    nome_sistema = models.CharField(max_length=80, default="CycloHub")
     rotulo_evento_singular = models.CharField(max_length=40, default="Evento")
     rotulo_evento_plural = models.CharField(max_length=40, default="Eventos")
     modulo_financeiro_ativo = models.BooleanField(default=True)

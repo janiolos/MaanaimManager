@@ -1,20 +1,20 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-cd "$ROOT_DIR"
+# Script de Rotação de Backups
+# Remove backups mais antigos que X dias para economizar espaço.
 
-[[ -f .env ]] || { echo "[ERRO] Arquivo .env não encontrado."; exit 1; }
-set -a
-source .env
-set +a
+BACKUP_DIR="/opt/cyclohub/backups/global"
+KEEP_DAYS=7
 
-RETENTION_DAYS="${BACKUP_RETENTION_DAYS:-30}"
-TARGET_DIR="./backups/db"
+echo "🧹 Iniciando limpeza de backups antigos (mantendo os últimos $KEEP_DAYS dias)..."
 
-mkdir -p "$TARGET_DIR"
+if [ ! -d "$BACKUP_DIR" ]; then
+    echo "⚠️ Diretório de backups não encontrado."
+    exit 0
+fi
 
-echo "[INFO] Removendo backups locais com mais de ${RETENTION_DAYS} dias..."
-find "$TARGET_DIR" -type f -name '*.sql.gz' -mtime +"$RETENTION_DAYS" -print -delete
+# Procurar e remover arquivos .sql.gz com mais de KEEP_DAYS dias
+find "$BACKUP_DIR" -type f -name "*.sql.gz" -mtime +$KEEP_DAYS -exec rm {} \; -print
 
-echo "[OK] Rotação concluída."
+echo "✅ Limpeza concluída."
