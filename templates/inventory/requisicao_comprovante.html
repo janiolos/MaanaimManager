@@ -1,0 +1,73 @@
+{% extends "layout/base.html" %}
+
+{% block title %}Comprovante {{ requisicao.numero }}{% endblock %}
+
+{% block page_header %}
+<div class="page-header d-print-none mb-3">
+  <div class="row align-items-center">
+    <div class="col">
+      <h2 class="page-title">Comprovante de requisicao</h2>
+      <div class="text-muted">{{ requisicao.numero }} - {{ via }}</div>
+    </div>
+    <div class="col-auto ms-auto d-flex gap-2">
+      <a class="btn btn-outline-secondary" href="{% url 'inventory:movimentos_lista' %}">Voltar</a>
+      <button class="btn btn-primary" onclick="window.print()"><i class="ti ti-printer me-1"></i>Imprimir</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card-body">
+    <div class="row mb-4">
+      <div class="col-8">
+        <h3 class="mb-1">Requisicao de materiais</h3>
+        <div><strong>Numero:</strong> {{ requisicao.numero }}</div>
+        <div><strong>Protocolo:</strong> {{ requisicao.protocolo }}</div>
+        <div><strong>Evento:</strong> {{ requisicao.evento.nome }}</div>
+      </div>
+      <div class="col-4 text-end">
+        <div><strong>Data:</strong> {{ requisicao.data_solicitacao|date:"d/m/Y H:i" }}</div>
+        <div><strong>Status:</strong> {{ requisicao.get_status_display }}</div>
+        <div><strong>Via:</strong> {{ via }}</div>
+      </div>
+    </div>
+
+    <div class="mb-3"><strong>Area:</strong> {{ requisicao.get_area_display }}</div>
+    {% if requisicao.observacao %}<div class="mb-3"><strong>Observacao:</strong> {{ requisicao.observacao }}</div>{% endif %}
+
+    <div class="table-responsive mb-4">
+      <table class="table table-vcenter">
+        <thead>
+          <tr>
+            <th>Item</th>
+            <th class="text-end">Quantidade</th>
+            <th class="text-end">Custo medio</th>
+            <th class="text-end">Custo total</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in requisicao.itens.all %}
+          <tr>
+            <td>{{ item.produto.nome }}</td>
+            <td class="text-end">{{ item.quantidade }}</td>
+            <td class="text-end">R$ {{ item.custo_medio_unitario }}</td>
+            <td class="text-end">R$ {{ item.custo_total }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="row mt-5 pt-5">
+      <div class="col-6 text-center">
+        <div style="border-top:1px solid #000; padding-top:8px;">Requisitante</div>
+      </div>
+      <div class="col-6 text-center">
+        <div style="border-top:1px solid #000; padding-top:8px;">Almoxarifado</div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,80 @@
+{% extends "layout/base.html" %}
+
+{% block title %}{% if requisicao %}Editar Requisicao{% else %}Nova Requisicao{% endif %}{% endblock %}
+
+{% block page_header %}
+<div class="page-header d-print-none mb-3">
+  <div class="row align-items-center">
+    <div class="col">
+      <h2 class="page-title">{% if requisicao %}Editar requisicao {{ requisicao.numero }}{% else %}Nova requisicao de saida{% endif %}</h2>
+      <div class="text-muted">Evento atual: {{ evento.nome }}</div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<form method="post" class="card">
+  {% csrf_token %}
+  <div class="card-header">
+    <h3 class="card-title">Cabecalho</h3>
+  </div>
+  <div class="card-body">
+    <div class="row g-3">
+      <div class="col-md-4">
+        {{ form.area.label_tag }}
+        {{ form.area }}
+      </div>
+      <div class="col-md-8">
+        {{ form.observacao.label_tag }}
+        {{ form.observacao }}
+      </div>
+    </div>
+  </div>
+
+  <div class="card-header border-top">
+    <h3 class="card-title">Itens da requisicao</h3>
+  </div>
+  <div class="card-body">
+    {{ formset.management_form }}
+    <div class="table-responsive">
+      <table class="table table-vcenter card-table" id="itens-table">
+        <thead>
+          <tr>
+            <th>Produto</th>
+            <th style="width: 180px;">Quantidade</th>
+            <th style="width: 120px;">Remover</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item_form in formset %}
+            <tr>
+              <td>
+                {{ item_form.id }}
+                {{ item_form.produto }}
+              </td>
+              <td>{{ item_form.quantidade }}</td>
+              <td>
+                {% if item_form.DELETE %}
+                  <label class="form-check m-0">
+                    {{ item_form.DELETE }}
+                    <span class="form-check-label">Excluir</span>
+                  </label>
+                {% else %}
+                  -
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <small class="text-muted">Preencha apenas as linhas necessarias. Linhas vazias serao ignoradas.</small>
+  </div>
+
+  <div class="card-footer d-flex justify-content-end gap-2">
+    <a class="btn btn-outline-secondary" href="{% url 'inventory:movimentos_lista' %}">Cancelar</a>
+    <button class="btn btn-primary" type="submit">{% if requisicao %}Salvar alteracoes{% else %}Salvar requisicao{% endif %}</button>
+  </div>
+</form>
+{% endblock %}

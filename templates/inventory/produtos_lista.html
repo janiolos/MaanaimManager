@@ -21,22 +21,32 @@
 <div class="row mb-3">
   <div class="col-md-4"><div class="card"><div class="card-body"><div class="text-muted">Produtos</div><div class="h2">{{ totais.total }}</div></div></div></div>
   <div class="col-md-4"><div class="card"><div class="card-body"><div class="text-muted">Estoque baixo</div><div class="h2 text-danger">{{ totais.baixo }}</div></div></div></div>
+  <div class="col-md-4"><div class="card"><div class="card-body"><div class="text-muted">Reabastecimento</div><div class="h2 text-orange">{{ totais.reabastecer }}</div></div></div></div>
   <div class="col-md-4"><div class="card"><div class="card-body"><div class="text-muted">Acima do maximo</div><div class="h2 text-warning">{{ totais.acima }}</div></div></div></div>
 </div>
 
 <div class="card mb-3">
   <div class="card-body">
     <form class="row g-2" method="get">
-      <div class="col-md-5"><input class="form-control" type="text" name="busca" value="{{ filtros.busca }}" placeholder="Buscar por nome"></div>
+      <div class="col-md-4"><input class="form-control" type="text" name="busca" value="{{ filtros.busca }}" placeholder="Buscar por nome"></div>
+      <div class="col-md-3">
+        <select class="form-select" name="categoria">
+          <option value="">Todas as categorias</option>
+          {% for value, label in categorias %}
+          <option value="{{ value }}" {% if filtros.categoria == value %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
       <div class="col-md-3">
         <select class="form-select" name="status">
           <option value="">Todos os status</option>
           <option value="baixo" {% if filtros.status == 'baixo' %}selected{% endif %}>Abaixo do minimo</option>
+          <option value="reabastecer" {% if filtros.status == 'reabastecer' %}selected{% endif %}>Reabastecimento</option>
           <option value="acima" {% if filtros.status == 'acima' %}selected{% endif %}>Acima do maximo</option>
         </select>
       </div>
-      <div class="col-md-2"><button class="btn btn-secondary w-100" type="submit">Filtrar</button></div>
-      <div class="col-md-2"><a class="btn btn-outline w-100" href="{% url 'inventory:produtos_lista' %}">Limpar</a></div>
+      <div class="col-md-1"><button class="btn btn-secondary w-100" type="submit">Filtrar</button></div>
+      <div class="col-md-1"><a class="btn btn-outline w-100" href="{% url 'inventory:produtos_lista' %}">Limpar</a></div>
     </form>
   </div>
 </div>
@@ -48,10 +58,12 @@
         <tr>
           <th>Produto</th>
           <th>SKU</th>
+          <th>Categoria</th>
           <th>Unid.</th>
           <th class="text-end">Atual</th>
-          <th class="text-end">Min.</th>
-          <th class="text-end">Max.</th>
+          <th class="text-end">Reabastecer em</th>
+          <th class="text-end">Custo medio</th>
+          <th class="text-end">Valor estoque</th>
           <th>Status</th>
         </tr>
       </thead>
@@ -60,13 +72,17 @@
           <tr>
             <td>{{ produto.nome }}</td>
             <td>{{ produto.sku }}</td>
+            <td>{{ produto.get_categoria_display }}</td>
             <td>{{ produto.unidade }}</td>
             <td class="text-end">{{ produto.estoque_atual }}</td>
-            <td class="text-end">{{ produto.estoque_minimo }}</td>
-            <td class="text-end">{{ produto.estoque_maximo }}</td>
+            <td class="text-end">{{ produto.estoque_reabastecimento }}</td>
+            <td class="text-end">R$ {{ produto.custo_medio_atual }}</td>
+            <td class="text-end">R$ {{ produto.valor_estoque_atual }}</td>
             <td>
               {% if produto.status_estoque == 'BAIXO' %}
                 <span class="badge bg-danger">Baixo</span>
+              {% elif produto.status_estoque == 'REABASTECER' %}
+                <span class="badge bg-orange text-dark">Reabastecer</span>
               {% elif produto.status_estoque == 'ACIMA' %}
                 <span class="badge bg-warning">Acima</span>
               {% else %}
@@ -75,13 +91,13 @@
             </td>
           </tr>
         {% empty %}
-          <tr><td colspan="7">Nenhum produto encontrado.</td></tr>
+          <tr><td colspan="9">Nenhum produto encontrado.</td></tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
   <div class="card-footer d-flex justify-content-between align-items-center">
-    <a class="btn btn-secondary" href="{% url 'inventory:movimentos_lista' %}">Ver saidas/devolucoes</a>
+    <a class="btn btn-secondary" href="{% url 'inventory:movimentos_lista' %}">Ver requisicoes</a>
     {% if page_obj.paginator.num_pages > 1 %}
       <div>
         {% if page_obj.has_previous %}<a class="btn btn-outline" href="?{{ querystring }}&page={{ page_obj.previous_page_number }}">Anterior</a>{% endif %}

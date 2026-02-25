@@ -1,0 +1,84 @@
+{% extends "layout/base.html" %}
+
+{% block title %}Cotacoes{% endblock %}
+
+{% block page_header %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h2 class="page-title">Cotacoes de compra</h2>
+    <div class="text-muted">{% if evento %}Evento atual: {{ evento.nome }}{% else %}Nenhum evento selecionado{% endif %}</div>
+  </div>
+  <div class="d-flex gap-2">
+    <a class="btn btn-secondary" href="{% url 'inventory:fornecedores_lista' %}">Fornecedores</a>
+    {% if pode_editar %}<a class="btn btn-primary" href="{% url 'inventory:cotacao_criar' %}">Nova cotacao</a>{% endif %}
+  </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="card mb-3">
+  <div class="card-body">
+    <form class="row g-2" method="get">
+      <div class="col-md-4">
+        <select class="form-select" name="status">
+          <option value="">Todos os status</option>
+          {% for value, label in status_choices %}
+          <option value="{{ value }}" {% if filtros.status == value %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2"><button class="btn btn-secondary w-100" type="submit">Filtrar</button></div>
+      <div class="col-md-2"><a class="btn btn-outline w-100" href="{% url 'inventory:cotacoes_lista' %}">Limpar</a></div>
+    </form>
+  </div>
+</div>
+
+<div class="card">
+  <div class="table-responsive">
+    <table class="table card-table table-vcenter">
+      <thead>
+        <tr>
+          <th>Numero</th>
+          <th>Data</th>
+          <th>Itens</th>
+          <th>Melhor proposta</th>
+          <th>Status</th>
+          <th class="text-end">Acoes</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for cotacao in page_obj %}
+        <tr>
+          <td><strong>{{ cotacao.numero }}</strong></td>
+          <td>{{ cotacao.data_cotacao|date:"d/m/Y H:i" }}</td>
+          <td>{{ cotacao.total_itens }}</td>
+          <td>{% if cotacao.melhor_total %}R$ {{ cotacao.melhor_total }}{% else %}-{% endif %}</td>
+          <td>
+            {% if cotacao.status == 'ABERTA' %}<span class="badge bg-warning text-dark">Aberta</span>
+            {% elif cotacao.status == 'FECHADA' %}<span class="badge bg-success">Fechada</span>
+            {% else %}<span class="badge bg-secondary">Cancelada</span>{% endif %}
+          </td>
+          <td class="text-end">
+            <a class="btn btn-sm btn-outline-secondary" href="{% url 'inventory:cotacao_comprovante' cotacao.pk %}"><i class="ti ti-printer"></i></a>
+            {% if pode_editar and cotacao.status == 'ABERTA' %}
+              <a class="btn btn-sm btn-primary" href="{% url 'inventory:cotacao_aprovar' cotacao.pk %}" title="Aprovar cotacao"><i class="ti ti-checkup-list"></i></a>
+              <a class="btn btn-sm btn-outline-primary" href="{% url 'inventory:cotacao_editar' cotacao.pk %}"><i class="ti ti-edit"></i></a>
+              <form method="post" class="d-inline" action="{% url 'inventory:cotacao_fechar' cotacao.pk %}">{% csrf_token %}<button class="btn btn-sm btn-success" type="submit"><i class="ti ti-check"></i></button></form>
+              <form method="post" class="d-inline" action="{% url 'inventory:cotacao_cancelar' cotacao.pk %}" onsubmit="return confirm('Cancelar esta cotacao?');">{% csrf_token %}<button class="btn btn-sm btn-outline-danger" type="submit"><i class="ti ti-trash"></i></button></form>
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6">Nenhuma cotacao registrada.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if page_obj.paginator.num_pages > 1 %}
+  <div class="card-footer text-end">
+    {% if page_obj.has_previous %}<a class="btn btn-outline" href="?{{ querystring }}&page={{ page_obj.previous_page_number }}">Anterior</a>{% endif %}
+    {% if page_obj.has_next %}<a class="btn btn-outline" href="?{{ querystring }}&page={{ page_obj.next_page_number }}">Proxima</a>{% endif %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

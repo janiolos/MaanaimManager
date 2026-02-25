@@ -1,0 +1,82 @@
+{% extends "layout/base.html" %}
+
+{% block title %}Comprovante {{ cotacao.numero }}{% endblock %}
+
+{% block page_header %}
+<div class="page-header d-print-none mb-3">
+  <div class="row align-items-center">
+    <div class="col">
+      <h2 class="page-title">Mapa comparativo de precos</h2>
+      <div class="text-muted">{{ cotacao.numero }} - {{ via }}</div>
+    </div>
+    <div class="col-auto ms-auto d-flex gap-2">
+      <a class="btn btn-outline-secondary" href="{% url 'inventory:cotacoes_lista' %}">Voltar</a>
+      <button class="btn btn-primary" onclick="window.print()"><i class="ti ti-printer me-1"></i>Imprimir</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card-body">
+    <div class="row mb-4">
+      <div class="col-8">
+        <h3 class="mb-1">Cotacao multi-item</h3>
+        <div><strong>Numero:</strong> {{ cotacao.numero }}</div>
+        <div><strong>Evento:</strong> {{ cotacao.evento.nome }}</div>
+        {% if cotacao.fornecedor_aprovado %}<div><strong>Fornecedor aprovado:</strong> {{ cotacao.fornecedor_aprovado.nome }}</div>{% endif %}
+        {% if cotacao.tem_ordem_compra %}<div><strong>Ordem de compra:</strong> {{ cotacao.numero_ordem_compra }}</div>{% endif %}
+      </div>
+      <div class="col-4 text-end">
+        <div><strong>Data:</strong> {{ cotacao.data_cotacao|date:"d/m/Y H:i" }}</div>
+        <div><strong>Status:</strong> {{ cotacao.get_status_display }}</div>
+        {% if cotacao.valor_aprovado %}<div><strong>Total aprovado:</strong> R$ {{ cotacao.valor_aprovado }}</div>{% endif %}
+      </div>
+    </div>
+
+    <div class="table-responsive mb-3">
+      <table class="table table-vcenter">
+        <thead>
+          <tr>
+            <th>Produto</th>
+            <th class="text-end">Qtd</th>
+            {% for fornecedor in fornecedores %}
+            <th class="text-end">{{ fornecedor.nome }}</th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in cotacao.itens.all %}
+          <tr>
+            <td>{{ item.produto.nome }}</td>
+            <td class="text-end">{{ item.quantidade }}</td>
+            {% for fornecedor in fornecedores %}
+              <td class="text-end">
+                {% for preco in item.precos.all %}
+                  {% if preco.fornecedor_id == fornecedor.id %}
+                    R$ {{ preco.valor_total }}
+                  {% endif %}
+                {% endfor %}
+              </td>
+            {% endfor %}
+          </tr>
+          {% endfor %}
+        </tbody>
+        <tfoot>
+          <tr>
+            <th colspan="2" class="text-end">Totais</th>
+            {% for fornecedor in fornecedores %}
+              <th class="text-end">
+                {% for reg in totais.values %}
+                  {% if reg.fornecedor.id == fornecedor.id %}R$ {{ reg.total }}{% endif %}
+                {% endfor %}
+              </th>
+            {% endfor %}
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

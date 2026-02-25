@@ -1,0 +1,121 @@
+{% extends "layout/base.html" %}
+
+{% block title %}Requisicoes de Saida{% endblock %}
+
+{% block page_header %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h2 class="page-title">Requisicoes de saida</h2>
+    <div class="text-muted">
+      {% if evento %}Evento atual: {{ evento.nome }}{% else %}Nenhum evento selecionado{% endif %}
+    </div>
+  </div>
+  {% if pode_editar %}
+  <div class="d-flex gap-2">
+    <a class="btn btn-secondary" href="{% url 'inventory:produtos_lista' %}">Produtos</a>
+    <a class="btn btn-primary" href="{% url 'inventory:requisicao_criar' %}">Nova requisicao</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="card mb-3">
+  <div class="card-body">
+    <form class="row g-2" method="get">
+      <div class="col-md-4">
+        <select class="form-select" name="status">
+          <option value="">Todos os status</option>
+          {% for value, label in status_choices %}
+            <option value="{{ value }}" {% if filtros.status == value %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-4">
+        <select class="form-select" name="area">
+          <option value="">Todas as areas</option>
+          {% for value, label in area_choices %}
+            <option value="{{ value }}" {% if filtros.area == value %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2"><button class="btn btn-secondary w-100" type="submit">Filtrar</button></div>
+      <div class="col-md-2"><a class="btn btn-outline w-100" href="{% url 'inventory:movimentos_lista' %}">Limpar</a></div>
+    </form>
+  </div>
+</div>
+
+<div class="card">
+  <div class="table-responsive">
+    <table class="table card-table table-vcenter">
+      <thead>
+        <tr>
+          <th>Numero</th>
+          <th>Data</th>
+          <th>Area</th>
+          <th>Itens</th>
+          <th>Status</th>
+          <th>Solicitante</th>
+          <th class="text-end">Acoes</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for requisicao in page_obj %}
+          <tr>
+            <td><strong>{{ requisicao.numero }}</strong></td>
+            <td>{{ requisicao.data_solicitacao|date:"d/m/Y H:i" }}</td>
+            <td>{{ requisicao.get_area_display }}</td>
+            <td>
+              {% for item in requisicao.itens.all %}
+                <div>{{ item.produto.nome }} <strong>{{ item.quantidade }}</strong></div>
+              {% empty %}
+                -
+              {% endfor %}
+            </td>
+            <td>
+              {% if requisicao.status == 'ABERTA' %}
+                <span class="badge bg-warning text-dark">Aberta</span>
+              {% elif requisicao.status == 'FINALIZADA' %}
+                <span class="badge bg-success">Finalizada</span>
+              {% else %}
+                <span class="badge bg-secondary">Cancelada</span>
+              {% endif %}
+            </td>
+            <td>{{ requisicao.criado_por }}</td>
+            <td class="text-end">
+              <a class="btn btn-sm btn-outline-secondary" href="{% url 'inventory:requisicao_comprovante' requisicao.pk %}">
+                <i class="ti ti-printer"></i>
+              </a>
+              {% if pode_editar and requisicao.status == 'ABERTA' %}
+                <a class="btn btn-sm btn-outline-primary" href="{% url 'inventory:requisicao_editar' requisicao.pk %}">
+                  <i class="ti ti-edit"></i>
+                </a>
+                <form method="post" action="{% url 'inventory:requisicao_finalizar' requisicao.pk %}" class="d-inline">
+                  {% csrf_token %}
+                  <button class="btn btn-sm btn-success" type="submit">
+                    <i class="ti ti-truck-delivery"></i>
+                  </button>
+                </form>
+                <form method="post" action="{% url 'inventory:requisicao_cancelar' requisicao.pk %}" class="d-inline" onsubmit="return confirm('Cancelar esta requisicao?');">
+                  {% csrf_token %}
+                  <button class="btn btn-sm btn-outline-danger" type="submit">
+                    <i class="ti ti-trash"></i>
+                  </button>
+                </form>
+              {% endif %}
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="7">Nenhuma requisicao registrada.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if page_obj.paginator.num_pages > 1 %}
+  <div class="card-footer text-end">
+    {% if page_obj.has_previous %}<a class="btn btn-outline" href="?{{ querystring }}&page={{ page_obj.previous_page_number }}">Anterior</a>{% endif %}
+    {% if page_obj.has_next %}<a class="btn btn-outline" href="?{{ querystring }}&page={{ page_obj.next_page_number }}">Proxima</a>{% endif %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

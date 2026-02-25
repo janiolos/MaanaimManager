@@ -1,0 +1,87 @@
+{% extends "layout/base.html" %}
+
+{% block title %}{% if cotacao %}Editar Cotacao{% else %}Nova Cotacao{% endif %}{% endblock %}
+
+{% block page_header %}
+<div class="page-header d-print-none mb-3">
+  <div class="row align-items-center">
+    <div class="col">
+      <h2 class="page-title">{% if cotacao %}Editar cotacao {{ cotacao.numero }}{% else %}Nova cotacao multi-item{% endif %}</h2>
+      <div class="text-muted">Evento atual: {{ evento.nome }}</div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<form method="post" class="row g-3">
+  {% csrf_token %}
+
+  <div class="col-lg-4">
+    <div class="card h-100">
+      <div class="card-header"><h3 class="card-title">1. Inserir Produto</h3></div>
+      <div class="card-body">
+        <div class="mb-3">
+          {{ form.observacao.label_tag }}
+          {{ form.observacao }}
+        </div>
+        <hr>
+        <div class="text-muted mb-2">Fornecedores ativos na cotacao:</div>
+        {% for fornecedor in fornecedores %}
+        <div class="mb-1"><span class="badge bg-blue-lt">{{ fornecedor.nome }}</span></div>
+        {% endfor %}
+        <small class="text-muted d-block mt-3">Preencha os produtos, quantidades e valores no quadro ao lado.</small>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-8">
+    <div class="card h-100">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h3 class="card-title">2. Totais da Cotacao</h3>
+      </div>
+      <div class="card-body">
+        {{ formset.management_form }}
+        <div class="table-responsive mb-3">
+          <table class="table table-vcenter card-table">
+            <thead>
+              <tr>
+                <th>Produto</th>
+                <th style="width: 90px;" class="text-end">Qtd</th>
+                <th style="width: 120px;">Excluir</th>
+                {% for fornecedor in fornecedores %}
+                <th>{{ fornecedor.nome }}</th>
+                {% endfor %}
+              </tr>
+            </thead>
+            <tbody>
+              {% for linha in linhas_cotacao %}
+              <tr>
+                {{ linha.form.id }}
+                <td>{{ linha.form.produto }}</td>
+                <td class="text-end">{{ linha.form.quantidade }}</td>
+                <td>
+                  {% if linha.form.DELETE %}
+                  <label class="form-check m-0">{{ linha.form.DELETE }}</label>
+                  {% else %}-{% endif %}
+                </td>
+                {% for preco in linha.precos %}
+                <td>
+                  <input type="number" step="0.01" min="0" class="form-control" name="{{ preco.field_name }}" placeholder="R$" value="{{ preco.value }}">
+                </td>
+                {% endfor %}
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2">
+          <a class="btn btn-outline-secondary" href="{% url 'inventory:cotacoes_lista' %}">Cancelar</a>
+          <button class="btn btn-primary" type="submit">{% if cotacao %}Salvar alteracoes{% else %}Salvar cotacao{% endif %}</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+{% endblock %}

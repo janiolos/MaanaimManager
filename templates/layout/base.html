@@ -16,13 +16,13 @@
   <div class="page">
     {% if current_url_name != 'login' %}
       <!-- SIDEBAR -->
-      <aside class="navbar navbar-vertical navbar-expand-lg" data-bs-theme="light">
+      <aside class="navbar navbar-vertical navbar-expand-sm position-absolute" data-bs-theme="dark">
         <div class="container-fluid">
           <a class="navbar-brand d-flex align-items-center" href="/">
             <span class="avatar avatar-md rounded bg-primary text-white me-2">EV</span>
             <span>
-              <span class="fw-bold d-block">{{ sistema_config.nome_sistema|default:"Eventa" }}</span>
-              <span class="text-muted small d-block">Gestao operacional modular</span>
+              <span class="fw-bold d-block">{{ sistema_config.nome_sistema|default:"Maanaim" }}</span>
+              <span class="text-muted small d-block">Manager</span>
             </span>
           </a>
 
@@ -121,9 +121,21 @@
                       </a>
                     </li>
                     <li class="nav-item">
-                      <a class="nav-link {% if request.resolver_match.url_name == 'movimentos_lista' %}active{% endif %}"
+                      <a class="nav-link {% if request.resolver_match.url_name == 'cotacoes_lista' or request.resolver_match.url_name == 'cotacao_criar' or request.resolver_match.url_name == 'cotacao_editar' or request.resolver_match.url_name == 'cotacao_comprovante' or request.resolver_match.url_name == 'cotacao_aprovar' %}active{% endif %}"
+                         href="{% url 'inventory:cotacoes_lista' %}">
+                        Orcamentos
+                      </a>
+                    </li>
+                    <li class="nav-item">
+                      <a class="nav-link {% if request.resolver_match.url_name == 'fornecedores_lista' or request.resolver_match.url_name == 'fornecedor_criar' %}active{% endif %}"
+                         href="{% url 'inventory:fornecedores_lista' %}">
+                        Fornecedores
+                      </a>
+                    </li>
+                    <li class="nav-item">
+                      <a class="nav-link {% if request.resolver_match.url_name == 'movimentos_lista' or request.resolver_match.url_name == 'requisicoes_lista' %}active{% endif %}"
                          href="{% url 'inventory:movimentos_lista' %}">
-                        Saidas e devolucoes
+                        Requisicoes de saida
                       </a>
                     </li>
                   </ul>
@@ -239,7 +251,7 @@
   <div class="modal-dialog modal-sm modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header bg-danger text-white">
-        <h5 class="modal-title">Erro</h5>
+        <h5 class="modal-title">Mensagem</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
       </div>
       <div class="modal-body">

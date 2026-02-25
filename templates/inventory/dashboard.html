@@ -18,15 +18,20 @@
 <div class="row row-cards">
   <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="text-muted">Produtos</div><div class="h2 mb-0">{{ produtos_total }}</div></div></div></div>
   <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="text-muted">Abaixo do minimo</div><div class="h2 mb-0 text-danger">{{ alerta_baixo }}</div></div></div></div>
-  <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="text-muted">Acima do maximo</div><div class="h2 mb-0 text-warning">{{ alerta_acima }}</div></div></div></div>
+  <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="text-muted">Reabastecimento</div><div class="h2 mb-0 text-orange">{{ alerta_reabastecimento }}</div></div></div></div>
+  <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="text-muted">Requisicoes abertas</div><div class="h2 mb-0 text-warning">{{ requisicoes_abertas }}</div></div></div></div>
+  <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="text-muted">Cotacoes abertas</div><div class="h2 mb-0 text-info">{{ cotacoes_abertas }}</div></div></div></div>
   <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="text-muted">Itens em estoque</div><div class="h2 mb-0">{{ total_estoque }}</div></div></div></div>
 </div>
 <div class="card mt-2">
   <div class="card-header"><h3 class="card-title">Acessos rapidos</h3></div>
   <div class="card-body">
     <a class="btn btn-outline-primary me-2" href="{% url 'inventory:produtos_lista' %}">Produtos</a>
-    <a class="btn btn-outline-primary me-2" href="{% url 'inventory:movimentos_lista' %}">Movimentos</a>
-    {% if pode_editar %}<a class="btn btn-outline-primary" href="{% url 'inventory:entrada_criar' %}">Nova entrada</a>{% endif %}
+    <a class="btn btn-outline-primary me-2" href="{% url 'inventory:movimentos_lista' %}">Requisicoes</a>
+    <a class="btn btn-outline-primary me-2" href="{% url 'inventory:cotacoes_lista' %}">Cotacoes</a>
+    <a class="btn btn-outline-primary me-2" href="{% url 'inventory:fornecedores_lista' %}">Fornecedores</a>
+    {% if pode_editar %}<a class="btn btn-outline-primary me-2" href="{% url 'inventory:entrada_criar' %}">Nova entrada</a>{% endif %}
+    {% if pode_editar %}<a class="btn btn-primary" href="{% url 'inventory:requisicao_criar' %}">Nova requisicao</a>{% endif %}
   </div>
 </div>
 {% endblock %}
