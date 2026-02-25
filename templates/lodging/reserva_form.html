@@ -36,7 +36,9 @@
           <input type="date"
                  name="{{ form.data_entrada.html_name }}"
                  class="form-control"
-                 value="{{ form.data_entrada.value|date:'Y-m-d' }}">
+                 value="{{ form.data_entrada.value|date:'Y-m-d' }}"
+                 min="{{ evento.data_inicio|date:'Y-m-d' }}"
+                 max="{{ evento.data_fim|date:'Y-m-d' }}">
           {% if form.data_entrada.errors %}
             <div class="text-danger small">{{ form.data_entrada.errors }}</div>
           {% endif %}
@@ -47,7 +49,10 @@
           <input type="date"
                  name="{{ form.data_saida.html_name }}"
                  class="form-control"
-                 value="{{ form.data_saida.value|date:'Y-m-d' }}">
+                 value="{{ form.data_saida.value|date:'Y-m-d' }}"
+                 min="{{ evento.data_inicio|date:'Y-m-d' }}"
+                 max="{{ evento.data_fim|date:'Y-m-d' }}"
+          >
           {% if form.data_saida.errors %}
             <div class="text-danger small">{{ form.data_saida.errors }}</div>
           {% endif %}
