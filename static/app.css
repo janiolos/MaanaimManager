@@ -2,17 +2,21 @@
 
 :root {
   /* Paleta Slate & Emerald - Premium e Moderna */
-  --mm-primary: #0f172a; 
+  --mm-primary: #0f172a;
   --mm-primary-light: #1e293b;
   --mm-primary-dark: #020617;
   --mm-primary-rgb: 15, 23, 42;
-  
-  --mm-accent: #10b981; 
-  --mm-success: #10b981; /* Esmeralda */
-  --mm-warning: #f59e0b; /* Âmbar */
-  --mm-danger: #ef4444;  /* Rosa-avermelhado */
-  --mm-info: #0ea5e9;    /* Céu */
-  
+
+  --mm-accent: #10b981;
+  --mm-success: #10b981;
+  /* Esmeralda */
+  --mm-warning: #f59e0b;
+  /* Âmbar */
+  --mm-danger: #ef4444;
+  /* Rosa-avermelhado */
+  --mm-info: #0ea5e9;
+  /* Céu */
+
   --mm-bg: #f8fafc;
   --mm-soft: #f1f5f9;
   --mm-card: #ffffff;
@@ -32,6 +36,9 @@
 
 body {
   font-family: "Source Sans 3", sans-serif;
+  font-size: 1.05rem;
+  /* Aumentado para melhor legibilidade */
+  line-height: 1.6;
   color: var(--mm-ink);
   background: var(--mm-soft);
 }
@@ -66,26 +73,26 @@ body {
 }
 
 /* Topbar: garantir legibilidade em fundo escuro */
-.page-wrapper > .navbar .navbar-text,
-.page-wrapper > .navbar .navbar-text strong,
-.page-wrapper > .navbar .navbar-text span,
-.page-wrapper > .navbar .navbar-text a,
-.page-wrapper > .navbar .nav-link,
-.page-wrapper > .navbar .nav-link i {
+.page-wrapper>.navbar .navbar-text,
+.page-wrapper>.navbar .navbar-text strong,
+.page-wrapper>.navbar .navbar-text span,
+.page-wrapper>.navbar .navbar-text a,
+.page-wrapper>.navbar .nav-link,
+.page-wrapper>.navbar .nav-link i {
   color: #ffffff !important;
 }
 
-.page-wrapper > .navbar .navbar-text a {
+.page-wrapper>.navbar .navbar-text a {
   text-decoration: underline;
   text-underline-offset: 2px;
 }
 
-.page-wrapper > .navbar .navbar-text a:hover,
-.page-wrapper > .navbar .nav-link:hover {
+.page-wrapper>.navbar .navbar-text a:hover,
+.page-wrapper>.navbar .nav-link:hover {
   color: #dbeafe !important;
 }
 
-.page-wrapper > .navbar .badge.bg-primary-lt {
+.page-wrapper>.navbar .badge.bg-primary-lt {
   background: rgba(255, 255, 255, 0.18) !important;
   color: #ffffff !important;
   border: 1px solid rgba(255, 255, 255, 0.28) !important;
@@ -118,6 +125,8 @@ body {
   border-radius: 0;
   margin: 0;
   padding: 0.75rem 1.25rem !important;
+  font-size: 1rem;
+  /* Aumentado */
   font-weight: 500;
   transition: all 0.2s ease;
 }
