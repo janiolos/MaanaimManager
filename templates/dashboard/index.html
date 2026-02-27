@@ -97,9 +97,26 @@
         <h3 class="card-title">Estoque</h3>
       </div>
       <div class="card-body">
-        <div class="text-muted">Produtos: <strong>{{ module_kpis.estoque.produtos_total }}</strong></div>
-        <div class="text-danger">Abaixo do minimo: <strong>{{ module_kpis.estoque.alerta_baixo }}</strong></div>
-        <div class="text-warning">Acima do maximo: <strong>{{ module_kpis.estoque.alerta_acima }}</strong></div>
+        <div class="text-muted mb-2">Produtos cadastrados: <strong>{{ module_kpis.estoque.produtos_total }}</strong>
+        </div>
+
+        {% if module_kpis.estoque.alerta_baixo > 0 %}
+        <div class="text-danger mb-3 d-flex align-items-center">
+          <i class="ti ti-alert-triangle me-2"></i>
+          <span><strong>{{ module_kpis.estoque.alerta_baixo }}</strong> itens abaixo do mínimo</span>
+        </div>
+        <a href="{% url 'inventory:produtos_lista' %}?status=baixo" class="btn btn-sm btn-outline-danger w-100">
+          Ver itens em falta
+        </a>
+        {% else %}
+        <div class="text-success mb-3 d-flex align-items-center">
+          <i class="ti ti-check me-2"></i>
+          <span>Estoque saudável</span>
+        </div>
+        <a href="{% url 'inventory:produtos_lista' %}" class="btn btn-sm btn-outline-secondary w-100">
+          Acessar Estoque
+        </a>
+        {% endif %}
       </div>
     </div>
   </div>
@@ -167,7 +184,8 @@
 {% block scripts %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script>
-  const chartData = {{ chart_data| safe }};
+  const chartDataRaw = '{{ chart_data|escapejs }}';
+  const chartData = chartDataRaw ? JSON.parse(chartDataRaw) : null;
   const ctx = document.getElementById('chart');
   const chartTypeStorageKey = 'eventa_dashboard_main_chart_type';
   const btnChartBar = document.getElementById('btn-chart-bar');

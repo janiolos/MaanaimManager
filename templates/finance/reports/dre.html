@@ -90,6 +90,20 @@
       </div>
     </div>
 
+    {# ── Gráfico Comparativo ────────────────────────────────────────── #}
+    <div class="row mb-3">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Composição do Resultado</h3>
+          </div>
+          <div class="card-body">
+            <canvas id="dreChart" height="60"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
     {# ── Detalhamento por categoria ────────────────────────────────── #}
     <div class="row row-cards">
       <div class="col-md-6">
@@ -172,4 +186,67 @@
     {% endif %}
   </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+{% if not erro %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const rawData = '{{ chart_data|escapejs }}';
+    if (!rawData) return;
+
+    const chartData = JSON.parse(rawData);
+    const ctx = document.getElementById('dreChart').getContext('2d');
+
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: chartData.labels, // ['Despesas', 'Receitas']
+        datasets: [{
+          label: 'Valor (R$)',
+          data: chartData.values,
+          backgroundColor: [
+            'rgba(220, 38, 38, 0.7)',  // red
+            'rgba(22, 163, 74, 0.7)'   // green
+          ],
+          borderColor: [
+            '#dc2626',
+            '#16a34a'
+          ],
+          borderWidth: 1,
+          borderRadius: 4
+        }]
+      },
+      options: {
+        indexAxis: 'y', // Grafico horizontal (Barras deitadas) fica melhor pra DRE
+        responsive: true,
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            callbacks: {
+              label: function (context) {
+                let value = context.raw || 0;
+                return 'R$ ' + parseFloat(value).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+              }
+            }
+          }
+        },
+        scales: {
+          x: {
+            beginAtZero: true,
+            ticks: {
+              callback: function (value) {
+                return 'R$ ' + value.toLocaleString('pt-BR');
+              }
+            }
+          }
+        }
+      }
+    });
+  });
+</script>
+{% endif %}
 {% endblock %}

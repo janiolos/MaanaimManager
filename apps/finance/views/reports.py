@@ -266,6 +266,14 @@ def relatorio_dre(request):
         receitas_por_categoria = list(qs.filter(tipo=LancamentoFinanceiro.RECEITA).values("categoria__nome").annotate(total=Sum("valor")).order_by("-total"))
         despesas_por_categoria = list(qs.filter(tipo=LancamentoFinanceiro.DESPESA).values("categoria__nome").annotate(total=Sum("valor")).order_by("-total"))
 
+        # Prepara dados para o grafico comparativo do DRE
+        chart_labels = ["Despesas", "Receitas"]
+        chart_values = [float(total_despesas), float(total_receitas)]
+        chart_data = json.dumps({
+            "labels": chart_labels,
+            "values": chart_values,
+        })
+
         context.update({
             "total_receitas":        total_receitas,
             "total_despesas":        total_despesas,
@@ -273,6 +281,7 @@ def relatorio_dre(request):
             "margem_percentual":     margem,
             "receitas_por_categoria": receitas_por_categoria,
             "despesas_por_categoria": despesas_por_categoria,
+            "chart_data":            chart_data,
         })
 
     except Exception as exc:
