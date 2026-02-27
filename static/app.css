@@ -36,9 +36,9 @@
 
 body {
   font-family: "Source Sans 3", sans-serif;
-  font-size: 1.5rem;
-  /* Aumentado drasticamente */
-  line-height: 1.6;
+  font-size: 1rem;
+  /* Padrão moderno (16px) */
+  line-height: 1.5;
   color: var(--mm-ink);
   background: var(--mm-soft);
 }
@@ -111,8 +111,8 @@ body {
 
 .navbar-vertical .navbar-brand .fw-bold {
   color: #fff !important;
-  font-size: 1.8rem;
-  /* Aumentado proporcionalmente */
+  font-size: 1.2rem;
+  /* Equilibrado */
 }
 
 .navbar-vertical .avatar.bg-primary {
@@ -125,9 +125,9 @@ body {
   border-left: 3px solid transparent !important;
   border-radius: 0;
   margin: 0;
-  padding: 0.75rem 1.25rem !important;
-  font-size: 1.5rem;
-  /* Aumentado drasticamente */
+  padding: 0.65rem 1.25rem !important;
+  font-size: 0.95rem;
+  /* Profissional e limpo */
   font-weight: 500;
   transition: all 0.2s ease;
 }
@@ -161,9 +161,9 @@ body {
 
 .navbar-vertical .nav-sm .nav-link {
   font-weight: 500;
-  font-size: 1.25rem;
-  /* Aumentado proporcionalmente */
-  padding: 0.42rem 0.7rem !important;
+  font-size: 0.875rem;
+  /* Hierarquia clara */
+  padding: 0.4rem 0.7rem !important;
   border-left-width: 3px !important;
   margin: 1px 0;
 }
