@@ -94,7 +94,8 @@
         <select class="form-select" name="categoria">
           <option value="">Todas as categorias</option>
           {% for value, label in categorias %}
-          <option value="{{ value }}" {% if filtros.categoria==value %}selected{% endif %}>{{ label }}</option>
+          <option value="{{ value }}" {% if filtros.categoria==value|stringformat:"s" %}selected{% endif %}>{{ label }}
+          </option>
           {% endfor %}
         </select>
       </div>
