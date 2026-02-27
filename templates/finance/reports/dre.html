@@ -1,110 +1,175 @@
 {% extends 'layout/base.html' %}
-{% load humanize %}
 
-{% block title %}DRE - Demonstrativo de Resultado{% endblock %}
+{% block title %}DRE — Demonstrativo de Resultado{% endblock %}
 
 {% block content %}
-<div class="page-header">
-  <div class="page-title">DRE — Demonstrativo de Resultado do Exercício</div>
-</div>
-
-<div class="card">
-  <div class="card-body">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-      <form method="get" class="form-inline">
-      <label class="me-2">Periodo:</label>
-      <input type="date" name="data_inicio" value="{{ data_inicio }}" class="form-control me-2">
-      <input type="date" name="data_fim" value="{{ data_fim }}" class="form-control me-2">
-      <button class="btn btn-primary">Filtrar</button>
-      <a href="{% url 'finance:relatorio_dre' %}" class="btn btn-link ms-2">Limpar</a>
-      </form>
-      <div>
-        <a href="{% url 'finance:relatorio_dre_pdf' %}?data_inicio={{ data_inicio }}&data_fim={{ data_fim }}" class="btn btn-outline-primary me-2">Exportar PDF</a>
-        <a href="{% url 'finance:relatorio_dre_excel' %}?data_inicio={{ data_inicio }}&data_fim={{ data_fim }}" class="btn btn-outline-secondary">Exportar Excel (CSV)</a>
-      </div>
-    </div>
-
-    <h5>Resumo Geral</h5>
-    <table class="table">
-      <tbody>
-        <tr>
-          <th>Total Receitas</th>
-          <td>{{ total_receitas|floatformat:2 }}</td>
-        </tr>
-        <tr>
-          <th>Total Despesas</th>
-          <td>{{ total_despesas|floatformat:2 }}</td>
-        </tr>
-        <tr>
-          <th>Resultado Líquido</th>
-          <td>
-            {% if resultado_liquido >= 0 %}
-              <span class="text-success">{{ resultado_liquido|floatformat:2 }}</span>
-            {% else %}
-              <span class="text-danger">{{ resultado_liquido|floatformat:2 }}</span>
-            {% endif %}
-          </td>
-        </tr>
-        <tr>
-          <th>Margem (% sobre receitas)</th>
-          <td>
-            {% if margem_percentual is not None %}
-              {{ margem_percentual|floatformat:2 }} %
-            {% else %}
-              N/A
-            {% endif %}
-          </td>
-        </tr>
-      </tbody>
-    </table>
-
-    <div class="row">
-      <div class="col-md-6">
-        <h6>Receitas por Categoria</h6>
-        <table class="table table-sm">
-          <thead>
-            <tr>
-              <th>Categoria</th>
-              <th class="text-end">Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for row in receitas_por_categoria %}
-            <tr>
-              <td>{{ row.categoria__nome }}</td>
-              <td class="text-end">{{ row.total|floatformat:2 }}</td>
-            </tr>
-            {% empty %}
-            <tr><td colspan="2">Nenhuma receita encontrada no periodo.</td></tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-
-      <div class="col-md-6">
-        <h6>Despesas por Categoria</h6>
-        <table class="table table-sm">
-          <thead>
-            <tr>
-              <th>Categoria</th>
-              <th class="text-end">Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for row in despesas_por_categoria %}
-            <tr>
-              <td>{{ row.categoria__nome }}</td>
-              <td class="text-end">{{ row.total|floatformat:2 }}</td>
-            </tr>
-            {% empty %}
-            <tr><td colspan="2">Nenhuma despesa encontrada no periodo.</td></tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-    </div>
-
+<div class="page-header d-print-none">
+  <div class="container-xl">
+    <div class="page-pretitle">Financeiro / Relatórios</div>
+    <div class="page-title">DRE — Demonstrativo de Resultado do Exercício</div>
   </div>
 </div>
 
+<div class="page-body">
+  <div class="container-xl">
+
+    {% if erro %}
+    <div class="alert alert-danger" role="alert">
+      <h4 class="alert-heading">Erro ao gerar o DRE</h4>
+      <p class="mb-0"><code>{{ erro }}</code></p>
+    </div>
+    {% else %}
+
+    {# ── Filtro de período ──────────────────────────────────────────── #}
+    <div class="card mb-3">
+      <div class="card-body">
+        <form method="get" class="row g-2 align-items-end">
+          <div class="col-auto">
+            <label class="form-label">Data início</label>
+            <input type="date" name="data_inicio" value="{{ data_inicio }}" class="form-control">
+          </div>
+          <div class="col-auto">
+            <label class="form-label">Data fim</label>
+            <input type="date" name="data_fim" value="{{ data_fim }}" class="form-control">
+          </div>
+          <div class="col-auto">
+            <button type="submit" class="btn btn-primary">Filtrar</button>
+            <a href="{% url 'finance:relatorio_dre' %}" class="btn btn-link">Limpar</a>
+          </div>
+          <div class="col-auto ms-auto">
+            <a href="{% url 'finance:relatorio_dre_excel' %}?data_inicio={{ data_inicio }}&data_fim={{ data_fim }}"
+              class="btn btn-outline-secondary">
+              <i class="ti ti-file-spreadsheet me-1"></i>Exportar CSV/Excel
+            </a>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    {# ── Resumo geral ────────────────────────────────────────────────── #}
+    <div class="row row-cards mb-3">
+      <div class="col-sm-6 col-lg-3">
+        <div class="card card-sm card-tinted-green">
+          <div class="card-status-start bg-success"></div>
+          <div class="card-body">
+            <div class="text-muted small fw-medium">Total Receitas</div>
+            <div class="h2 mb-0 fw-bold text-success">R$ {{ total_receitas|floatformat:2 }}</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <div class="card card-sm card-tinted-red">
+          <div class="card-status-start bg-danger"></div>
+          <div class="card-body">
+            <div class="text-muted small fw-medium">Total Despesas</div>
+            <div class="h2 mb-0 fw-bold text-danger">R$ {{ total_despesas|floatformat:2 }}</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <div class="card card-sm {% if resultado_liquido >= 0 %}card-tinted-green{% else %}card-tinted-red{% endif %}">
+          <div class="card-status-start {% if resultado_liquido >= 0 %}bg-success{% else %}bg-danger{% endif %}"></div>
+          <div class="card-body">
+            <div class="text-muted small fw-medium">Resultado Líquido</div>
+            <div class="h2 mb-0 fw-bold {% if resultado_liquido >= 0 %}text-success{% else %}text-danger{% endif %}">
+              R$ {{ resultado_liquido|floatformat:2 }}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <div class="card card-sm card-tinted-azure">
+          <div class="card-status-start bg-info"></div>
+          <div class="card-body">
+            <div class="text-muted small fw-medium">Margem</div>
+            <div class="h2 mb-0 fw-bold">
+              {% if margem_percentual is not None %}{{ margem_percentual|floatformat:1 }}%{% else %}N/A{% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {# ── Detalhamento por categoria ────────────────────────────────── #}
+    <div class="row row-cards">
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title"><i class="ti ti-trending-up text-success me-2"></i>Receitas por Categoria</h3>
+          </div>
+          <div class="table-responsive">
+            <table class="table table-sm table-hover mb-0">
+              <thead>
+                <tr>
+                  <th>Categoria</th>
+                  <th class="text-end">Total (R$)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for row in receitas_por_categoria %}
+                <tr>
+                  <td>{{ row.categoria__nome|default:"(Sem categoria)" }}</td>
+                  <td class="text-end">{{ row.total|floatformat:2 }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="2" class="text-center text-muted py-3">Nenhuma receita no período.</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+              {% if total_receitas %}
+              <tfoot>
+                <tr class="fw-bold table-success">
+                  <td>Total</td>
+                  <td class="text-end">{{ total_receitas|floatformat:2 }}</td>
+                </tr>
+              </tfoot>
+              {% endif %}
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title"><i class="ti ti-trending-down text-danger me-2"></i>Despesas por Categoria</h3>
+          </div>
+          <div class="table-responsive">
+            <table class="table table-sm table-hover mb-0">
+              <thead>
+                <tr>
+                  <th>Categoria</th>
+                  <th class="text-end">Total (R$)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for row in despesas_por_categoria %}
+                <tr>
+                  <td>{{ row.categoria__nome|default:"(Sem categoria)" }}</td>
+                  <td class="text-end">{{ row.total|floatformat:2 }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="2" class="text-center text-muted py-3">Nenhuma despesa no período.</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+              {% if total_despesas %}
+              <tfoot>
+                <tr class="fw-bold table-danger">
+                  <td>Total</td>
+                  <td class="text-end">{{ total_despesas|floatformat:2 }}</td>
+                </tr>
+              </tfoot>
+              {% endif %}
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {% endif %}
+  </div>
+</div>
 {% endblock %}

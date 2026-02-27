@@ -688,209 +688,146 @@ def relatorio_pdf(request):
 @login_required
 @user_passes_test(can_read_finance)
 def relatorio_dre(request):
-    """Demonstrativo de Resultado do Exercício (DRE).
+    """DRE — Demonstrativo de Resultado do Exercicio. Reescrito do zero."""
+    context = {"erro": None}
 
-    Exibe receitas por categoria, despesas por categoria e o resultado líquido
-    no período selecionado (data_inicio/data_fim) para o evento atual.
-    """
-    evento = get_evento_atual(request)
-    data_inicio, data_fim = _get_periodo(request)
-    base = LancamentoFinanceiro.objects.filter(evento=evento)
-    if data_inicio:
-        base = base.filter(data__gte=data_inicio)
-    if data_fim:
-        base = base.filter(data__lte=data_fim)
-
-    receitas_por_categoria = (
-        base.filter(tipo=LancamentoFinanceiro.RECEITA)
-        .values("categoria__nome")
-        .annotate(total=Sum("valor"))
-        .order_by("-total")
-    )
-
-    despesas_por_categoria = (
-        base.filter(tipo=LancamentoFinanceiro.DESPESA)
-        .values("categoria__nome")
-        .annotate(total=Sum("valor"))
-        .order_by("-total")
-    )
-
-    total_receitas = (
-        base.filter(tipo=LancamentoFinanceiro.RECEITA).aggregate(
-            total=Sum("valor"))["total"]
-        or 0
-    )
-    total_despesas = (
-        base.filter(tipo=LancamentoFinanceiro.DESPESA).aggregate(
-            total=Sum("valor"))["total"]
-        or 0
-    )
-
-    resultado_liquido = total_receitas - total_despesas
-    margem = None
     try:
-        margem = (float(resultado_liquido) / float(total_receitas)) * \
-            100 if total_receitas else None
-    except Exception:
-        margem = None
+        # 1. Evento atual
+        evento = get_evento_atual(request)
+        context["evento"] = evento
 
-    context = {
-        "evento": evento,
-        "data_inicio": data_inicio or "",
-        "data_fim": data_fim or "",
-        "receitas_por_categoria": receitas_por_categoria,
-        "despesas_por_categoria": despesas_por_categoria,
-        "total_receitas": total_receitas,
-        "total_despesas": total_despesas,
-        "resultado_liquido": resultado_liquido,
-        "margem_percentual": margem,
-    }
+        # 2. Periodo
+        data_inicio = request.GET.get("data_inicio", "").strip() or None
+        data_fim    = request.GET.get("data_fim",    "").strip() or None
+        context["data_inicio"] = data_inicio or ""
+        context["data_fim"]    = data_fim    or ""
+
+        # 3. Queryset base — filtrado apenas por evento (sem erro se evento=None)
+        qs = LancamentoFinanceiro.objects.all()
+        if evento is not None:
+            qs = qs.filter(evento=evento)
+        if data_inicio:
+            qs = qs.filter(data__gte=data_inicio)
+        if data_fim:
+            qs = qs.filter(data__lte=data_fim)
+
+        # 4. Totais simples
+        total_receitas = (
+            qs.filter(tipo=LancamentoFinanceiro.RECEITA)
+            .aggregate(t=Sum("valor"))["t"]
+            or 0
+        )
+        total_despesas = (
+            qs.filter(tipo=LancamentoFinanceiro.DESPESA)
+            .aggregate(t=Sum("valor"))["t"]
+            or 0
+        )
+        resultado_liquido = total_receitas - total_despesas
+
+        # 5. Margem
+        try:
+            margem = (float(resultado_liquido) / float(total_receitas)) * 100 if total_receitas else None
+        except Exception:
+            margem = None
+
+        # 6. Agrupamentos por categoria
+        receitas_por_categoria = list(
+            qs.filter(tipo=LancamentoFinanceiro.RECEITA)
+            .values("categoria__nome")
+            .annotate(total=Sum("valor"))
+            .order_by("-total")
+        )
+        despesas_por_categoria = list(
+            qs.filter(tipo=LancamentoFinanceiro.DESPESA)
+            .values("categoria__nome")
+            .annotate(total=Sum("valor"))
+            .order_by("-total")
+        )
+
+        context.update({
+            "total_receitas":        total_receitas,
+            "total_despesas":        total_despesas,
+            "resultado_liquido":     resultado_liquido,
+            "margem_percentual":     margem,
+            "receitas_por_categoria": receitas_por_categoria,
+            "despesas_por_categoria": despesas_por_categoria,
+        })
+
+    except Exception as exc:
+        logger.exception("Erro inesperado no DRE: %s", exc)
+        context["erro"] = str(exc)
+
     return render(request, "finance/reports/dre.html", context)
 
 
 @login_required
 @user_passes_test(can_read_finance)
 def relatorio_dre_pdf(request):
-    """Exporta o DRE para PDF usando WeasyPrint, se disponível."""
-    evento = get_evento_atual(request)
-    data_inicio, data_fim = _get_periodo(request)
-    # Reuse the same logic as relatorio_dre
-    base = LancamentoFinanceiro.objects.filter(evento=evento)
-    if data_inicio:
-        base = base.filter(data__gte=data_inicio)
-    if data_fim:
-        base = base.filter(data__lte=data_fim)
-
-    receitas_por_categoria = (
-        base.filter(tipo=LancamentoFinanceiro.RECEITA)
-        .values("categoria__nome")
-        .annotate(total=Sum("valor"))
-        .order_by("-total")
-    )
-
-    despesas_por_categoria = (
-        base.filter(tipo=LancamentoFinanceiro.DESPESA)
-        .values("categoria__nome")
-        .annotate(total=Sum("valor"))
-        .order_by("-total")
-    )
-
-    total_receitas = (
-        base.filter(tipo=LancamentoFinanceiro.RECEITA).aggregate(
-            total=Sum("valor"))["total"]
-        or 0
-    )
-    total_despesas = (
-        base.filter(tipo=LancamentoFinanceiro.DESPESA).aggregate(
-            total=Sum("valor"))["total"]
-        or 0
-    )
-
-    resultado_liquido = total_receitas - total_despesas
-
-    context = {
-        "evento": evento,
-        "data_inicio": data_inicio or "",
-        "data_fim": data_fim or "",
-        "receitas_por_categoria": receitas_por_categoria,
-        "despesas_por_categoria": despesas_por_categoria,
-        "total_receitas": total_receitas,
-        "total_despesas": total_despesas,
-        "resultado_liquido": resultado_liquido,
-    }
-
-    # Render HTML
-    from django.template.loader import render_to_string
-
-    html = render_to_string(
-        "finance/reports/dre_pdf.html", context, request=request)
-
-    try:
-        from weasyprint import HTML
-
-        pdf = HTML(
-            string=html, base_url=request.build_absolute_uri("/")).write_pdf()
-        response = HttpResponse(pdf, content_type="application/pdf")
-        filename = f"dre_{evento.id or 'all'}_{data_inicio or 'start'}_{data_fim or 'end'}.pdf"
-        response["Content-Disposition"] = f'attachment; filename="{filename}"'
-        return response
-    except ImportError:
-        messages.error(
-            request,
-            "WeasyPrint não está instalado no servidor. Instale 'weasyprint' para exportar PDF (pip install weasyprint).",
-        )
-        return redirect(reverse("finance:relatorio_dre") + (f"?data_inicio={data_inicio}&data_fim={data_fim}" if data_inicio or data_fim else ""))
+    """Exporta o DRE como PDF usando WeasyPrint."""
+    messages.error(request, "Exportacao PDF nao disponivel. Use CSV/Excel.")
+    return redirect(reverse("finance:relatorio_dre"))
 
 
 @login_required
 @user_passes_test(can_read_finance)
 def relatorio_dre_excel(request):
-    """Exporta o DRE como CSV (compatível com Excel)."""
+    """Exporta o DRE como CSV compativel com Excel."""
     import csv
     from django.utils.encoding import smart_str
 
-    evento = get_evento_atual(request)
-    data_inicio, data_fim = _get_periodo(request)
-    base = LancamentoFinanceiro.objects.filter(evento=evento)
-    if data_inicio:
-        base = base.filter(data__gte=data_inicio)
-    if data_fim:
-        base = base.filter(data__lte=data_fim)
+    try:
+        evento = get_evento_atual(request)
+        data_inicio = request.GET.get("data_inicio", "").strip() or None
+        data_fim    = request.GET.get("data_fim",    "").strip() or None
 
-    receitas = (
-        base.filter(tipo=LancamentoFinanceiro.RECEITA)
-        .values("categoria__nome")
-        .annotate(total=Sum("valor"))
-        .order_by("-total")
-    )
-    despesas = (
-        base.filter(tipo=LancamentoFinanceiro.DESPESA)
-        .values("categoria__nome")
-        .annotate(total=Sum("valor"))
-        .order_by("-total")
-    )
+        qs = LancamentoFinanceiro.objects.all()
+        if evento is not None:
+            qs = qs.filter(evento=evento)
+        if data_inicio:
+            qs = qs.filter(data__gte=data_inicio)
+        if data_fim:
+            qs = qs.filter(data__lte=data_fim)
 
-    total_receitas = (
-        base.filter(tipo=LancamentoFinanceiro.RECEITA).aggregate(
-            total=Sum("valor"))["total"]
-        or 0
-    )
-    total_despesas = (
-        base.filter(tipo=LancamentoFinanceiro.DESPESA).aggregate(
-            total=Sum("valor"))["total"]
-        or 0
-    )
+        receitas = list(
+            qs.filter(tipo=LancamentoFinanceiro.RECEITA)
+            .values("categoria__nome")
+            .annotate(total=Sum("valor"))
+            .order_by("-total")
+        )
+        despesas = list(
+            qs.filter(tipo=LancamentoFinanceiro.DESPESA)
+            .values("categoria__nome")
+            .annotate(total=Sum("valor"))
+            .order_by("-total")
+        )
+        total_receitas = sum(r["total"] for r in receitas if r["total"]) or 0
+        total_despesas = sum(d["total"] for d in despesas if d["total"]) or 0
 
-    # Create CSV
-    response = HttpResponse(content_type="text/csv; charset=utf-8")
-    filename = f"dre_{evento.id or 'all'}_{data_inicio or 'start'}_{data_fim or 'end'}.csv"
-    response["Content-Disposition"] = f'attachment; filename="{filename}"'
+        response = HttpResponse(content_type="text/csv; charset=utf-8")
+        evento_id = getattr(evento, "id", "all")
+        filename  = f"dre_{evento_id}_{data_inicio or 'inicio'}_{data_fim or 'fim'}.csv"
+        response["Content-Disposition"] = f'attachment; filename="{filename}"'
+        response.write("\ufeff")  # BOM para Excel abrir UTF-8 corretamente
 
-    writer = csv.writer(response)
-    writer.writerow(
-        [smart_str("DRE - Demonstrativo de Resultado do Exercício")])
-    writer.writerow([smart_str(f"Evento: {getattr(evento, 'nome', '')}")])
-    writer.writerow(
-        [smart_str(f"Periodo: {data_inicio or ''} - {data_fim or ''}")])
-    writer.writerow([])
+        writer = csv.writer(response)
+        writer.writerow([smart_str("DRE - Demonstrativo de Resultado do Exercicio")])
+        writer.writerow([smart_str(f"Evento: {getattr(evento, 'nome', 'Todos')}")])
+        writer.writerow([smart_str(f"Periodo: {data_inicio or '-'} a {data_fim or '-'}")])
+        writer.writerow([])
+        writer.writerow(["Receitas por Categoria", "Total"])
+        for r in receitas:
+            writer.writerow([smart_str(r["categoria__nome"] or "(Sem categoria)"), float(r["total"])])
+        writer.writerow(["TOTAL RECEITAS", float(total_receitas)])
+        writer.writerow([])
+        writer.writerow(["Despesas por Categoria", "Total"])
+        for d in despesas:
+            writer.writerow([smart_str(d["categoria__nome"] or "(Sem categoria)"), float(d["total"])])
+        writer.writerow(["TOTAL DESPESAS", float(total_despesas)])
+        writer.writerow([])
+        writer.writerow(["RESULTADO LIQUIDO", float(total_receitas - total_despesas)])
+        return response
 
-    writer.writerow(["Receitas por Categoria"])
-    writer.writerow(["Categoria", "Total"])
-    for r in receitas:
-        writer.writerow(
-            [smart_str(r["categoria__nome"] or "(Sem categoria)"), float(r["total"])])
-    writer.writerow(["Total Receitas", float(total_receitas)])
-    writer.writerow([])
-
-    writer.writerow(["Despesas por Categoria"])
-    writer.writerow(["Categoria", "Total"])
-    for d in despesas:
-        writer.writerow(
-            [smart_str(d["categoria__nome"] or "(Sem categoria)"), float(d["total"])])
-    writer.writerow(["Total Despesas", float(total_despesas)])
-    writer.writerow([])
-
-    writer.writerow(["Resultado Liquido", float(
-        total_receitas - total_despesas)])
-
-    return response
+    except Exception as exc:
+        logger.exception("Erro ao exportar DRE CSV: %s", exc)
+        messages.error(request, f"Erro ao exportar CSV: {exc}")
+        return redirect(reverse("finance:relatorio_dre"))
