@@ -148,3 +148,39 @@ APSCHEDULER_RUN_NOW_TIMEOUT = 25
 
 INACTIVITY_TIMEOUT_SECONDS = int(
     os.environ.get("INACTIVITY_TIMEOUT_SECONDS", "1800"))
+
+# Logging Configuration
+LOGLEVEL = os.environ.get("LOGLEVEL", "INFO").upper()
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "[{asctime}] {levelname} [{name}:{lineno}] {message}",
+            "style": "{",
+        },
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "verbose",
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": LOGLEVEL,
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["console"],
+            "level": os.environ.get("DJANGO_LOGLEVEL", "INFO").upper(),
+            "propagate": False,
+        },
+        "django.request": {
+            "handlers": ["console"],
+            "level": "ERROR",
+            "propagate": False,
+        },
+    },
+}
