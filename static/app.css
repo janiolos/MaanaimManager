@@ -161,7 +161,8 @@ body {
 
 .navbar-vertical .nav-sm .nav-link {
   font-weight: 500;
-  font-size: 0.92rem;
+  font-size: 1.25rem;
+  /* Aumentado proporcionalmente */
   padding: 0.42rem 0.7rem !important;
   border-left-width: 3px !important;
   margin: 1px 0;
