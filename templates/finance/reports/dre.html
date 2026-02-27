@@ -39,7 +39,11 @@
           <div class="col-auto ms-auto">
             <a href="{% url 'finance:relatorio_dre_excel' %}?data_inicio={{ data_inicio }}&data_fim={{ data_fim }}"
               class="btn btn-outline-secondary">
-              <i class="ti ti-file-spreadsheet me-1"></i>Exportar CSV/Excel
+              <i class="ti ti-file-spreadsheet me-1"></i>Excel/CSV
+            </a>
+            <a href="{% url 'finance:relatorio_dre_pdf' %}?data_inicio={{ data_inicio }}&data_fim={{ data_fim }}"
+              class="btn btn-outline-danger ms-2">
+              <i class="ti ti-file-type-pdf me-1"></i>PDF
             </a>
           </div>
         </form>

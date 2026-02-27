@@ -293,8 +293,59 @@ def relatorio_dre(request):
 @login_required
 @user_passes_test(can_read_finance)
 def relatorio_dre_pdf(request):
-    messages.error(request, "Exportacao PDF nao disponivel. Use CSV/Excel.")
-    return redirect(reverse("finance:relatorio_dre"))
+    import weasyprint
+    from django.template.loader import render_to_string
+
+    try:
+        evento = get_evento_atual(request)
+        data_inicio = request.GET.get("data_inicio", "").strip() or None
+        data_fim    = request.GET.get("data_fim",    "").strip() or None
+
+        qs = LancamentoFinanceiro.objects.all()
+        if evento is not None:
+            qs = qs.filter(evento=evento)
+        if data_inicio:
+            qs = qs.filter(data__gte=data_inicio)
+        if data_fim:
+            qs = qs.filter(data__lte=data_fim)
+
+        total_receitas = qs.filter(tipo=LancamentoFinanceiro.RECEITA).aggregate(t=Sum("valor"))["t"] or 0
+        total_despesas = qs.filter(tipo=LancamentoFinanceiro.DESPESA).aggregate(t=Sum("valor"))["t"] or 0
+        resultado_liquido = total_receitas - total_despesas
+
+        try:
+            margem = (float(resultado_liquido) / float(total_receitas)) * 100 if total_receitas else None
+        except Exception:
+            margem = None
+
+        receitas_por_categoria = list(qs.filter(tipo=LancamentoFinanceiro.RECEITA).values("categoria__nome").annotate(total=Sum("valor")).order_by("-total"))
+        despesas_por_categoria = list(qs.filter(tipo=LancamentoFinanceiro.DESPESA).values("categoria__nome").annotate(total=Sum("valor")).order_by("-total"))
+
+        context = {
+            "evento": evento,
+            "data_inicio": data_inicio,
+            "data_fim": data_fim,
+            "total_receitas": total_receitas,
+            "total_despesas": total_despesas,
+            "resultado_liquido": resultado_liquido,
+            "margem_percentual": margem,
+            "receitas_por_categoria": receitas_por_categoria,
+            "despesas_por_categoria": despesas_por_categoria,
+        }
+
+        html_string = render_to_string("finance/reports/dre_pdf.html", context, request=request)
+        pdf_file = weasyprint.HTML(string=html_string, base_url=request.build_absolute_uri()).write_pdf()
+
+        response = HttpResponse(pdf_file, content_type="application/pdf")
+        evento_id = getattr(evento, "id", "all")
+        filename = f"dre_{evento_id}_{data_inicio or 'inicio'}_{data_fim or 'fim'}.pdf"
+        response["Content-Disposition"] = f'attachment; filename="{filename}"'
+        return response
+
+    except Exception as exc:
+        logger.exception("Erro ao exportar DRE PDF: %s", exc)
+        messages.error(request, f"Erro ao gerar PDF: {exc}")
+        return redirect(reverse("finance:relatorio_dre"))
 
 @login_required
 @user_passes_test(can_read_finance)

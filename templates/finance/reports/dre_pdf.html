@@ -1,82 +1,189 @@
-<!doctype html>
-<html lang="pt-BR">
-  <head>
-    <meta charset="utf-8">
-    <title>DRE - Demonstrativo de Resultado</title>
-    <style>
-      body { font-family: Arial, Helvetica, sans-serif; color: #222; }
-      .header { text-align: center; margin-bottom: 20px; }
-      h1 { font-size: 18px; margin: 0; }
-      table { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
-      th, td { padding: 6px 8px; border: 1px solid #ddd; }
-      th { background: #f5f5f5; text-align: left; }
-      .text-right { text-align: right; }
-      .muted { color: #666; font-size: 12px; }
-      .positive { color: #0a0; }
-      .negative { color: #a00; }
-    </style>
-  </head>
-  <body>
-    <div class="header">
-      <h1>DRE — Demonstrativo de Resultado do Exercício</h1>
-      <div class="muted">Evento: {{ evento.nome if evento }} | Período: {{ data_inicio }} - {{ data_fim }}</div>
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+  <meta charset="UTF-8">
+  <title>DRE - {{ evento.nome|default:"Todos" }}</title>
+  <style>
+    @page {
+      size: A4 portrait;
+      margin: 2cm;
+
+      @bottom-right {
+        content: "Página " counter(page) " de " counter(pages);
+        font-size: 10pt;
+        color: #666;
+      }
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      color: #333;
+      font-size: 12pt;
+    }
+
+    h1 {
+      color: #206bc4;
+      text-align: center;
+      margin-bottom: 5px;
+    }
+
+    .header-info {
+      text-align: center;
+      margin-bottom: 30px;
+      color: #555;
+      font-size: 11pt;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+      font-size: 11pt;
+    }
+
+    th,
+    td {
+      padding: 8px 10px;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    th {
+      background-color: #f8f9fa;
+      text-align: left;
+      font-weight: bold;
+    }
+
+    .text-right {
+      text-align: right;
+    }
+
+    .text-strong {
+      font-weight: bold;
+    }
+
+    .text-success {
+      color: #2fb344;
+    }
+
+    .text-danger {
+      color: #d63939;
+    }
+
+    .bg-light {
+      background-color: #f8f9fa;
+    }
+
+    .summary-box {
+      border: 1px solid #ddd;
+      padding: 15px;
+      margin-bottom: 30px;
+      border-radius: 4px;
+    }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .summary-row:last-child {
+      margin-bottom: 0;
+      padding-top: 10px;
+      border-top: 2px solid #ddd;
+      font-size: 14pt;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Demonstrativo de Resultado do Exercício (DRE)</h1>
+  <div class="header-info">
+    <strong>Evento:</strong> {{ evento.nome|default:"Todos" }}<br>
+    <strong>Período:</strong>
+    {% if data_inicio and data_fim %}
+    {{ data_inicio }} a {{ data_fim }}
+    {% elif data_inicio %}
+    A partir de {{ data_inicio }}
+    {% elif data_fim %}
+    Até {{ data_fim }}
+    {% else %}
+    Todo o período
+    {% endif %}
+  </div>
+
+  <div class="summary-box bg-light">
+    <div class="summary-row text-success">
+      <span>Total Receitas (+)</span>
+      <span>R$ {{ total_receitas|floatformat:2 }}</span>
     </div>
-
-    <h2>Resumo</h2>
-    <table>
-      <tr>
-        <th>Total Receitas</th>
-        <td class="text-right">{{ total_receitas|floatformat:2 }}</td>
-      </tr>
-      <tr>
-        <th>Total Despesas</th>
-        <td class="text-right">{{ total_despesas|floatformat:2 }}</td>
-      </tr>
-      <tr>
-        <th>Resultado Líquido</th>
-        <td class="text-right">{% if resultado_liquido >= 0 %}<span class="positive">{{ resultado_liquido|floatformat:2 }}</span>{% else %}<span class="negative">{{ resultado_liquido|floatformat:2 }}</span>{% endif %}</td>
-      </tr>
-    </table>
-
-    <div style="display:flex; gap:20px;">
-      <div style="flex:1">
-        <h3>Receitas por Categoria</h3>
-        <table>
-          <thead>
-            <tr><th>Categoria</th><th class="text-right">Total</th></tr>
-          </thead>
-          <tbody>
-            {% for row in receitas_por_categoria %}
-            <tr>
-              <td>{{ row.categoria__nome }}</td>
-              <td class="text-right">{{ row.total|floatformat:2 }}</td>
-            </tr>
-            {% empty %}
-            <tr><td colspan="2">Nenhuma receita encontrada.</td></tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-
-      <div style="flex:1">
-        <h3>Despesas por Categoria</h3>
-        <table>
-          <thead>
-            <tr><th>Categoria</th><th class="text-right">Total</th></tr>
-          </thead>
-          <tbody>
-            {% for row in despesas_por_categoria %}
-            <tr>
-              <td>{{ row.categoria__nome }}</td>
-              <td class="text-right">{{ row.total|floatformat:2 }}</td>
-            </tr>
-            {% empty %}
-            <tr><td colspan="2">Nenhuma despesa encontrada.</td></tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
+    <div class="summary-row text-danger">
+      <span>Total Despesas (-)</span>
+      <span>R$ {{ total_despesas|floatformat:2 }}</span>
     </div>
+    <div class="summary-row {% if resultado_liquido >= 0 %}text-success{% else %}text-danger{% endif %}">
+      <span>Resultado Líquido</span>
+      <span>R$ {{ resultado_liquido|floatformat:2 }}</span>
+    </div>
+  </div>
 
-  </body>
+  <h3>Receitas por Categoria</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Categoria</th>
+        <th class="text-right">Total (R$)</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in receitas_por_categoria %}
+      <tr>
+        <td>{{ row.categoria__nome|default:"(Sem categoria)" }}</td>
+        <td class="text-right">{{ row.total|floatformat:2 }}</td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="2" style="text-align: center; color: #777;">Nenhuma receita no período.</td>
+      </tr>
+      {% endfor %}
+      {% if total_receitas %}
+      <tr>
+        <td class="text-strong">Total de Receitas</td>
+        <td class="text-right text-strong text-success">{{ total_receitas|floatformat:2 }}</td>
+      </tr>
+      {% endif %}
+    </tbody>
+  </table>
+
+  <h3 style="margin-top: 30px;">Despesas por Categoria</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Categoria</th>
+        <th class="text-right">Total (R$)</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in despesas_por_categoria %}
+      <tr>
+        <td>{{ row.categoria__nome|default:"(Sem categoria)" }}</td>
+        <td class="text-right">{{ row.total|floatformat:2 }}</td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="2" style="text-align: center; color: #777;">Nenhuma despesa no período.</td>
+      </tr>
+      {% endfor %}
+      {% if total_despesas %}
+      <tr>
+        <td class="text-strong">Total de Despesas</td>
+        <td class="text-right text-strong text-danger">{{ total_despesas|floatformat:2 }}</td>
+      </tr>
+      {% endif %}
+    </tbody>
+  </table>
+
+</body>
+
 </html>
