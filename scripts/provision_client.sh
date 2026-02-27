@@ -67,6 +67,30 @@ cd "${BASE_DIR}"
 # Garantir que o docker compose veja o .env local
 docker compose --env-file .env up -d --build
 
+# 6. Configurações Iniciais
+echo "⏳ Aguardando containers ficarem prontos (isso pode levar um minuto)..."
+# Loop simples para esperar o container app estar saudável
+MAX_RETRIES=30
+COUNT=0
+while [ $COUNT -lt $MAX_RETRIES ]; do
+    HEALTH=$(docker inspect -f '{{if .State.Running}}{{if .State.Health}}{{.State.Health.Status}}{{else}}running{{end}}{{else}}down{{end}}' "${CLIENT_NAME}_app" 2>/dev/null || echo "down")
+    if [ "$HEALTH" == "healthy" ]; then
+        echo -e "\n✅ Containers saudáveis!"
+        break
+    fi
+    echo -n "."
+    sleep 5
+    COUNT=$((COUNT + 1))
+done
+
+if [ $COUNT -eq $MAX_RETRIES ]; then
+    echo -e "\n⚠️ Aviso: O container não ficou saudável a tempo, mas tentaremos rodar as configurações assim mesmo."
+fi
+
+echo "⚙️ Realizando configurações iniciais..."
+bash scripts/criar_grupos.sh
+bash scripts/criar_evento.sh
+
 echo "✅ Cliente ${CLIENT_NAME} provisionado com sucesso!"
 echo "🔗 Acesso via: http://${DOMAIN} (Porta exposta: ${HOST_PORT})"
 echo "📂 Pastas localizadas em: ${BASE_DIR}"
