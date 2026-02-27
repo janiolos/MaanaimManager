@@ -177,7 +177,8 @@ body {
 }
 
 .card {
-  border: none !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  /* Borda sutil porém visível */
   background: var(--mm-card) !important;
   box-shadow: var(--mm-shadow) !important;
   border-radius: 12px !important;
@@ -231,8 +232,15 @@ body {
 }
 
 .card-header {
-  border-bottom: 1px solid var(--mm-border) !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
   background: linear-gradient(90deg, #ffffff 0%, #f8fafc 100%) !important;
+}
+
+/* Aumento do contraste e espessura das linhas de status */
+.card-status-start {
+  width: 4px !important;
+  /* Mais espesso para maior contraste */
+  opacity: 1 !important;
 }
 
 .page-title {
