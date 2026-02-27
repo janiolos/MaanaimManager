@@ -189,6 +189,47 @@ body {
   box-shadow: var(--mm-shadow-lg) !important;
 }
 
+/* Tinted Card Backgrounds */
+.card-tinted-green {
+  background-color: #f0fdf4 !important;
+}
+
+.card-tinted-red {
+  background-color: #fef2f2 !important;
+}
+
+.card-tinted-blue {
+  background-color: #eff6ff !important;
+}
+
+.card-tinted-azure {
+  background-color: #f0f9ff !important;
+}
+
+.card-tinted-orange {
+  background-color: #fffaf0 !important;
+}
+
+.card-tinted-warning {
+  background-color: #fffbeb !important;
+}
+
+/* Dark text for tinted cards to ensure contrast */
+.card-tinted-green .h2,
+.card-tinted-green .text-muted,
+.card-tinted-red .h2,
+.card-tinted-red .text-muted,
+.card-tinted-blue .h2,
+.card-tinted-blue .text-muted,
+.card-tinted-azure .h2,
+.card-tinted-azure .text-muted,
+.card-tinted-orange .h2,
+.card-tinted-orange .text-muted,
+.card-tinted-warning .h2,
+.card-tinted-warning .text-muted {
+  color: var(--mm-ink) !important;
+}
+
 .card-header {
   border-bottom: 1px solid var(--mm-border) !important;
   background: linear-gradient(90deg, #ffffff 0%, #f8fafc 100%) !important;
