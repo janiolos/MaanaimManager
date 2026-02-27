@@ -18,35 +18,97 @@
 {% endblock %}
 
 {% block content %}
-<div class="row mb-3">
-  <div class="col-md-4"><div class="card"><div class="card-body"><div class="text-muted">Produtos</div><div class="h2">{{ totais.total }}</div></div></div></div>
-  <div class="col-md-4"><div class="card"><div class="card-body"><div class="text-muted">Estoque baixo</div><div class="h2 text-danger">{{ totais.baixo }}</div></div></div></div>
-  <div class="col-md-4"><div class="card"><div class="card-body"><div class="text-muted">Reabastecimento</div><div class="h2 text-orange">{{ totais.reabastecer }}</div></div></div></div>
-  <div class="col-md-4"><div class="card"><div class="card-body"><div class="text-muted">Acima do maximo</div><div class="h2 text-warning">{{ totais.acima }}</div></div></div></div>
+<div class="row row-cards mb-3">
+  <div class="col-sm-6 col-lg-3">
+    <div class="card card-sm">
+      <div class="card-status-start bg-blue"></div>
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <span class="avatar avatar-md bg-blue-lt text-blue me-3">
+            <i class="ti ti-box" aria-hidden="true"></i>
+          </span>
+          <div>
+            <div class="text-muted small fw-medium">Produtos</div>
+            <div class="h2 mb-0 fw-bold">{{ totais.total }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-lg-3">
+    <div class="card card-sm">
+      <div class="card-status-start bg-red"></div>
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <span class="avatar avatar-md bg-red-lt text-red me-3">
+            <i class="ti ti-alert-triangle" aria-hidden="true"></i>
+          </span>
+          <div>
+            <div class="text-muted small fw-medium">Estoque Baixo</div>
+            <div class="h2 mb-0 fw-bold">{{ totais.baixo }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-lg-3">
+    <div class="card card-sm">
+      <div class="card-status-start bg-orange"></div>
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <span class="avatar avatar-md bg-orange-lt text-orange me-3">
+            <i class="ti ti-refresh" aria-hidden="true"></i>
+          </span>
+          <div>
+            <div class="text-muted small fw-medium">Reabastecimento</div>
+            <div class="h2 mb-0 fw-bold">{{ totais.reabastecer }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-lg-3">
+    <div class="card card-sm">
+      <div class="card-status-start bg-warning"></div>
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <span class="avatar avatar-md bg-warning-lt text-warning me-3">
+            <i class="ti ti-arrow-bar-up" aria-hidden="true"></i>
+          </span>
+          <div>
+            <div class="text-muted small fw-medium">Acima do Máximo</div>
+            <div class="h2 mb-0 fw-bold">{{ totais.acima }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <div class="card mb-3">
   <div class="card-body">
     <form class="row g-2" method="get">
-      <div class="col-md-4"><input class="form-control" type="text" name="busca" value="{{ filtros.busca }}" placeholder="Buscar por nome"></div>
+      <div class="col-md-4"><input class="form-control" type="text" name="busca" value="{{ filtros.busca }}"
+          placeholder="Buscar por nome"></div>
       <div class="col-md-3">
         <select class="form-select" name="categoria">
           <option value="">Todas as categorias</option>
           {% for value, label in categorias %}
-          <option value="{{ value }}" {% if filtros.categoria == value %}selected{% endif %}>{{ label }}</option>
+          <option value="{{ value }}" {% if filtros.categoria==value %}selected{% endif %}>{{ label }}</option>
           {% endfor %}
         </select>
       </div>
       <div class="col-md-3">
         <select class="form-select" name="status">
           <option value="">Todos os status</option>
-          <option value="baixo" {% if filtros.status == 'baixo' %}selected{% endif %}>Abaixo do minimo</option>
-          <option value="reabastecer" {% if filtros.status == 'reabastecer' %}selected{% endif %}>Reabastecimento</option>
-          <option value="acima" {% if filtros.status == 'acima' %}selected{% endif %}>Acima do maximo</option>
+          <option value="baixo" {% if filtros.status=='baixo' %}selected{% endif %}>Abaixo do minimo</option>
+          <option value="reabastecer" {% if filtros.status=='reabastecer' %}selected{% endif %}>Reabastecimento</option>
+          <option value="acima" {% if filtros.status=='acima' %}selected{% endif %}>Acima do maximo</option>
         </select>
       </div>
       <div class="col-md-1"><button class="btn btn-secondary w-100" type="submit">Filtrar</button></div>
-      <div class="col-md-1"><a class="btn btn-outline w-100" href="{% url 'inventory:produtos_lista' %}">Limpar</a></div>
+      <div class="col-md-1"><a class="btn btn-outline w-100" href="{% url 'inventory:produtos_lista' %}">Limpar</a>
+      </div>
     </form>
   </div>
 </div>
@@ -69,29 +131,31 @@
       </thead>
       <tbody>
         {% for produto in page_obj %}
-          <tr>
-            <td>{{ produto.nome }}</td>
-            <td>{{ produto.sku }}</td>
-            <td>{{ produto.get_categoria_display }}</td>
-            <td>{{ produto.unidade }}</td>
-            <td class="text-end">{{ produto.estoque_atual }}</td>
-            <td class="text-end">{{ produto.estoque_reabastecimento }}</td>
-            <td class="text-end">R$ {{ produto.custo_medio_atual }}</td>
-            <td class="text-end">R$ {{ produto.valor_estoque_atual }}</td>
-            <td>
-              {% if produto.status_estoque == 'BAIXO' %}
-                <span class="badge bg-danger">Baixo</span>
-              {% elif produto.status_estoque == 'REABASTECER' %}
-                <span class="badge bg-orange text-dark">Reabastecer</span>
-              {% elif produto.status_estoque == 'ACIMA' %}
-                <span class="badge bg-warning">Acima</span>
-              {% else %}
-                <span class="badge bg-success">OK</span>
-              {% endif %}
-            </td>
-          </tr>
+        <tr>
+          <td>{{ produto.nome }}</td>
+          <td>{{ produto.sku }}</td>
+          <td>{{ produto.get_categoria_display }}</td>
+          <td>{{ produto.unidade }}</td>
+          <td class="text-end">{{ produto.estoque_atual }}</td>
+          <td class="text-end">{{ produto.estoque_reabastecimento }}</td>
+          <td class="text-end">R$ {{ produto.custo_medio_atual }}</td>
+          <td class="text-end">R$ {{ produto.valor_estoque_atual }}</td>
+          <td>
+            {% if produto.status_estoque == 'BAIXO' %}
+            <span class="badge bg-danger">Baixo</span>
+            {% elif produto.status_estoque == 'REABASTECER' %}
+            <span class="badge bg-orange text-dark">Reabastecer</span>
+            {% elif produto.status_estoque == 'ACIMA' %}
+            <span class="badge bg-warning">Acima</span>
+            {% else %}
+            <span class="badge bg-success">OK</span>
+            {% endif %}
+          </td>
+        </tr>
         {% empty %}
-          <tr><td colspan="9">Nenhum produto encontrado.</td></tr>
+        <tr>
+          <td colspan="9">Nenhum produto encontrado.</td>
+        </tr>
         {% endfor %}
       </tbody>
     </table>
@@ -99,11 +163,13 @@
   <div class="card-footer d-flex justify-content-between align-items-center">
     <a class="btn btn-secondary" href="{% url 'inventory:movimentos_lista' %}">Ver requisicoes</a>
     {% if page_obj.paginator.num_pages > 1 %}
-      <div>
-        {% if page_obj.has_previous %}<a class="btn btn-outline" href="?{{ querystring }}&page={{ page_obj.previous_page_number }}">Anterior</a>{% endif %}
-        <span class="mx-2">Pagina {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
-        {% if page_obj.has_next %}<a class="btn btn-outline" href="?{{ querystring }}&page={{ page_obj.next_page_number }}">Proxima</a>{% endif %}
-      </div>
+    <div>
+      {% if page_obj.has_previous %}<a class="btn btn-outline"
+        href="?{{ querystring }}&page={{ page_obj.previous_page_number }}">Anterior</a>{% endif %}
+      <span class="mx-2">Pagina {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+      {% if page_obj.has_next %}<a class="btn btn-outline"
+        href="?{{ querystring }}&page={{ page_obj.next_page_number }}">Proxima</a>{% endif %}
+    </div>
     {% endif %}
   </div>
 </div>
