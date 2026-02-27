@@ -23,60 +23,64 @@
 {% block content %}
 <div class="row row-cards">
   <div class="col-sm-6 col-lg-3">
-    <div class="card">
+    <div class="card card-sm">
+      <div class="card-status-start bg-green"></div>
       <div class="card-body">
         <div class="d-flex align-items-center">
-          <span class="avatar avatar-sm bg-green-lt me-3">
+          <span class="avatar avatar-md bg-green-lt text-green me-3">
             <i class="ti ti-trending-up" aria-hidden="true"></i>
           </span>
           <div>
-            <div class="text-muted">Total receitas</div>
-            <div class="h2 mb-0">R$ {{ total_receitas|floatformat:2 }}</div>
+            <div class="text-muted small fw-medium">Total Receitas</div>
+            <div class="h2 mb-0 fw-bold">R$ {{ total_receitas|floatformat:2 }}</div>
           </div>
         </div>
       </div>
     </div>
   </div>
   <div class="col-sm-6 col-lg-3">
-    <div class="card">
+    <div class="card card-sm">
+      <div class="card-status-start bg-red"></div>
       <div class="card-body">
         <div class="d-flex align-items-center">
-          <span class="avatar avatar-sm bg-red-lt me-3">
+          <span class="avatar avatar-md bg-red-lt text-red me-3">
             <i class="ti ti-trending-down" aria-hidden="true"></i>
           </span>
           <div>
-            <div class="text-muted">Total despesas</div>
-            <div class="h2 mb-0">R$ {{ total_despesas|floatformat:2 }}</div>
+            <div class="text-muted small fw-medium">Total Despesas</div>
+            <div class="h2 mb-0 fw-bold">R$ {{ total_despesas|floatformat:2 }}</div>
           </div>
         </div>
       </div>
     </div>
   </div>
   <div class="col-sm-6 col-lg-3">
-    <div class="card">
+    <div class="card card-sm">
+      <div class="card-status-start bg-blue"></div>
       <div class="card-body">
         <div class="d-flex align-items-center">
-          <span class="avatar avatar-sm bg-blue-lt me-3">
+          <span class="avatar avatar-md bg-blue-lt text-blue me-3">
             <i class="ti ti-scale" aria-hidden="true"></i>
           </span>
           <div>
-            <div class="text-muted">Saldo</div>
-            <div class="h2 mb-0">R$ {{ saldo|floatformat:2 }}</div>
+            <div class="text-muted small fw-medium">Saldo Atual</div>
+            <div class="h2 mb-0 fw-bold">R$ {{ saldo|floatformat:2 }}</div>
           </div>
         </div>
       </div>
     </div>
   </div>
   <div class="col-sm-6 col-lg-3">
-    <div class="card">
+    <div class="card card-sm">
+      <div class="card-status-start bg-azure"></div>
       <div class="card-body">
         <div class="d-flex align-items-center">
-          <span class="avatar avatar-sm bg-azure-lt me-3">
+          <span class="avatar avatar-md bg-azure-lt text-azure me-3">
             <i class="ti ti-receipt" aria-hidden="true"></i>
           </span>
           <div>
-            <div class="text-muted">Lancamentos</div>
-            <div class="h2 mb-0">{{ qtd_lancamentos }}</div>
+            <div class="text-muted small fw-medium">Lançamentos</div>
+            <div class="h2 mb-0 fw-bold">{{ qtd_lancamentos }}</div>
           </div>
         </div>
       </div>
@@ -89,7 +93,9 @@
   {% if module_kpis.estoque %}
   <div class="col-md-4">
     <div class="card">
-      <div class="card-header"><h3 class="card-title">Estoque</h3></div>
+      <div class="card-header">
+        <h3 class="card-title">Estoque</h3>
+      </div>
       <div class="card-body">
         <div class="text-muted">Produtos: <strong>{{ module_kpis.estoque.produtos_total }}</strong></div>
         <div class="text-danger">Abaixo do minimo: <strong>{{ module_kpis.estoque.alerta_baixo }}</strong></div>
@@ -101,7 +107,9 @@
   {% if module_kpis.hospedagem %}
   <div class="col-md-4">
     <div class="card">
-      <div class="card-header"><h3 class="card-title">Hospedagem</h3></div>
+      <div class="card-header">
+        <h3 class="card-title">Hospedagem</h3>
+      </div>
       <div class="card-body">
         <div class="text-muted">Reservas no ciclo: <strong>{{ module_kpis.hospedagem.reservas_total }}</strong></div>
         <div class="text-success">Confirmadas: <strong>{{ module_kpis.hospedagem.reservas_confirmadas }}</strong></div>
@@ -112,7 +120,9 @@
   {% if module_kpis.notificacoes %}
   <div class="col-md-4">
     <div class="card">
-      <div class="card-header"><h3 class="card-title">Lembretes</h3></div>
+      <div class="card-header">
+        <h3 class="card-title">Lembretes</h3>
+      </div>
       <div class="card-body">
         <div class="text-muted">Ativos: <strong>{{ module_kpis.notificacoes.lembretes_ativos }}</strong></div>
         <div class="text-warning">Pendentes: <strong>{{ module_kpis.notificacoes.lembretes_pendentes }}</strong></div>
@@ -157,7 +167,7 @@
 {% block scripts %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script>
-  const chartData = {{ chart_data|safe }};
+  const chartData = {{ chart_data| safe }};
   const ctx = document.getElementById('chart');
   const chartTypeStorageKey = 'eventa_dashboard_main_chart_type';
   const btnChartBar = document.getElementById('btn-chart-bar');
