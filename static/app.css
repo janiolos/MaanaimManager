@@ -1,37 +1,43 @@
 @import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Source+Sans+3:wght@400;600&display=swap");
 
 :root {
-  /* Paleta Slate & Emerald - Premium e Moderna */
-  --mm-primary: #0f172a;
-  --mm-primary-light: #1e293b;
-  --mm-primary-dark: #020617;
-  --mm-primary-rgb: 15, 23, 42;
+  /* Paleta inspirada no AdminLTE v3 */
+  --mm-primary: #343a40;
+  /* Sidebar escura estilo AdminLTE */
+  --mm-primary-light: #495057;
+  --mm-primary-dark: #1d2124;
+  --mm-primary-rgb: 52, 58, 64;
 
-  --mm-accent: #10b981;
-  --mm-success: #10b981;
-  /* Esmeralda */
-  --mm-warning: #f59e0b;
-  /* Âmbar */
-  --mm-danger: #ef4444;
-  /* Rosa-avermelhado */
-  --mm-info: #0ea5e9;
-  /* Céu */
+  --mm-accent: #28a745;
+  /* Verde AdminLTE */
+  --mm-success: #28a745;
+  --mm-warning: #ffc107;
+  /* Amarelo AdminLTE */
+  --mm-danger: #dc3545;
+  /* Vermelho AdminLTE */
+  --mm-info: #17a2b8;
+  /* Azul AdminLTE */
+  --mm-blue: #007bff;
 
-  --mm-bg: #f8fafc;
-  --mm-soft: #f1f5f9;
+  /* Fundos: página em cinza-azulado, card branco */
+  --mm-bg: #f4f6f9;
+  /* Exato AdminLTE v3 */
+  --mm-soft: #f4f6f9;
   --mm-card: #ffffff;
-  --mm-ink: #0f172a;
-  --mm-muted: #64748b;
-  --mm-border: #e2e8f0;
+  --mm-ink: #212529;
+  /* Texto escuro AdminLTE */
+  --mm-muted: #6c757d;
+  --mm-border: #dee2e6;
+  /* Borda padrão AdminLTE */
 
-  /* Sombras Modernas */
-  --mm-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --mm-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  --mm-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  /* Sombras suaves duplas (estilo AdminLTE) */
+  --mm-shadow-sm: 0 0 1px rgba(0, 0, 0, .125);
+  --mm-shadow: 0 0 1px rgba(0, 0, 0, .125), 0 1px 3px rgba(0, 0, 0, .2);
+  --mm-shadow-lg: 0 0 1px rgba(0, 0, 0, .125), 0 4px 10px rgba(0, 0, 0, .15);
 
   /* Tabler tokens override */
   --tblr-primary: var(--mm-accent);
-  --tblr-primary-rgb: 16, 185, 129;
+  --tblr-primary-rgb: 40, 167, 69;
 }
 
 body {
@@ -117,7 +123,7 @@ body {
 
 .navbar-vertical .avatar.bg-primary {
   background: var(--mm-accent) !important;
-  box-shadow: 0 0 15px rgba(16, 185, 129, 0.3);
+  box-shadow: 0 0 12px rgba(40, 167, 69, 0.3);
 }
 
 .navbar-vertical .nav-link {
@@ -144,7 +150,7 @@ body {
 }
 
 .navbar-vertical .nav-link-icon {
-  color: #64748b;
+  color: #adb5bd;
   margin-right: 0.5rem;
 }
 
@@ -155,7 +161,7 @@ body {
 
 .navbar-vertical .nav-sm {
   margin: 0.2rem 0 0.35rem 0.8rem;
-  border-left: 1px dashed rgba(var(--mm-primary-rgb), 0.24);
+  border-left: 1px dashed rgba(255, 255, 255, 0.15);
   padding-left: 0.6rem;
 }
 
@@ -173,49 +179,57 @@ body {
 }
 
 .page-body {
-  background: linear-gradient(180deg, #f6f8fb 0%, #eef2f7 100%);
+  background: var(--mm-soft);
+  /* #f4f6f9 igual ao AdminLTE */
 }
 
+/* Cards estilo AdminLTE: sombra suave + borda 1px rgba */
 .card {
-  border: 1px solid rgba(0, 0, 0, 0.08) !important;
-  /* Borda sutil porém visível */
+  border: 1px solid rgba(0, 0, 0, .125) !important;
   background: var(--mm-card) !important;
   box-shadow: var(--mm-shadow) !important;
-  border-radius: 12px !important;
-  transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+  border-radius: 4px !important;
+  /* Raio AdminLTE padrão */
+  transition: box-shadow 0.2s ease !important;
 }
 
 .card:hover {
-  transform: translateY(-2px);
   box-shadow: var(--mm-shadow-lg) !important;
 }
 
-/* Tinted Card Backgrounds */
+/* ===== Cards tintados (KPI widgets) ===== */
+/* Borda colorida no TOPO do card (estilo AdminLTE info-box) */
 .card-tinted-green {
-  background-color: #f0fdf4 !important;
+  background-color: #f6fff9 !important;
+  border-top: 3px solid #28a745 !important;
 }
 
 .card-tinted-red {
-  background-color: #fef2f2 !important;
+  background-color: #fff8f8 !important;
+  border-top: 3px solid #dc3545 !important;
 }
 
 .card-tinted-blue {
-  background-color: #eff6ff !important;
+  background-color: #f5f8ff !important;
+  border-top: 3px solid #007bff !important;
 }
 
 .card-tinted-azure {
-  background-color: #f0f9ff !important;
+  background-color: #f4fbff !important;
+  border-top: 3px solid #17a2b8 !important;
 }
 
 .card-tinted-orange {
-  background-color: #fffaf0 !important;
+  background-color: #fff9f4 !important;
+  border-top: 3px solid #fd7e14 !important;
 }
 
 .card-tinted-warning {
-  background-color: #fffbeb !important;
+  background-color: #fffdf4 !important;
+  border-top: 3px solid #ffc107 !important;
 }
 
-/* Dark text for tinted cards to ensure contrast */
+/* Textos legíveis nos cards tintados */
 .card-tinted-green .h2,
 .card-tinted-green .text-muted,
 .card-tinted-red .h2,
@@ -231,15 +245,18 @@ body {
   color: var(--mm-ink) !important;
 }
 
+/* Cabeçalho do card: borda-bottom sutil (estilo AdminLTE) */
 .card-header {
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
-  background: linear-gradient(90deg, #ffffff 0%, #f8fafc 100%) !important;
+  border-bottom: 1px solid rgba(0, 0, 0, .125) !important;
+  background: #fff !important;
+  font-weight: 600;
+  padding: .75rem 1.25rem !important;
 }
 
-/* Aumento do contraste e espessura das linhas de status */
+/* Barras laterais de acento (card-status-start) */
 .card-status-start {
   width: 4px !important;
-  /* Mais espesso para maior contraste */
+  border-radius: 4px 0 0 4px !important;
   opacity: 1 !important;
 }
 
@@ -249,21 +266,29 @@ body {
   color: var(--mm-ink) !important;
 }
 
+/* Tabelas estilo AdminLTE */
+.table {
+  border-color: var(--mm-border) !important;
+  /* #dee2e6 */
+}
+
 .table thead th,
 .table th {
-  color: var(--mm-primary) !important;
-  font-weight: 600 !important;
-  background: rgba(var(--mm-primary-rgb), 0.06) !important;
+  color: var(--mm-ink) !important;
+  font-weight: 700 !important;
+  background: #f8f9fa !important;
+  /* Cinza claro AdminLTE */
   border-bottom: 2px solid var(--mm-border) !important;
+  border-top: 0 !important;
 }
 
 .table tbody tr {
   border-bottom: 1px solid var(--mm-border) !important;
-  transition: background-color 0.2s ease !important;
+  transition: background-color 0.15s ease !important;
 }
 
 .table tbody tr:hover {
-  background: rgba(var(--mm-primary-rgb), 0.03) !important;
+  background-color: rgba(0, 0, 0, .035) !important;
 }
 
 .btn-primary {
