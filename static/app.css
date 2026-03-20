@@ -99,83 +99,94 @@ body {
 }
 
 .page-wrapper>.navbar .badge.bg-primary-lt {
-  background: rgba(255, 255, 255, 0.18) !important;
+  background: rgba(255, 255, 255, 0.15) !important;
   color: #ffffff !important;
-  border: 1px solid rgba(255, 255, 255, 0.28) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  opacity: 1 !important;
 }
 
-.navbar-vertical[data-bs-theme="dark"] {
-  background: var(--mm-primary) !important;
-  border-right: none !important;
-  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.05) !important;
-}
-
-.navbar-vertical .navbar-brand {
-  padding: 1.5rem 1rem !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.navbar-vertical .navbar-brand .fw-bold {
-  color: #fff !important;
-  font-size: 1.2rem;
-  /* Equilibrado */
-}
-
-.navbar-vertical .avatar.bg-primary {
+header.navbar .badge.bg-primary-lt {
   background: var(--mm-accent) !important;
-  box-shadow: 0 0 12px rgba(40, 167, 69, 0.3);
+  color: #ffffff !important;
+  border: none !important;
+  font-weight: 700 !important;
 }
 
-.navbar-vertical .nav-link {
-  color: #94a3b8 !important;
-  border-left: 3px solid transparent !important;
-  border-radius: 0;
-  margin: 0;
-  padding: 0.65rem 1.25rem !important;
-  font-size: 0.95rem;
-  /* Profissional e limpo */
+/* horizontal Topbar Header */
+header.navbar {
+  margin-bottom: 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+}
+
+header.navbar .navbar-nav .nav-link {
+  padding: 0.75rem 1rem !important;
   font-weight: 500;
   transition: all 0.2s ease;
 }
 
-.navbar-vertical .nav-link:hover {
-  background: rgba(255, 255, 255, 0.03) !important;
+header.navbar .navbar-nav .nav-link:hover,
+header.navbar .navbar-nav .nav-link.active {
+  background: rgba(255, 255, 255, 0.05);
   color: #fff !important;
 }
 
-.navbar-vertical .nav-link.active {
-  background: rgba(255, 255, 255, 0.05) !important;
-  color: #fff !important;
-  border-left-color: var(--mm-accent) !important;
+header.navbar .navbar-nav .nav-link.active {
+  border-bottom: 2px solid var(--mm-accent) !important;
 }
 
-.navbar-vertical .nav-link-icon {
-  color: #adb5bd;
-  margin-right: 0.5rem;
+/* Dropdown Menu Styles */
+.dropdown-menu {
+  box-shadow: var(--mm-shadow-lg) !important;
+  border: 1px solid var(--mm-border) !important;
+  border-radius: 4px !important;
+  padding: 0.5rem 0 !important;
 }
 
-.navbar-vertical .nav-link.active .nav-link-icon,
-.navbar-vertical .nav-link:hover .nav-link-icon {
-  color: var(--mm-accent) !important;
-}
-
-.navbar-vertical .nav-sm {
-  margin: 0.2rem 0 0.35rem 0.8rem;
-  border-left: 1px dashed rgba(255, 255, 255, 0.15);
-  padding-left: 0.6rem;
-}
-
-.navbar-vertical .nav-sm .nav-link {
+.dropdown-item {
+  padding: 0.5rem 1.25rem !important;
   font-weight: 500;
-  font-size: 0.875rem;
-  /* Hierarquia clara */
-  padding: 0.4rem 0.7rem !important;
-  border-left-width: 3px !important;
-  margin: 1px 0;
+  color: var(--mm-ink) !important;
 }
 
-.navbar-vertical .navbar-toggler {
-  border-color: rgba(var(--mm-primary-rgb), 0.22) !important;
+.dropdown-item.active,
+.dropdown-item:active {
+  background-color: var(--mm-accent) !important;
+  color: #fff !important;
+}
+
+.dropdown-item {
+  color: var(--mm-ink) !important;
+}
+
+/* Ensure white text for dropdowns in the dark navbar */
+.navbar[data-bs-theme="dark"] .dropdown-menu .dropdown-item,
+.navbar[data-bs-theme="dark"] .navbar-collapse .dropdown-item {
+  color: #ffffff !important;
+}
+
+.navbar[data-bs-theme="dark"] .dropdown-menu .dropdown-item:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  color: #ffffff !important;
+}
+
+/* Ensure the EVENTO badge is bright and readable */
+.navbar[data-bs-theme="dark"] .badge.bg-primary-lt {
+  background-color: var(--mm-accent) !important;
+  color: #ffffff !important;
+  font-weight: 800 !important;
+}
+
+.dropdown-item:hover {
+  background-color: var(--mm-bg) !important;
+}
+
+@media (max-width: 991.98px) {
+  .navbar-collapse {
+    background: var(--mm-primary) !important;
+    padding: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
 }
 
 .page-body {

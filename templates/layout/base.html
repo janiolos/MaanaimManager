@@ -1,6 +1,7 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -8,284 +9,210 @@
 
   <link href="{% static 'tabler/tabler.min.css' %}" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.46.0/tabler-icons.min.css" rel="stylesheet">
-  <link href="{% static 'app.css' %}?v=20260207-01" rel="stylesheet">
+  <link href="{% static 'app.css' %}?v=20260301-03" rel="stylesheet">
 </head>
 
 {% with current_url_name=request.resolver_match.url_name %}
+
 <body class="app{% if current_url_name == 'login' %} is-login{% endif %}">
   <div class="page">
     {% if current_url_name != 'login' %}
-      <!-- SIDEBAR -->
-      <aside class="navbar navbar-vertical navbar-expand-sm position-absolute" data-bs-theme="dark">
-        <div class="container-fluid">
-          <a class="navbar-brand d-flex align-items-center" href="/">
-            <span class="avatar avatar-md rounded bg-primary text-white me-2">EV</span>
-            <span>
-              <span class="fw-bold d-block">{{ sistema_config.nome_sistema|default:"Maanaim" }}</span>
-              <span class="text-muted small d-block">Manager</span>
-            </span>
-          </a>
+    <header class="navbar navbar-expand-md d-print-none sticky-top" data-bs-theme="dark">
+      <div class="container-fluid">
+        <!-- Brand -->
+        <a class="navbar-brand d-flex align-items-center me-3" href="/">
+          <span class="avatar avatar-sm rounded bg-primary text-white me-2">EV</span>
+          <span class="d-none d-lg-inline">
+            <span class="fw-bold">{{ sistema_config.nome_sistema|default:"Maanaim" }}</span>
+            <span class="text-muted small ms-1">Manager</span>
+          </span>
+        </a>
 
-          <!-- Toggler (mobile) -->
-          <button class="navbar-toggler" type="button"
-                  data-bs-toggle="collapse" data-bs-target="#sidebar-menu"
-                  aria-controls="sidebar-menu" aria-expanded="false" aria-label="Abrir menu">
-            <span class="navbar-toggler-icon"></span>
-          </button>
+        <!-- Toggler (mobile) -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar-menu"
+          aria-controls="navbar-menu" aria-expanded="false" aria-label="Abrir menu">
+          <span class="navbar-toggler-icon"></span>
+        </button>
 
-          <div class="collapse navbar-collapse" id="sidebar-menu">
-            <ul class="navbar-nav pt-lg-3">
+        <!-- Menu Content -->
+        <div class="collapse navbar-collapse" id="navbar-menu">
+          <ul class="navbar-nav me-auto">
+            <li class="nav-item">
+              <a class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}" href="/">
+                <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="ti ti-chart-bar"></i></span>
+                <span class="nav-link-title">Dashboard</span>
+              </a>
+            </li>
 
-              <li class="nav-item">
-                <a class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}" href="/">
-                  <span class="nav-link-icon d-md-none d-lg-inline-block">
-                    <i class="ti ti-chart-bar" aria-hidden="true"></i>
-                  </span>
-                  <span class="nav-link-title">Dashboard</span>
-                </a>
-              </li>
+            {% if modulos_ativos.financeiro and acesso_modulos.financeiro %}
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle {% if request.resolver_match.namespace == 'finance' %}active{% endif %}"
+                href="#navbar-finance" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button"
+                aria-expanded="false">
+                <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="ti ti-wallet"></i></span>
+                <span class="nav-link-title">Financeiro</span>
+              </a>
+              <div class="dropdown-menu">
+                <a class="dropdown-item {% if request.resolver_match.url_name == 'dashboard' and request.resolver_match.namespace == 'finance' %}active{% endif %}"
+                  href="{% url 'finance:dashboard' %}">Dashboard</a>
+                <a class="dropdown-item {% if request.resolver_match.url_name == 'lancamentos_lista' %}active{% endif %}"
+                  href="{% url 'finance:lancamentos_lista' %}">Lançamentos</a>
+                <a class="dropdown-item {% if request.resolver_match.url_name == 'relatorios_index' %}active{% endif %}"
+                  href="{% url 'finance:relatorios_index' %}">Relatórios</a>
+              </div>
+            </li>
+            {% endif %}
 
-              {% if modulos_ativos.financeiro and acesso_modulos.financeiro %}
-              <li class="nav-item">
-                <a class="nav-link {% if request.resolver_match.namespace == 'finance' %}active{% endif %}"
-                   href="{% url 'finance:dashboard' %}"
-                   data-bs-toggle="collapse"
-                   data-bs-target="#menu-finance"
-                   aria-expanded="{% if request.resolver_match.namespace == 'finance' %}true{% else %}false{% endif %}"
-                   aria-controls="menu-finance">
-                  <span class="nav-link-icon d-md-none d-lg-inline-block">
-                    <i class="ti ti-wallet" aria-hidden="true"></i>
-                  </span>
-                  <span class="nav-link-title">Financeiro</span>
-                </a>
-                <div class="collapse {% if request.resolver_match.namespace == 'finance' %}show{% endif %}" id="menu-finance">
-                  <ul class="nav nav-sm flex-column">
-                    <li class="nav-item">
-                      <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' and request.resolver_match.namespace == 'finance' %}active{% endif %}"
-                         href="{% url 'finance:dashboard' %}">
-                        Dashboard
-                      </a>
-                    </li>
-                    <li class="nav-item">
-                      <a class="nav-link {% if request.resolver_match.url_name == 'lancamentos_lista' %}active{% endif %}"
-                         href="{% url 'finance:lancamentos_lista' %}">
-                        Lancamentos
-                      </a>
-                    </li>
-                    <li class="nav-item">
-                      <a class="nav-link {% if request.resolver_match.url_name == 'relatorios_index' %}active{% endif %}"
-                         href="{% url 'finance:relatorios_index' %}">
-                        Relatorios
-                      </a>
-                    </li>
-                  </ul>
+            <li class="nav-item">
+              <a class="nav-link {% if request.resolver_match.namespace == 'core' and request.resolver_match.url_name == 'dashboard' %}active{% endif %}"
+                href="{% url 'core:dashboard' %}">
+                <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="ti ti-calendar-event"></i></span>
+                <span class="nav-link-title">Core</span>
+              </a>
+            </li>
+
+            {% if modulos_ativos.estoque and acesso_modulos.estoque %}
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle {% if request.resolver_match.namespace == 'inventory' %}active{% endif %}"
+                href="#navbar-inventory" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button"
+                aria-expanded="false">
+                <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="ti ti-package"></i></span>
+                <span class="nav-link-title">Estoque</span>
+              </a>
+              <div class="dropdown-menu">
+                <div class="dropdown-menu-columns">
+                  <div class="dropdown-menu-column">
+                    <a class="dropdown-item {% if request.resolver_match.url_name == 'dashboard' and request.resolver_match.namespace == 'inventory' %}active{% endif %}"
+                      href="{% url 'inventory:dashboard' %}">Dashboard</a>
+                    <a class="dropdown-item {% if request.resolver_match.url_name == 'produtos_lista' %}active{% endif %}"
+                      href="{% url 'inventory:produtos_lista' %}">Produtos</a>
+                    <a class="dropdown-item {% if request.resolver_match.url_name == 'cotacoes_lista' %}active{% endif %}"
+                      href="{% url 'inventory:cotacoes_lista' %}">Orçamentos</a>
+                  </div>
+                  <div class="dropdown-menu-column">
+                    <a class="dropdown-item {% if request.resolver_match.url_name == 'fornecedores_lista' %}active{% endif %}"
+                      href="{% url 'inventory:fornecedores_lista' %}">Fornecedores</a>
+                    <a class="dropdown-item {% if request.resolver_match.url_name == 'movimentos_lista' %}active{% endif %}"
+                      href="{% url 'inventory:movimentos_lista' %}">Requisições</a>
+                  </div>
                 </div>
-              </li>
+              </div>
+            </li>
+            {% endif %}
+
+            {% if modulos_ativos.notificacoes and acesso_modulos.notificacoes %}
+            <li class="nav-item">
+              <a class="nav-link {% if request.resolver_match.namespace == 'notifications' %}active{% endif %}"
+                href="{% url 'notifications:dashboard' %}">
+                <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="ti ti-bell"></i></span>
+                <span class="nav-link-title">Lembretes</span>
+              </a>
+            </li>
+            {% endif %}
+
+            {% if modulos_ativos.hospedagem and acesso_modulos.hospedagem %}
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle {% if request.resolver_match.namespace == 'lodging' %}active{% endif %}"
+                href="#navbar-lodging" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button"
+                aria-expanded="false">
+                <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="ti ti-home"></i></span>
+                <span class="nav-link-title">Chalés</span>
+              </a>
+              <div class="dropdown-menu">
+                <a class="dropdown-item {% if request.resolver_match.url_name == 'dashboard' and request.resolver_match.namespace == 'lodging' %}active{% endif %}"
+                  href="{% url 'lodging:dashboard' %}">Dashboard</a>
+                <a class="dropdown-item {% if request.resolver_match.url_name == 'chales_lista' %}active{% endif %}"
+                  href="{% url 'lodging:chales_lista' %}">Chalés</a>
+                <a class="dropdown-item {% if request.resolver_match.url_name == 'reservas_lista' %}active{% endif %}"
+                  href="{% url 'lodging:reservas_lista' %}">Reservas</a>
+                <a class="dropdown-item {% if request.resolver_match.url_name == 'mapa_chales' %}active{% endif %}"
+                  href="{% url 'lodging:mapa_chales' %}">Mapa</a>
+              </div>
+            </li>
+            {% endif %}
+          </ul>
+
+          <!-- Right controls -->
+          <div class="navbar-nav flex-row order-md-last align-items-center">
+            <div class="nav-item me-3 d-none d-sm-flex">
+              {% if evento_atual %}
+              <span class="badge bg-primary-lt me-2">{{ rotulo_evento_singular|default:"Evento"|upper }}</span>
+              <strong class="text-white small me-1">{{ evento_atual.nome }}</strong>
+              <a href="{% url 'core:selecionar_evento' %}"
+                class="text-white-50 small text-decoration-underline">Trocar</a>
+              {% else %}
+              <a class="btn btn-sm btn-outline-white" href="{% url 'core:selecionar_evento' %}">Selecionar Evento</a>
               {% endif %}
+            </div>
 
-              <li class="nav-item">
-                <a class="nav-link {% if request.resolver_match.namespace == 'core' and request.resolver_match.url_name == 'dashboard' %}active{% endif %}"
-                   href="{% url 'core:dashboard' %}">
-                  <span class="nav-link-icon d-md-none d-lg-inline-block">
-                    <i class="ti ti-calendar-event" aria-hidden="true"></i>
-                  </span>
-                  <span class="nav-link-title">Core</span>
-                </a>
-              </li>
-
-              {% if modulos_ativos.estoque and acesso_modulos.estoque %}
-              <li class="nav-item">
-                <a class="nav-link {% if request.resolver_match.namespace == 'inventory' %}active{% endif %}"
-                   href="{% url 'inventory:dashboard' %}"
-                   data-bs-toggle="collapse"
-                   data-bs-target="#menu-inventory"
-                   aria-expanded="{% if request.resolver_match.namespace == 'inventory' %}true{% else %}false{% endif %}"
-                   aria-controls="menu-inventory">
-                  <span class="nav-link-icon d-md-none d-lg-inline-block">
-                    <i class="ti ti-package" aria-hidden="true"></i>
-                  </span>
-                  <span class="nav-link-title">Estoque</span>
-                </a>
-                <div class="collapse {% if request.resolver_match.namespace == 'inventory' %}show{% endif %}" id="menu-inventory">
-                  <ul class="nav nav-sm flex-column">
-                    <li class="nav-item">
-                      <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' and request.resolver_match.namespace == 'inventory' %}active{% endif %}"
-                         href="{% url 'inventory:dashboard' %}">
-                        Dashboard
-                      </a>
-                    </li>
-                    <li class="nav-item">
-                      <a class="nav-link {% if request.resolver_match.url_name == 'produtos_lista' %}active{% endif %}"
-                         href="{% url 'inventory:produtos_lista' %}">
-                        Produtos
-                      </a>
-                    </li>
-                    <li class="nav-item">
-                      <a class="nav-link {% if request.resolver_match.url_name == 'cotacoes_lista' or request.resolver_match.url_name == 'cotacao_criar' or request.resolver_match.url_name == 'cotacao_editar' or request.resolver_match.url_name == 'cotacao_comprovante' or request.resolver_match.url_name == 'cotacao_aprovar' %}active{% endif %}"
-                         href="{% url 'inventory:cotacoes_lista' %}">
-                        Orcamentos
-                      </a>
-                    </li>
-                    <li class="nav-item">
-                      <a class="nav-link {% if request.resolver_match.url_name == 'fornecedores_lista' or request.resolver_match.url_name == 'fornecedor_criar' %}active{% endif %}"
-                         href="{% url 'inventory:fornecedores_lista' %}">
-                        Fornecedores
-                      </a>
-                    </li>
-                    <li class="nav-item">
-                      <a class="nav-link {% if request.resolver_match.url_name == 'movimentos_lista' or request.resolver_match.url_name == 'requisicoes_lista' %}active{% endif %}"
-                         href="{% url 'inventory:movimentos_lista' %}">
-                        Requisicoes de saida
-                      </a>
-                    </li>
-                  </ul>
-                </div>
-              </li>
-              {% endif %}
-
-              {% if modulos_ativos.notificacoes and acesso_modulos.notificacoes %}
-              <li class="nav-item">
-                <a class="nav-link {% if request.resolver_match.namespace == 'notifications' %}active{% endif %}"
-                   href="{% url 'notifications:dashboard' %}">
-                  <span class="nav-link-icon d-md-none d-lg-inline-block">
-                    <i class="ti ti-bell" aria-hidden="true"></i>
-                  </span>
-                  <span class="nav-link-title">Lembretes</span>
-                </a>
-              </li>
-              {% endif %}
-
-              {% if modulos_ativos.hospedagem and acesso_modulos.hospedagem %}
-              <li class="nav-item">
-                <a class="nav-link {% if request.resolver_match.namespace == 'lodging' %}active{% endif %}"
-                   href="{% url 'lodging:dashboard' %}"
-                   data-bs-toggle="collapse"
-                   data-bs-target="#menu-lodging"
-                   aria-expanded="{% if request.resolver_match.namespace == 'lodging' %}true{% else %}false{% endif %}"
-                   aria-controls="menu-lodging">
-                  <span class="nav-link-icon d-md-none d-lg-inline-block">
-                    <i class="ti ti-home" aria-hidden="true"></i>
-                  </span>
-                  <span class="nav-link-title">Chalés</span>
-                </a>
-                <div class="collapse {% if request.resolver_match.namespace == 'lodging' %}show{% endif %}" id="menu-lodging">
-                  <ul class="nav nav-sm flex-column">
-                    <li class="nav-item">
-                      <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' and request.resolver_match.namespace == 'lodging' %}active{% endif %}"
-                         href="{% url 'lodging:dashboard' %}">
-                        Dashboard
-                      </a>
-                    </li>
-                    <li class="nav-item">
-                      <a class="nav-link {% if request.resolver_match.url_name == 'chales_lista' %}active{% endif %}"
-                         href="{% url 'lodging:chales_lista' %}">
-                        Chalés
-                      </a>
-                    </li>
-                    <li class="nav-item">
-                      <a class="nav-link {% if request.resolver_match.url_name == 'reservas_lista' %}active{% endif %}"
-                         href="{% url 'lodging:reservas_lista' %}">
-                        Reservas
-                      </a>
-                    </li>
-                    <li class="nav-item">
-                      <a class="nav-link {% if request.resolver_match.url_name == 'mapa_chales' %}active{% endif %}"
-                         href="{% url 'lodging:mapa_chales' %}">
-                        Mapa de Chalés
-                      </a>
-                    </li>
-                  </ul>
-                </div>
-              </li>
-              {% endif %}
-
-            </ul>
+            {% if user.is_authenticated %}
+            <div class="nav-item">
+              <form method="post" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button class="nav-link btn btn-link p-0 text-white" type="submit">
+                  <i class="ti ti-logout me-1" aria-hidden="true"></i>Sair
+                </button>
+              </form>
+            </div>
+            {% endif %}
           </div>
         </div>
-      </aside>
+      </div>
+    </header>
     {% endif %}
 
-    <!-- MAIN -->
-    <div class="page-wrapper">
-    {% if current_url_name != 'login' %}
-        <header class="navbar navbar-expand-md d-print-none" data-bs-theme="dark">
-          <div class="container-fluid">
-            <div class="navbar-nav flex-row order-md-last">
-              {% if user.is_authenticated %}
-                <form method="post" action="{% url 'logout' %}">
-                  {% csrf_token %}
-                  <button class="nav-link btn btn-link p-0" type="submit">
-                    <i class="ti ti-logout me-1" aria-hidden="true"></i>Sair
-                  </button>
-                </form>
-              {% endif %}
-            </div>
+    <div class="page-body">
+      <div class="container-fluid">
+        {% block page_header %}{% endblock %}
+        {% block content %}{% endblock %}
+      </div>
+    </div>
+  </div>
+  </div>
+  {% endwith %}
 
-            <div class="navbar-text">
-              {% if evento_atual %}
-                <span class="badge bg-primary-lt me-2">{{ rotulo_evento_singular|default:"Evento"|upper }}</span>
-                <strong class="text-white">{{ evento_atual.nome }}</strong>
-                <a href="{% url 'core:selecionar_evento' %}" class="ms-2 text-white-50 small">Trocar</a>
-              {% else %}
-                <span class="text-white-50">Nenhum evento selecionado.</span>
-                <a class="ms-2 btn btn-sm btn-outline-white" href="{% url 'core:selecionar_evento' %}">Selecionar</a>
-              {% endif %}
-            </div>
-          </div>
-        </header>
-      {% endif %}
-
-      <div class="page-body">
-        <div class="container-fluid">
-          {% block page_header %}{% endblock %}
-          {% block content %}{% endblock %}
+  {% if messages or form.errors %}
+  <div class="modal modal-blur fade" id="feedback-modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header bg-danger text-white">
+          <h5 class="modal-title">Mensagem</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        </div>
+        <div class="modal-body">
+          <ul class="mb-0 ps-3">
+            {% if form.errors %}
+            {% for field, errors in form.errors.items %}
+            {% for error in errors %}
+            <li>{{ error|striptags }}</li>
+            {% endfor %}
+            {% endfor %}
+            {% endif %}
+            {% if messages %}
+            {% for message in messages %}
+            <li>{{ message }}</li>
+            {% endfor %}
+            {% endif %}
+          </ul>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-danger w-100" data-bs-dismiss="modal">Entendi</button>
         </div>
       </div>
     </div>
   </div>
-{% endwith %}
-
-{% if messages or form.errors %}
-<div class="modal modal-blur fade" id="feedback-modal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-sm modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header bg-danger text-white">
-        <h5 class="modal-title">Mensagem</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
-      </div>
-      <div class="modal-body">
-        <ul class="mb-0 ps-3">
-          {% if form.errors %}
-            {% for field, errors in form.errors.items %}
-              {% for error in errors %}
-                <li>{{ error|striptags }}</li>
-              {% endfor %}
-            {% endfor %}
-          {% endif %}
-          {% if messages %}
-            {% for message in messages %}
-              <li>{{ message }}</li>
-            {% endfor %}
-          {% endif %}
-        </ul>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-danger w-100" data-bs-dismiss="modal">Entendi</button>
-      </div>
-    </div>
-  </div>
-</div>
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    const modalEl = document.getElementById('feedback-modal');
-    if (!modalEl || !window.bootstrap) return;
-    const modal = new bootstrap.Modal(modalEl);
-    modal.show();
-  });
-</script>
-{% endif %}
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const modalEl = document.getElementById('feedback-modal');
+      if (!modalEl || !window.bootstrap) return;
+      const modal = new bootstrap.Modal(modalEl);
+      modal.show();
+    });
+  </script>
+  {% endif %}
 
   <script src="{% static 'tabler/tabler.min.js' %}"></script>
   {% block scripts %}{% endblock %}
 </body>
+
 </html>
