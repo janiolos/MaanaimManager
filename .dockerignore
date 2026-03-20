@@ -8,8 +8,7 @@ __pycache__
 *.sqlite3
 
 # Dados e volumes locais
-data/postgres
-data/static
+data/
 backups
 media
 
