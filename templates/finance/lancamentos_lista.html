@@ -37,8 +37,8 @@
         <label class="form-label">Tipo</label>
         <select class="form-select" name="tipo" id="filtro_tipo">
           <option value="">Todos</option>
-          <option value="RECEITA" {% if filtros.tipo == 'RECEITA' %}selected{% endif %}>Receita</option>
-          <option value="DESPESA" {% if filtros.tipo == 'DESPESA' %}selected{% endif %}>Despesa</option>
+          <option value="RECEITA" {% if filtros.tipo  ==  'RECEITA' %}selected{% endif %}>Receita</option>
+          <option value="DESPESA" {% if filtros.tipo  ==  'DESPESA' %}selected{% endif %}>Despesa</option>
         </select>
       </div>
       <div class="col-md-2">
@@ -46,7 +46,7 @@
         <select class="form-select" name="categoria" id="filtro_categoria">
           <option value="">Todas</option>
           {% for categoria in categorias %}
-            <option value="{{ categoria.id }}" {% if filtros.categoria == categoria.id|stringformat:'s' %}selected{% endif %}>{{ categoria.nome }}</option>
+            <option value="{{ categoria.id }}" {% if filtros.categoria  ==  categoria.id|stringformat:'s' %}selected{% endif %}>{{ categoria.nome }}</option>
           {% endfor %}
         </select>
       </div>
@@ -55,7 +55,7 @@
         <select class="form-select" name="conta">
           <option value="">Todas</option>
           {% for conta in contas %}
-            <option value="{{ conta.id }}" {% if filtros.conta == conta.id|stringformat:'s' %}selected{% endif %}>{{ conta.nome }}</option>
+            <option value="{{ conta.id }}" {% if filtros.conta  ==  conta.id|stringformat:'s' %}selected{% endif %}>{{ conta.nome }}</option>
           {% endfor %}
         </select>
       </div>
@@ -116,7 +116,7 @@
         <li><a href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page_obj.previous_page_number }}">Anterior</a></li>
       {% endif %}
       {% for page in page_obj.paginator.page_range %}
-        <li class="{% if page_obj.number == page %}active{% endif %}">
+        <li class="{% if page_obj.number  ==  page %}active{% endif %}">
           <a href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page }}">{{ page }}</a>
         </li>
       {% endfor %}

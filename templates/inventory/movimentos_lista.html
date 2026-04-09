@@ -22,8 +22,8 @@
       <div class="col-md-4">
         <select class="form-select" name="tipo">
           <option value="">Todos os tipos</option>
-          <option value="SAIDA" {% if filtros.tipo == 'SAIDA' %}selected{% endif %}>Saida</option>
-          <option value="DEVOLUCAO" {% if filtros.tipo == 'DEVOLUCAO' %}selected{% endif %}>Devolucao</option>
+          <option value="SAIDA" {% if filtros.tipo  ==  'SAIDA' %}selected{% endif %}>Saida</option>
+          <option value="DEVOLUCAO" {% if filtros.tipo  ==  'DEVOLUCAO' %}selected{% endif %}>Devolucao</option>
         </select>
       </div>
       <div class="col-md-2"><button class="btn btn-secondary w-100" type="submit">Filtrar</button></div>
@@ -50,7 +50,7 @@
           <tr>
             <td>{{ movimento.data|date:"d/m/Y" }}</td>
             <td>
-              {% if movimento.tipo == 'SAIDA' %}
+              {% if movimento.tipo  ==  'SAIDA' %}
                 <span class="badge bg-danger">Saida</span>
               {% else %}
                 <span class="badge bg-success">Devolucao</span>

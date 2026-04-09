@@ -12,7 +12,7 @@
 </head>
 
 {% with current_url_name=request.resolver_match.url_name %}
-<body class="app{% if current_url_name == 'login' %} is-login{% endif %}">
+<body class="app{% if current_url_name  ==  'login' %} is-login{% endif %}">
   <div class="page">
     {% if current_url_name != 'login' %}
       <!-- SIDEBAR -->
@@ -37,7 +37,7 @@
             <ul class="navbar-nav pt-lg-3">
 
               <li class="nav-item">
-                <a class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}" href="/">
+                <a class="nav-link {% if request.resolver_match.url_name  ==  'home' %}active{% endif %}" href="/">
                   <span class="nav-link-icon d-md-none d-lg-inline-block">
                     <i class="ti ti-chart-bar" aria-hidden="true"></i>
                   </span>
@@ -47,33 +47,33 @@
 
               {% if modulos_ativos.financeiro and acesso_modulos.financeiro %}
               <li class="nav-item">
-                <a class="nav-link {% if request.resolver_match.namespace == 'finance' %}active{% endif %}"
+                <a class="nav-link {% if request.resolver_match.namespace  ==  'finance' %}active{% endif %}"
                    href="{% url 'finance:dashboard' %}"
                    data-bs-toggle="collapse"
                    data-bs-target="#menu-finance"
-                   aria-expanded="{% if request.resolver_match.namespace == 'finance' %}true{% else %}false{% endif %}"
+                   aria-expanded="{% if request.resolver_match.namespace  ==  'finance' %}true{% else %}false{% endif %}"
                    aria-controls="menu-finance">
                   <span class="nav-link-icon d-md-none d-lg-inline-block">
                     <i class="ti ti-wallet" aria-hidden="true"></i>
                   </span>
                   <span class="nav-link-title">Financeiro</span>
                 </a>
-                <div class="collapse {% if request.resolver_match.namespace == 'finance' %}show{% endif %}" id="menu-finance">
+                <div class="collapse {% if request.resolver_match.namespace  ==  'finance' %}show{% endif %}" id="menu-finance">
                   <ul class="nav nav-sm flex-column">
                     <li class="nav-item">
-                      <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' and request.resolver_match.namespace == 'finance' %}active{% endif %}"
+                      <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' and request.resolver_match.namespace  ==  'finance' %}active{% endif %}"
                          href="{% url 'finance:dashboard' %}">
                         Dashboard
                       </a>
                     </li>
                     <li class="nav-item">
-                      <a class="nav-link {% if request.resolver_match.url_name == 'lancamentos_lista' %}active{% endif %}"
+                      <a class="nav-link {% if request.resolver_match.url_name  ==  'lancamentos_lista' %}active{% endif %}"
                          href="{% url 'finance:lancamentos_lista' %}">
                         Lancamentos
                       </a>
                     </li>
                     <li class="nav-item">
-                      <a class="nav-link {% if request.resolver_match.url_name == 'relatorios_index' %}active{% endif %}"
+                      <a class="nav-link {% if request.resolver_match.url_name  ==  'relatorios_index' %}active{% endif %}"
                          href="{% url 'finance:relatorios_index' %}">
                         Relatorios
                       </a>
@@ -84,7 +84,7 @@
               {% endif %}
 
               <li class="nav-item">
-                <a class="nav-link {% if request.resolver_match.namespace == 'core' and request.resolver_match.url_name == 'dashboard' %}active{% endif %}"
+                <a class="nav-link {% if request.resolver_match.namespace == 'core' and request.resolver_match.url_name  ==  'dashboard' %}active{% endif %}"
                    href="{% url 'core:dashboard' %}">
                   <span class="nav-link-icon d-md-none d-lg-inline-block">
                     <i class="ti ti-calendar-event" aria-hidden="true"></i>
@@ -95,45 +95,45 @@
 
               {% if modulos_ativos.estoque and acesso_modulos.estoque %}
               <li class="nav-item">
-                <a class="nav-link {% if request.resolver_match.namespace == 'inventory' %}active{% endif %}"
+                <a class="nav-link {% if request.resolver_match.namespace  ==  'inventory' %}active{% endif %}"
                    href="{% url 'inventory:dashboard' %}"
                    data-bs-toggle="collapse"
                    data-bs-target="#menu-inventory"
-                   aria-expanded="{% if request.resolver_match.namespace == 'inventory' %}true{% else %}false{% endif %}"
+                   aria-expanded="{% if request.resolver_match.namespace  ==  'inventory' %}true{% else %}false{% endif %}"
                    aria-controls="menu-inventory">
                   <span class="nav-link-icon d-md-none d-lg-inline-block">
                     <i class="ti ti-package" aria-hidden="true"></i>
                   </span>
                   <span class="nav-link-title">Estoque</span>
                 </a>
-                <div class="collapse {% if request.resolver_match.namespace == 'inventory' %}show{% endif %}" id="menu-inventory">
+                <div class="collapse {% if request.resolver_match.namespace  ==  'inventory' %}show{% endif %}" id="menu-inventory">
                   <ul class="nav nav-sm flex-column">
                     <li class="nav-item">
-                      <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' and request.resolver_match.namespace == 'inventory' %}active{% endif %}"
+                      <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' and request.resolver_match.namespace  ==  'inventory' %}active{% endif %}"
                          href="{% url 'inventory:dashboard' %}">
                         Dashboard
                       </a>
                     </li>
                     <li class="nav-item">
-                      <a class="nav-link {% if request.resolver_match.url_name == 'produtos_lista' %}active{% endif %}"
+                      <a class="nav-link {% if request.resolver_match.url_name  ==  'produtos_lista' %}active{% endif %}"
                          href="{% url 'inventory:produtos_lista' %}">
                         Produtos
                       </a>
                     </li>
                     <li class="nav-item">
-                      <a class="nav-link {% if request.resolver_match.url_name == 'cotacoes_lista' or request.resolver_match.url_name == 'cotacao_criar' or request.resolver_match.url_name == 'cotacao_editar' or request.resolver_match.url_name == 'cotacao_comprovante' or request.resolver_match.url_name == 'cotacao_aprovar' %}active{% endif %}"
+                      <a class="nav-link {% if request.resolver_match.url_name == 'cotacoes_lista' or request.resolver_match.url_name == 'cotacao_criar' or request.resolver_match.url_name == 'cotacao_editar' or request.resolver_match.url_name == 'cotacao_comprovante' or request.resolver_match.url_name  ==  'cotacao_aprovar' %}active{% endif %}"
                          href="{% url 'inventory:cotacoes_lista' %}">
                         Orcamentos
                       </a>
                     </li>
                     <li class="nav-item">
-                      <a class="nav-link {% if request.resolver_match.url_name == 'fornecedores_lista' or request.resolver_match.url_name == 'fornecedor_criar' %}active{% endif %}"
+                      <a class="nav-link {% if request.resolver_match.url_name == 'fornecedores_lista' or request.resolver_match.url_name  ==  'fornecedor_criar' %}active{% endif %}"
                          href="{% url 'inventory:fornecedores_lista' %}">
                         Fornecedores
                       </a>
                     </li>
                     <li class="nav-item">
-                      <a class="nav-link {% if request.resolver_match.url_name == 'movimentos_lista' or request.resolver_match.url_name == 'requisicoes_lista' %}active{% endif %}"
+                      <a class="nav-link {% if request.resolver_match.url_name == 'movimentos_lista' or request.resolver_match.url_name  ==  'requisicoes_lista' %}active{% endif %}"
                          href="{% url 'inventory:movimentos_lista' %}">
                         Requisicoes de saida
                       </a>
@@ -145,7 +145,7 @@
 
               {% if modulos_ativos.notificacoes and acesso_modulos.notificacoes %}
               <li class="nav-item">
-                <a class="nav-link {% if request.resolver_match.namespace == 'notifications' %}active{% endif %}"
+                <a class="nav-link {% if request.resolver_match.namespace  ==  'notifications' %}active{% endif %}"
                    href="{% url 'notifications:dashboard' %}">
                   <span class="nav-link-icon d-md-none d-lg-inline-block">
                     <i class="ti ti-bell" aria-hidden="true"></i>
@@ -157,39 +157,39 @@
 
               {% if modulos_ativos.hospedagem and acesso_modulos.hospedagem %}
               <li class="nav-item">
-                <a class="nav-link {% if request.resolver_match.namespace == 'lodging' %}active{% endif %}"
+                <a class="nav-link {% if request.resolver_match.namespace  ==  'lodging' %}active{% endif %}"
                    href="{% url 'lodging:dashboard' %}"
                    data-bs-toggle="collapse"
                    data-bs-target="#menu-lodging"
-                   aria-expanded="{% if request.resolver_match.namespace == 'lodging' %}true{% else %}false{% endif %}"
+                   aria-expanded="{% if request.resolver_match.namespace  ==  'lodging' %}true{% else %}false{% endif %}"
                    aria-controls="menu-lodging">
                   <span class="nav-link-icon d-md-none d-lg-inline-block">
                     <i class="ti ti-home" aria-hidden="true"></i>
                   </span>
                   <span class="nav-link-title">Chalés</span>
                 </a>
-                <div class="collapse {% if request.resolver_match.namespace == 'lodging' %}show{% endif %}" id="menu-lodging">
+                <div class="collapse {% if request.resolver_match.namespace  ==  'lodging' %}show{% endif %}" id="menu-lodging">
                   <ul class="nav nav-sm flex-column">
                     <li class="nav-item">
-                      <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' and request.resolver_match.namespace == 'lodging' %}active{% endif %}"
+                      <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' and request.resolver_match.namespace  ==  'lodging' %}active{% endif %}"
                          href="{% url 'lodging:dashboard' %}">
                         Dashboard
                       </a>
                     </li>
                     <li class="nav-item">
-                      <a class="nav-link {% if request.resolver_match.url_name == 'chales_lista' %}active{% endif %}"
+                      <a class="nav-link {% if request.resolver_match.url_name  ==  'chales_lista' %}active{% endif %}"
                          href="{% url 'lodging:chales_lista' %}">
                         Chalés
                       </a>
                     </li>
                     <li class="nav-item">
-                      <a class="nav-link {% if request.resolver_match.url_name == 'reservas_lista' %}active{% endif %}"
+                      <a class="nav-link {% if request.resolver_match.url_name  ==  'reservas_lista' %}active{% endif %}"
                          href="{% url 'lodging:reservas_lista' %}">
                         Reservas
                       </a>
                     </li>
                     <li class="nav-item">
-                      <a class="nav-link {% if request.resolver_match.url_name == 'mapa_chales' %}active{% endif %}"
+                      <a class="nav-link {% if request.resolver_match.url_name  ==  'mapa_chales' %}active{% endif %}"
                          href="{% url 'lodging:mapa_chales' %}">
                         Mapa de Chalés
                       </a>

@@ -19,7 +19,7 @@
         <select class="form-select" name="status">
           <option value="">Todos</option>
           {% for code, label in status_choices %}
-          <option value="{{ code }}" {% if filtros.status==code %}selected{% endif %}>{{ label }}</option>
+          <option value="{{ code }}" {% if filtros.status == code %}selected{% endif %}>{{ label }}</option>
           {% endfor %}
         </select>
       </div>
@@ -28,7 +28,7 @@
         <select class="form-select" name="chale">
           <option value="">Todos</option>
           {% for chale in chales %}
-          <option value="{{ chale.id }}" {% if filtros.chale==chale.id|stringformat:'s' %}selected{% endif %}>{{
+          <option value="{{ chale.id }}" {% if filtros.chale == chale.id|stringformat:'s' %}selected{% endif %}>{{
             chale.codigo }}</option>
           {% endfor %}
         </select>
@@ -37,8 +37,8 @@
         <label class="form-label">Acessivel</label>
         <select class="form-select" name="acessivel">
           <option value="">Todos</option>
-          <option value="sim" {% if filtros.acessivel=='sim' %}selected{% endif %}>Sim</option>
-          <option value="nao" {% if filtros.acessivel=='nao' %}selected{% endif %}>Nao</option>
+          <option value="sim" {% if filtros.acessivel == 'sim' %}selected{% endif %}>Sim</option>
+          <option value="nao" {% if filtros.acessivel == 'nao' %}selected{% endif %}>Nao</option>
         </select>
       </div>
       <div class="col-md-3 text-end" style="margin-top: 28px;">
@@ -128,7 +128,7 @@
       {% endif %}
 
       {% for page in page_obj.paginator.page_range %}
-      <li class="page-item {% if page_obj.number == page %}active{% endif %}">
+      <li class="page-item {% if page_obj.number  ==  page %}active{% endif %}">
         <a class="page-link" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page }}">{{ page }}</a>
       </li>
       {% endfor %}

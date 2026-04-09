@@ -27,7 +27,7 @@
         <select class="form-select" name="status">
           <option value="">Todos os status</option>
           {% for value, label in status_choices %}
-            <option value="{{ value }}" {% if filtros.status == value %}selected{% endif %}>{{ label }}</option>
+            <option value="{{ value }}" {% if filtros.status  ==  value %}selected{% endif %}>{{ label }}</option>
           {% endfor %}
         </select>
       </div>
@@ -35,7 +35,7 @@
         <select class="form-select" name="area">
           <option value="">Todas as areas</option>
           {% for value, label in area_choices %}
-            <option value="{{ value }}" {% if filtros.area == value %}selected{% endif %}>{{ label }}</option>
+            <option value="{{ value }}" {% if filtros.area  ==  value %}selected{% endif %}>{{ label }}</option>
           {% endfor %}
         </select>
       </div>
@@ -73,7 +73,7 @@
               {% endfor %}
             </td>
             <td>
-              {% if requisicao.status == 'ABERTA' %}
+              {% if requisicao.status  ==  'ABERTA' %}
                 <span class="badge bg-warning text-dark">Aberta</span>
               {% elif requisicao.status == 'FINALIZADA' %}
                 <span class="badge bg-success">Finalizada</span>
@@ -86,7 +86,7 @@
               <a class="btn btn-sm btn-outline-secondary" href="{% url 'inventory:requisicao_comprovante' requisicao.pk %}">
                 <i class="ti ti-printer"></i>
               </a>
-              {% if pode_editar and requisicao.status == 'ABERTA' %}
+              {% if pode_editar and requisicao.status  ==  'ABERTA' %}
                 <a class="btn btn-sm btn-outline-primary" href="{% url 'inventory:requisicao_editar' requisicao.pk %}">
                   <i class="ti ti-edit"></i>
                 </a>

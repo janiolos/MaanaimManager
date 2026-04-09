@@ -94,7 +94,7 @@
         <select class="form-select" name="categoria">
           <option value="">Todas as categorias</option>
           {% for value, label in categorias %}
-          <option value="{{ value }}" {% if filtros.categoria==value|stringformat:"s" %}selected{% endif %}>{{ label }}
+          <option value="{{ value }}" {% if filtros.categoria == value|stringformat:"s" %}selected{% endif %}>{{ label }}
           </option>
           {% endfor %}
         </select>
@@ -102,9 +102,9 @@
       <div class="col-md-3">
         <select class="form-select" name="status">
           <option value="">Todos os status</option>
-          <option value="baixo" {% if filtros.status=='baixo' %}selected{% endif %}>Abaixo do minimo</option>
-          <option value="reabastecer" {% if filtros.status=='reabastecer' %}selected{% endif %}>Reabastecimento</option>
-          <option value="acima" {% if filtros.status=='acima' %}selected{% endif %}>Acima do maximo</option>
+          <option value="baixo" {% if filtros.status == 'baixo' %}selected{% endif %}>Abaixo do minimo</option>
+          <option value="reabastecer" {% if filtros.status == 'reabastecer' %}selected{% endif %}>Reabastecimento</option>
+          <option value="acima" {% if filtros.status == 'acima' %}selected{% endif %}>Acima do maximo</option>
         </select>
       </div>
       <div class="col-md-1"><button class="btn btn-secondary w-100" type="submit">Filtrar</button></div>
@@ -142,7 +142,7 @@
           <td class="text-end">R$ {{ produto.custo_medio_atual }}</td>
           <td class="text-end">R$ {{ produto.valor_estoque_atual }}</td>
           <td>
-            {% if produto.status_estoque == 'BAIXO' %}
+            {% if produto.status_estoque  ==  'BAIXO' %}
             <span class="badge bg-danger">Baixo</span>
             {% elif produto.status_estoque == 'REABASTECER' %}
             <span class="badge bg-orange text-dark">Reabastecer</span>

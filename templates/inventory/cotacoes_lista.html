@@ -23,7 +23,7 @@
         <select class="form-select" name="status">
           <option value="">Todos os status</option>
           {% for value, label in status_choices %}
-          <option value="{{ value }}" {% if filtros.status == value %}selected{% endif %}>{{ label }}</option>
+          <option value="{{ value }}" {% if filtros.status  ==  value %}selected{% endif %}>{{ label }}</option>
           {% endfor %}
         </select>
       </div>
@@ -54,13 +54,13 @@
           <td>{{ cotacao.total_itens }}</td>
           <td>{% if cotacao.melhor_total %}R$ {{ cotacao.melhor_total }}{% else %}-{% endif %}</td>
           <td>
-            {% if cotacao.status == 'ABERTA' %}<span class="badge bg-warning text-dark">Aberta</span>
+            {% if cotacao.status  ==  'ABERTA' %}<span class="badge bg-warning text-dark">Aberta</span>
             {% elif cotacao.status == 'FECHADA' %}<span class="badge bg-success">Fechada</span>
             {% else %}<span class="badge bg-secondary">Cancelada</span>{% endif %}
           </td>
           <td class="text-end">
             <a class="btn btn-sm btn-outline-secondary" href="{% url 'inventory:cotacao_comprovante' cotacao.pk %}"><i class="ti ti-printer"></i></a>
-            {% if pode_editar and cotacao.status == 'ABERTA' %}
+            {% if pode_editar and cotacao.status  ==  'ABERTA' %}
               <a class="btn btn-sm btn-primary" href="{% url 'inventory:cotacao_aprovar' cotacao.pk %}" title="Aprovar cotacao"><i class="ti ti-checkup-list"></i></a>
               <a class="btn btn-sm btn-outline-primary" href="{% url 'inventory:cotacao_editar' cotacao.pk %}"><i class="ti ti-edit"></i></a>
               <form method="post" class="d-inline" action="{% url 'inventory:cotacao_fechar' cotacao.pk %}">{% csrf_token %}<button class="btn btn-sm btn-success" type="submit"><i class="ti ti-check"></i></button></form>

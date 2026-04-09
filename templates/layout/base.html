@@ -14,7 +14,7 @@
 
 {% with current_url_name=request.resolver_match.url_name %}
 
-<body class="app{% if current_url_name == 'login' %} is-login{% endif %}">
+<body class="app{% if current_url_name  ==  'login' %} is-login{% endif %}">
   <div class="page">
     {% if current_url_name != 'login' %}
     <header class="navbar navbar-expand-md d-print-none sticky-top" data-bs-theme="dark">
@@ -38,7 +38,7 @@
         <div class="collapse navbar-collapse" id="navbar-menu">
           <ul class="navbar-nav me-auto">
             <li class="nav-item">
-              <a class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}" href="/">
+              <a class="nav-link {% if request.resolver_match.url_name  ==  'home' %}active{% endif %}" href="/">
                 <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="ti ti-chart-bar"></i></span>
                 <span class="nav-link-title">Dashboard</span>
               </a>
@@ -46,25 +46,25 @@
 
             {% if modulos_ativos.financeiro and acesso_modulos.financeiro %}
             <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle {% if request.resolver_match.namespace == 'finance' %}active{% endif %}"
+              <a class="nav-link dropdown-toggle {% if request.resolver_match.namespace  ==  'finance' %}active{% endif %}"
                 href="#navbar-finance" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button"
                 aria-expanded="false">
                 <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="ti ti-wallet"></i></span>
                 <span class="nav-link-title">Financeiro</span>
               </a>
               <div class="dropdown-menu">
-                <a class="dropdown-item {% if request.resolver_match.url_name == 'dashboard' and request.resolver_match.namespace == 'finance' %}active{% endif %}"
+                <a class="dropdown-item {% if request.resolver_match.url_name == 'dashboard' and request.resolver_match.namespace  ==  'finance' %}active{% endif %}"
                   href="{% url 'finance:dashboard' %}">Dashboard</a>
-                <a class="dropdown-item {% if request.resolver_match.url_name == 'lancamentos_lista' %}active{% endif %}"
+                <a class="dropdown-item {% if request.resolver_match.url_name  ==  'lancamentos_lista' %}active{% endif %}"
                   href="{% url 'finance:lancamentos_lista' %}">Lançamentos</a>
-                <a class="dropdown-item {% if request.resolver_match.url_name == 'relatorios_index' %}active{% endif %}"
+                <a class="dropdown-item {% if request.resolver_match.url_name  ==  'relatorios_index' %}active{% endif %}"
                   href="{% url 'finance:relatorios_index' %}">Relatórios</a>
               </div>
             </li>
             {% endif %}
 
             <li class="nav-item">
-              <a class="nav-link {% if request.resolver_match.namespace == 'core' and request.resolver_match.url_name == 'dashboard' %}active{% endif %}"
+              <a class="nav-link {% if request.resolver_match.namespace == 'core' and request.resolver_match.url_name  ==  'dashboard' %}active{% endif %}"
                 href="{% url 'core:dashboard' %}">
                 <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="ti ti-calendar-event"></i></span>
                 <span class="nav-link-title">Core</span>
@@ -73,7 +73,7 @@
 
             {% if modulos_ativos.estoque and acesso_modulos.estoque %}
             <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle {% if request.resolver_match.namespace == 'inventory' %}active{% endif %}"
+              <a class="nav-link dropdown-toggle {% if request.resolver_match.namespace  ==  'inventory' %}active{% endif %}"
                 href="#navbar-inventory" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button"
                 aria-expanded="false">
                 <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="ti ti-package"></i></span>
@@ -82,17 +82,17 @@
               <div class="dropdown-menu">
                 <div class="dropdown-menu-columns">
                   <div class="dropdown-menu-column">
-                    <a class="dropdown-item {% if request.resolver_match.url_name == 'dashboard' and request.resolver_match.namespace == 'inventory' %}active{% endif %}"
+                    <a class="dropdown-item {% if request.resolver_match.url_name == 'dashboard' and request.resolver_match.namespace  ==  'inventory' %}active{% endif %}"
                       href="{% url 'inventory:dashboard' %}">Dashboard</a>
-                    <a class="dropdown-item {% if request.resolver_match.url_name == 'produtos_lista' %}active{% endif %}"
+                    <a class="dropdown-item {% if request.resolver_match.url_name  ==  'produtos_lista' %}active{% endif %}"
                       href="{% url 'inventory:produtos_lista' %}">Produtos</a>
-                    <a class="dropdown-item {% if request.resolver_match.url_name == 'cotacoes_lista' %}active{% endif %}"
+                    <a class="dropdown-item {% if request.resolver_match.url_name  ==  'cotacoes_lista' %}active{% endif %}"
                       href="{% url 'inventory:cotacoes_lista' %}">Orçamentos</a>
                   </div>
                   <div class="dropdown-menu-column">
-                    <a class="dropdown-item {% if request.resolver_match.url_name == 'fornecedores_lista' %}active{% endif %}"
+                    <a class="dropdown-item {% if request.resolver_match.url_name  ==  'fornecedores_lista' %}active{% endif %}"
                       href="{% url 'inventory:fornecedores_lista' %}">Fornecedores</a>
-                    <a class="dropdown-item {% if request.resolver_match.url_name == 'movimentos_lista' %}active{% endif %}"
+                    <a class="dropdown-item {% if request.resolver_match.url_name  ==  'movimentos_lista' %}active{% endif %}"
                       href="{% url 'inventory:movimentos_lista' %}">Requisições</a>
                   </div>
                 </div>
@@ -102,7 +102,7 @@
 
             {% if modulos_ativos.notificacoes and acesso_modulos.notificacoes %}
             <li class="nav-item">
-              <a class="nav-link {% if request.resolver_match.namespace == 'notifications' %}active{% endif %}"
+              <a class="nav-link {% if request.resolver_match.namespace  ==  'notifications' %}active{% endif %}"
                 href="{% url 'notifications:dashboard' %}">
                 <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="ti ti-bell"></i></span>
                 <span class="nav-link-title">Lembretes</span>
@@ -112,20 +112,20 @@
 
             {% if modulos_ativos.hospedagem and acesso_modulos.hospedagem %}
             <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle {% if request.resolver_match.namespace == 'lodging' %}active{% endif %}"
+              <a class="nav-link dropdown-toggle {% if request.resolver_match.namespace  ==  'lodging' %}active{% endif %}"
                 href="#navbar-lodging" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button"
                 aria-expanded="false">
                 <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="ti ti-home"></i></span>
                 <span class="nav-link-title">Chalés</span>
               </a>
               <div class="dropdown-menu">
-                <a class="dropdown-item {% if request.resolver_match.url_name == 'dashboard' and request.resolver_match.namespace == 'lodging' %}active{% endif %}"
+                <a class="dropdown-item {% if request.resolver_match.url_name == 'dashboard' and request.resolver_match.namespace  ==  'lodging' %}active{% endif %}"
                   href="{% url 'lodging:dashboard' %}">Dashboard</a>
-                <a class="dropdown-item {% if request.resolver_match.url_name == 'chales_lista' %}active{% endif %}"
+                <a class="dropdown-item {% if request.resolver_match.url_name  ==  'chales_lista' %}active{% endif %}"
                   href="{% url 'lodging:chales_lista' %}">Chalés</a>
-                <a class="dropdown-item {% if request.resolver_match.url_name == 'reservas_lista' %}active{% endif %}"
+                <a class="dropdown-item {% if request.resolver_match.url_name  ==  'reservas_lista' %}active{% endif %}"
                   href="{% url 'lodging:reservas_lista' %}">Reservas</a>
-                <a class="dropdown-item {% if request.resolver_match.url_name == 'mapa_chales' %}active{% endif %}"
+                <a class="dropdown-item {% if request.resolver_match.url_name  ==  'mapa_chales' %}active{% endif %}"
                   href="{% url 'lodging:mapa_chales' %}">Mapa</a>
               </div>
             </li>

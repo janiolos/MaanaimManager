@@ -14,7 +14,7 @@
           <select class="form-select" name="chale" id="id_chale" required>
             <option value="">Selecione...</option>
             {% for chale in chales_disponiveis %}
-              <option value="{{ chale.id }}" data-capacidade="{{ chale.capacidade }}" data-acessivel="{{ chale.acessivel_cadeirante|yesno:'sim,nao' }}" {% if form.chale.value|stringformat:'s' == chale.id|stringformat:'s' %}selected{% endif %}>
+              <option value="{{ chale.id }}" data-capacidade="{{ chale.capacidade }}" data-acessivel="{{ chale.acessivel_cadeirante|yesno:'sim,nao' }}" {% if form.chale.value|stringformat:'s'  ==  chale.id|stringformat:'s' %}selected{% endif %}>
                 {{ chale.codigo }} (cap: {{ chale.capacidade }}){% if chale.acessivel_cadeirante %} - acessivel{% endif %}
               </option>
             {% empty %}

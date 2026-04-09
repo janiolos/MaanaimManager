@@ -21,7 +21,7 @@
             {% for categoria in categorias %}
               <option value="{{ categoria.id }}"
                       data-tipo="{{ categoria.tipo }}"
-                      {% if form.categoria.value|stringformat:'s' == categoria.id|stringformat:'s' %}selected{% endif %}>
+                      {% if form.categoria.value|stringformat:'s'  ==  categoria.id|stringformat:'s' %}selected{% endif %}>
                 {{ categoria.nome }}
               </option>
             {% endfor %}

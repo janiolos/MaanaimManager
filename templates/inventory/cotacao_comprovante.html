@@ -54,7 +54,7 @@
             {% for fornecedor in fornecedores %}
               <td class="text-end">
                 {% for preco in item.precos.all %}
-                  {% if preco.fornecedor_id == fornecedor.id %}
+                  {% if preco.fornecedor_id  ==  fornecedor.id %}
                     R$ {{ preco.valor_total }}
                   {% endif %}
                 {% endfor %}
@@ -69,7 +69,7 @@
             {% for fornecedor in fornecedores %}
               <th class="text-end">
                 {% for reg in totais.values %}
-                  {% if reg.fornecedor.id == fornecedor.id %}R$ {{ reg.total }}{% endif %}
+                  {% if reg.fornecedor.id  ==  fornecedor.id %}R$ {{ reg.total }}{% endif %}
                 {% endfor %}
               </th>
             {% endfor %}
