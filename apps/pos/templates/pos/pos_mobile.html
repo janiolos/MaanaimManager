@@ -88,6 +88,10 @@
         </div>
     </header>
 
+    <div id="offline-banner" style="display:none; background: var(--warning, #f57c00); color: white; text-align: center; padding: 10px; font-weight: bold; cursor: pointer;" onclick="sincronizarVendasOffline()">
+        Você possui <span id="offline-count">0</span> vendas offline pendentes. TOQUE PARA SINCRONIZAR.
+    </div>
+
     <nav>
         <button class="nav-btn active" onclick="showTab('tab-venda', this)">Vender</button>
         <button class="nav-btn" onclick="showTab('tab-eventos', this)">Eventos</button>
@@ -319,17 +323,28 @@
         btn.disabled = true;
         btn.innerText = "PROCESSANDO...";
 
-        try {
-            const total = carrinho.reduce((acc, i) => acc + i.totalItem, 0);
-            const forma = document.querySelector('input[name="pag"]:checked').value;
-            
-            const payload = {
-                eventoId: evId,
-                total: total,
-                forma: forma,
-                itens: carrinho
-            };
+        const total = carrinho.reduce((acc, i) => acc + i.totalItem, 0);
+        const forma = document.querySelector('input[name="pag"]:checked').value;
+        
+        const payload = {
+            idUnico: Date.now().toString(),
+            eventoId: evId,
+            total: total,
+            forma: forma,
+            itens: carrinho
+        };
 
+        if(!navigator.onLine) {
+            salvarVendaOffline(payload);
+            abaterEstoqueLocal();
+            limparFormularioVenda();
+            alert("VOCÊ ESTÁ SEM CONEXÃO! Venda salva OFFLINE no aparelho.");
+            btn.disabled = false;
+            btn.innerText = "SALVAR VENDA";
+            return;
+        }
+
+        try {
             const resp = await fetch('/pos/api/venda/', {
                 method: 'POST',
                 headers: {
@@ -345,24 +360,100 @@
             }
 
             const resData = await resp.json();
-            
-            // Abater estoque local visualmente para nao precisar reloading total
-            carrinho.forEach(item => {
-                const p = produtos.find(x => x.id === item.id);
-                if(p) p.estoque -= item.qtd;
-            });
-            
-            document.getElementById('valor-pago').value = '';
-            renderizarGradeVenda();
-            
-            alert(`Venda registrada no Postgres! ID Geração: ${resData.venda_id}`);
+            abaterEstoqueLocal();
+            limparFormularioVenda();
+            alert(`Venda registrada! ID: ${resData.venda_id}`);
         } catch(e) {
-            alert("Erro: " + e.message);
+            console.error(e);
+            alert("Erro de servidor ou rede instável. Salvando offline por segurança.");
+            salvarVendaOffline(payload);
+            abaterEstoqueLocal();
+            limparFormularioVenda();
         } finally {
             btn.disabled = false;
             btn.innerText = "SALVAR VENDA";
         }
     }
+
+    function abaterEstoqueLocal() {
+        carrinho.forEach(item => {
+            const p = produtos.find(x => x.id === item.id);
+            if(p) p.estoque -= item.qtd;
+        });
+    }
+
+    function limparFormularioVenda() {
+        document.getElementById('valor-pago').value = '';
+        renderizarGradeVenda();
+    }
+
+    function salvarVendaOffline(venda) {
+        let fila = JSON.parse(localStorage.getItem('filaVendasPDV') || '[]');
+        fila.push(venda);
+        localStorage.setItem('filaVendasPDV', JSON.stringify(fila));
+        checarOffline();
+    }
+
+    window.checarOffline = function() {
+        let fila = JSON.parse(localStorage.getItem('filaVendasPDV') || '[]');
+        const banner = document.getElementById('offline-banner');
+        if(fila.length > 0) {
+            banner.style.display = 'block';
+            document.getElementById('offline-count').innerText = fila.length;
+        } else {
+            banner.style.display = 'none';
+        }
+    }
+
+    window.sincronizarVendasOffline = async function() {
+        if(!navigator.onLine) {
+            return alert("Ainda sem conexão com a internet.");
+        }
+        
+        let fila = JSON.parse(localStorage.getItem('filaVendasPDV') || '[]');
+        if(fila.length === 0) return;
+
+        const banner = document.getElementById('offline-banner');
+        banner.innerText = "Sincronizando... Aguarde";
+        
+        let pendentes = [];
+        let sucessoCount = 0;
+
+        for(let venda of fila) {
+            try {
+                const resp = await fetch('/pos/api/venda/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+                    body: JSON.stringify(venda)
+                });
+                if(resp.ok) {
+                    sucessoCount++;
+                } else {
+                    pendentes.push(venda);
+                }
+            } catch(e) {
+                pendentes.push(venda);
+            }
+        }
+
+        localStorage.setItem('filaVendasPDV', JSON.stringify(pendentes));
+        
+        if(pendentes.length === 0) {
+            alert(`${sucessoCount} vendas sincronizadas com sucesso!`);
+            banner.style.display = 'none';
+        } else {
+            alert(`${sucessoCount} sincronizadas. Mas ${pendentes.length} falharam.`);
+        }
+        
+        banner.innerHTML = `Você possui <span id="offline-count">${pendentes.length}</span> vendas offline pendentes. TOQUE PARA SINCRONIZAR.`;
+        checarOffline();
+    }
+
+    window.addEventListener('online', checarOffline);
+    window.addEventListener('offline', checarOffline);
+    
+    // Check initial state
+    document.addEventListener('DOMContentLoaded', () => setTimeout(checarOffline, 1000));
 </script>
 </body>
 </html>

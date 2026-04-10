@@ -27,7 +27,29 @@
   </div>
 </div>
 
-<div class="card mt-2">
+</div>
+
+<!-- Charts Section -->
+<div class="row row-cards mt-2 mb-2 d-none" id="charts-row">
+  <div class="col-md-6">
+    <div class="card h-100">
+      <div class="card-header"><h3 class="card-title">Financeiro do Ciclo (R$)</h3></div>
+      <div class="card-body" style="position: relative; height:250px; width:100%">
+        <canvas id="financeChart"></canvas>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card h-100">
+      <div class="card-header"><h3 class="card-title">Resumo de Suprimentos</h3></div>
+      <div class="card-body" style="position: relative; height:250px; width:100%">
+         <canvas id="stockChart"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card mt-3">
   <div class="card-header">
     <h3 class="card-title">Modulos</h3>
   </div>
@@ -58,4 +80,66 @@
     </div>
   </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', async function() {
+    try {
+        const resp = await fetch('/api/v1/dashboard/');
+        if (!resp.ok) return;
+        const data = await resp.json();
+        
+        // Show charts row if we have an active event / data
+        if(data.evento) {
+            document.getElementById('charts-row').classList.remove('d-none');
+            
+            const finCtx = document.getElementById('financeChart').getContext('2d');
+            new Chart(finCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Receitas', 'Despesas'],
+                    datasets: [{
+                        data: [data.financeiro.receitas, data.financeiro.despesas],
+                        backgroundColor: ['#2e7d32', '#c0392b'],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+
+            const stockCtx = document.getElementById('stockChart').getContext('2d');
+            new Chart(stockCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Bons / Aceitáveis', 'Estoque Baixo'],
+                    datasets: [{
+                        label: 'Qtde Posições (Produtos)',
+                        data: [
+                            (data.estoque.produtos - data.estoque.alertas_baixo), 
+                            data.estoque.alertas_baixo
+                        ],
+                        backgroundColor: ['#0288d1', '#f57c00']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true, ticks: { stepSize: 1 } }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+    } catch(err) {
+        console.error("Dashboard API Error:", err);
+    }
+});
+</script>
 {% endblock %}

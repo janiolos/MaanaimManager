@@ -1,0 +1,295 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>{{ titulo_header|default:"Estoque Mobile" }}</title>
+    <style>
+        :root {
+            --primary: #1f2937;  
+            --secondary: #f6f8fb;
+            --accent: #0288d1;   
+            --success: #2e7d32;
+            --warning: #f57c00;
+            --danger: #c0392b;
+            --text: #1f2937;
+            --border: #dbe3ed;
+        }
+
+        * { box-sizing: border-box; font-family: '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', system-ui, sans-serif; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        body { background-color: #f0f2f5; color: var(--text); -webkit-font-smoothing: antialiased; }
+
+        #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.95); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10000; font-size: 1.1rem; font-weight: bold; color: var(--primary); }
+        .spinner { border: 4px solid #f3f3f3; border-top: 4px solid var(--primary); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 15px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        #app-content { display: none; padding-bottom: calc(30px + env(safe-area-inset-bottom)); }
+
+        header { background-color: var(--primary); color: white; padding: calc(1rem + env(safe-area-inset-top)) 1rem 1rem 1rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
+        nav { background: white; display: flex; overflow-x: auto; border-bottom: 1px solid var(--border); position: sticky; top: calc(56px + env(safe-area-inset-top)); z-index: 99; -webkit-overflow-scrolling: touch; }
+        .nav-btn { flex: 1; min-width: 80px; padding: 15px 5px; border: none; background: none; cursor: pointer; font-weight: 600; color: #666; font-size: 0.75rem; text-transform: uppercase; appearance: none; -webkit-appearance: none; }
+        .nav-btn.active { color: var(--accent); border-bottom: 3px solid var(--accent); }
+
+        .container { max-width: 650px; margin: 20px auto; padding: 0 15px; display: none; }
+        .container.active { display: block; }
+
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        h2 { margin-bottom: 15px; font-size: 1.1rem; color: var(--primary); border-left: 4px solid var(--accent); padding-left: 10px; display: flex; justify-content: space-between; align-items: center; }
+
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-size: 0.85rem; font-weight: bold; color: #555; }
+        
+        input[type="text"], input[type="number"], select { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 16px; background: #fff; appearance: none; -webkit-appearance: none; color: var(--text); }
+        select { background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e"); background-repeat: no-repeat; background-position: right 10px center; background-size: 1em; padding-right: 40px; }
+
+        button.main-btn { width: 100%; padding: 14px; border: none; border-radius: 8px; background: var(--primary); color: white; font-weight: bold; font-size: 1.1rem; cursor: pointer; transition: 0.2s; appearance: none; -webkit-appearance: none; }
+        button.secondary-btn { background: var(--accent); margin-top: 10px; }
+
+        .item-category-divider { font-weight: bold; font-size: 0.8rem; text-transform: uppercase; margin: 20px 0 10px 0; color: #888; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+        
+        .produto-venda-card { background: #fdfdfd; border: 1px solid #eee; border-radius: 8px; padding: 10px 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .produto-venda-info strong { display: block; font-size: 1rem; color: var(--text); }
+        .produto-venda-info span { color: #888; font-size: 0.8rem; }
+        
+        .stepper-container { display: flex; align-items: center; gap: 5px; }
+        .stepper-btn { width: 34px; height: 34px; border-radius: 6px; border: 1px solid var(--text); background: white; color: var(--text); font-weight: bold; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; }
+        .stepper-btn.plus { background: var(--accent); color: white; border: none; }
+        .produto-venda-qtd { width: 55px !important; text-align: center; font-size: 16px; font-weight: bold; padding: 6px !important; border: none; background: transparent; }
+
+        .search-container { position: sticky; top: -20px; background: white; padding-bottom: 10px; z-index: 90; margin-bottom: 10px; }
+        #search-box { padding-left: 30px; background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3ccircle cx='11' cy='11' r='8'%3e%3c/circle%3e%3cline x1='21' y1='21' x2='16.65' y2='16.65'%3e%3c/line%3e%3c/svg%3e"); background-repeat: no-repeat; background-position: left 10px center; }
+    </style>
+</head>
+<body>
+
+<div id="loading-overlay">
+    <div class="spinner"></div>
+    <p id="loading-text">Sincronizando Suprimentos...</p>
+</div>
+
+<div id="app-content">
+    <header>
+        <h1>{{ titulo_header|default:"PWA Estoque" }}</h1>
+        <div style="text-align: right; font-size: 0.8rem;">
+            <span id="nome-vendedor-header" style="font-weight:bold; display:block;"></span>
+            <a href="/" style="color:white; text-decoration:underline;">Painel Central</a>
+        </div>
+    </header>
+
+    <nav>
+        <button class="nav-btn active" onclick="showTab('tab-pedido', this)">Novo Pedido</button>
+    </nav>
+    
+    <div id="tab-pedido" class="container active">
+        <div class="card">
+            <h2>Cabeçalho da Requisição</h2>
+            <div class="form-group">
+                <label>Evento Atual</label>
+                <select id="req-evento"></select>
+            </div>
+            <div class="form-group">
+                <label>Área Solicitante</label>
+                <select id="req-area"></select>
+            </div>
+            <div class="form-group">
+                <label>Observações Adicionais</label>
+                <input type="text" id="req-obs" placeholder="Ex: Para o almoço de sábado">
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Seleção de Suprimentos</h2>
+            <div class="search-container">
+                <input type="text" id="search-box" placeholder="Buscar ingrediente/produto..." onkeyup="filtrarProdutos()">
+            </div>
+            <div id="lista-produtos-pedido" style="margin-top: 10px; margin-bottom: 20px;"></div>
+
+            <button class="main-btn secondary-btn" id="btn-finalizar" onclick="finalizarPedido()">ENVIAR PEDIDO</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    let eventos = [];
+    let produtos = [];
+    let areas = [];
+    let carrinho = {};
+
+    async function carregarDados() {
+        try {
+            const resp = await fetch('/inventory/mobile/api/dados/');
+            const data = await resp.json();
+            
+            document.getElementById('nome-vendedor-header').innerText = data.solicitante;
+            eventos = data.eventos;
+            produtos = data.produtos;
+            areas = data.areas;
+
+            document.getElementById('app-content').style.display = 'block';
+
+            atualizarDropdowns();
+            renderizarGradeProdutos();
+
+            document.getElementById('loading-overlay').style.display = 'none';
+        } catch (error) {
+            console.error(error);
+            document.getElementById('loading-text').innerHTML = "Falha ao baixar catálogo de produtos.";
+        }
+    }
+
+    carregarDados();
+
+    window.showTab = function(id, btn) {
+        document.querySelectorAll('.container').forEach(c => c.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        btn.classList.add('active');
+    }
+
+    function atualizarDropdowns() {
+        const evSelect = document.getElementById('req-evento');
+        evSelect.innerHTML = eventos.map(e => `<option value="${e.id}">${e.nome}</option>`).join('');
+        
+        const areaSelect = document.getElementById('req-area');
+        areaSelect.innerHTML = areas.map(a => `<option value="${a.id}" ${a.id === 'COZINHA' ? 'selected' : ''}>${a.nome}</option>`).join('');
+    }
+
+    function renderizarGradeProdutos(filtro = '') {
+        const container = document.getElementById('lista-produtos-pedido');
+        if (produtos.length === 0) {
+            container.innerHTML = '<p style="text-align:center; color:#666;">Catálogo vazio.</p>';
+            return;
+        }
+
+        const termo = filtro.toLowerCase().trim();
+        const filtrados = produtos.filter(p => p.nome.toLowerCase().includes(termo));
+
+        container.innerHTML = filtrados.map(p => {
+            const qtdAtual = carrinho[p.id] || 0;
+            return `
+            <div class="produto-venda-card">
+                <div class="produto-venda-info">
+                    <strong>${p.nome}</strong>
+                    <span>Disp: ${p.estoque} ${p.unidade}</span>
+                </div>
+                <div class="stepper-container">
+                    <button type="button" class="stepper-btn" onclick="alterarQuantidade(${p.id}, -1)">-</button>
+                    <input type="number" id="qtd-${p.id}" class="produto-venda-qtd" data-id="${p.id}" value="${qtdAtual}" readonly>
+                    <button type="button" class="stepper-btn plus" onclick="alterarQuantidade(${p.id}, 1)">+</button>
+                </div>
+            </div>
+            `;
+        }).join('');
+    }
+
+    window.filtrarProdutos = function() {
+        const termo = document.getElementById('search-box').value;
+        renderizarGradeProdutos(termo);
+    }
+
+    window.alterarQuantidade = function(id, delta) {
+        let atual = carrinho[id] || 0;
+        let nova = atual + delta;
+        if(nova < 0) nova = 0;
+        
+        // Verifica estoque maximo - o sistema nao deve travar aqui mas alertar se quiser
+        const produto = produtos.find(p => p.id === id);
+        if(nova > produto.estoque) {
+            // Permitimos pedir algo fora do estoque, o almoxarifado vai tratar (mas ajustamos no input)
+        }
+        
+        carrinho[id] = nova;
+        
+        const input = document.getElementById(`qtd-${id}`);
+        if(input) input.value = nova;
+        
+        atualizarTotalBotao();
+    }
+
+    function atualizarTotalBotao() {
+        let totalItemsCount = 0;
+        for (const [id, qtd] of Object.entries(carrinho)) {
+            if(qtd > 0) totalItemsCount++;
+        }
+        const btn = document.getElementById('btn-finalizar');
+        btn.innerText = `ENVIAR PEDIDO (${totalItemsCount} ITENS)`;
+    }
+
+    window.finalizarPedido = async function() {
+        const evId = document.getElementById('req-evento').value;
+        const area = document.getElementById('req-area').value;
+        const obs = document.getElementById('req-obs').value;
+        
+        if(!evId) return alert("Crie ou selecione um evento ativo no painel oficial primeiro.");
+        
+        const itensPedido = [];
+        for (const [idStr, qtd] of Object.entries(carrinho)) {
+            if(qtd > 0) {
+                itensPedido.push({ id: parseInt(idStr), qtd: parseFloat(qtd) });
+            }
+        }
+        
+        if(itensPedido.length === 0) return alert("Seu pedido está vazio. Selecione itens.");
+
+        const btn = document.getElementById('btn-finalizar');
+        btn.disabled = true;
+        btn.innerText = "ENVIANDO...";
+
+        try {
+            const payload = {
+                eventoId: evId,
+                area: area,
+                observacao: obs,
+                itens: itensPedido
+            };
+
+            const resp = await fetch('/inventory/mobile/api/salvar/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if(!resp.ok) {
+                const errData = await resp.json();
+                throw new Error(errData.error || "Erro misterioso no envio.");
+            }
+
+            const resData = await resp.json();
+            
+            alert(`Pedido gerado e impresso com sucesso no número: ${resData.requisicao_numero}`);
+            
+            carrinho = {};
+            document.getElementById('req-obs').value = '';
+            document.getElementById('search-box').value = '';
+            renderizarGradeProdutos();
+            atualizarTotalBotao();
+        } catch(e) {
+            alert("Falha no Envio: " + e.message);
+        } finally {
+            btn.disabled = false;
+        }
+    }
+</script>
+</body>
+</html>

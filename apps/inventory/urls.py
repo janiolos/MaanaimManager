@@ -12,6 +12,12 @@ urlpatterns = [
     path("inventory/movimentos/", views.movimentos_lista, name="movimentos_lista"),
     path("inventory/requisicoes/", views.movimentos_lista, name="requisicoes_lista"),
     path("inventory/requisicoes/nova/", views.requisicao_criar, name="requisicao_criar"),
+    
+    # Estoque Mobile (PWA da Cozinha)
+    path("inventory/mobile/", views.requisicao_mobile_view, name="requisicao_mobile"),
+    path("inventory/mobile/api/dados/", views.api_dados_iniciais_requisicao, name="mobile_api_dados"),
+    path("inventory/mobile/api/salvar/", views.api_enviar_requisicao, name="mobile_api_salvar"),
+    
     path("inventory/requisicoes/<int:pk>/editar/", views.requisicao_editar, name="requisicao_editar"),
     path("inventory/movimentos/novo/", views.movimentacao_criar, name="movimentacao_criar"),
     path("inventory/requisicoes/<int:pk>/finalizar/", views.requisicao_finalizar, name="requisicao_finalizar"),

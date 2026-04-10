@@ -129,6 +129,17 @@ def home(request):
 
     modulos.append(
         {
+            "nome": "Estoque Mobile (Cozinha)",
+            "descricao": "Requisição rápida de suprimentos com interface nativa Mobile.",
+            "icone": "ti ti-soup",
+            "cor": "inventory",
+            "url": reverse("inventory:requisicao_mobile"),
+            "resumo": "Dispare pedidos para o almoxarifado direto do celular.",
+        }
+    )
+
+    modulos.append(
+        {
             "nome": "Core",
             "descricao": "Configuracoes gerais e gestao de ciclos.",
             "icone": "ti ti-settings",

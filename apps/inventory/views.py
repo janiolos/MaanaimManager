@@ -943,3 +943,92 @@ def cotacao_aprovar(request, pk):
             "totais": sorted(totais.values(), key=lambda x: x["fornecedor"].nome),
         },
     )
+
+import json
+from django.http import JsonResponse
+from django.views.decorators.http import require_GET, require_POST
+from apps.inventory.models import RequisicaoSaidaItem
+from apps.core.models import Evento
+
+@login_required
+def requisicao_mobile_view(request):
+    """
+    Renderiza a PWA do Estoque Mobile para a Cozinha e outros setores
+    """
+    return render(request, "inventory/requisicao_mobile.html", {
+        "titulo_header": "Estoque Mobile"
+    })
+
+@login_required
+@require_GET
+def api_dados_iniciais_requisicao(request):
+    """
+    Retorna o catalogo de materias primas e eventos ativos
+    """
+    eventos = Evento.objects.filter(ativo=True).order_by('-data_inicio')
+    
+    produtos = Produto.objects.filter(ativo=True)
+    
+    lista_eventos = [{'id': e.id, 'nome': str(e)} for e in eventos]
+    
+    lista_produtos = [{
+        'id': p.id,
+        'nome': str(p.nome),
+        'unidade': p.unidade,
+        'estoque': float(p.estoque_atual),
+    } for p in produtos]
+    
+    return JsonResponse({
+        'solicitante': request.user.username,
+        'eventos': lista_eventos,
+        'produtos': lista_produtos,
+        'areas': [
+            {'id': 'COZINHA', 'nome': 'Cozinha'},
+            {'id': 'COPA', 'nome': 'Copa'},
+            {'id': 'CANTINA', 'nome': 'Cantina'},
+            {'id': 'COPA_PASTORES', 'nome': 'Copa Pastores'},
+            {'id': 'SECRETARIA', 'nome': 'Secretaria'},
+        ]
+    })
+
+@login_required
+@require_POST
+def api_enviar_requisicao(request):
+    """
+    Abre uma nova requisicao de saida
+    """
+    try:
+        data = json.loads(request.body)
+        evento_id = data.get('eventoId')
+        area = data.get('area')
+        observacao = data.get('observacao', '')
+        itens = data.get('itens', [])
+        
+        if not evento_id or not area or not itens:
+            return JsonResponse({'error': 'Evento, area e itens sao obrigatorios.'}, status=400)
+            
+        evento = Evento.objects.get(pk=evento_id)
+        
+        with transaction.atomic():
+            req = RequisicaoSaida.objects.create(
+                evento=evento,
+                area=area,
+                observacao=observacao if observacao else "Pedido via PWA",
+                criado_por=request.user
+            )
+            
+            for item in itens:
+                produto_id = item.get('id')
+                quantidade = item.get('qtd')
+                
+                produto = Produto.objects.get(pk=produto_id)
+                RequisicaoSaidaItem.objects.create(
+                    requisicao=req,
+                    produto=produto,
+                    quantidade=quantidade
+                )
+                
+        return JsonResponse({'success': True, 'requisicao_numero': req.numero})
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
