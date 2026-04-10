@@ -5,6 +5,12 @@ app_name = "finance"
 
 urlpatterns = [
     path("dashboard/", views.dashboard, name="dashboard"),
+    
+    # Caixa Mobile (PWA)
+    path("finance/caixa-app/", views.caixa_mobile_view, name="caixa_mobile"),
+    path("finance/caixa-app/api/dados/", views.api_dados_iniciais, name="caixa_api_dados"),
+    path("finance/caixa-app/api/salvar/", views.api_salvar_lancamento, name="caixa_api_salvar"),
+
     path("finance/categorias/", views.categorias_por_tipo,
          name="categorias_por_tipo"),
     path("finance/lancamentos/", views.lancamentos_lista, name="lancamentos_lista"),

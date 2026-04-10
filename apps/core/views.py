@@ -107,6 +107,28 @@ def home(request):
 
     modulos.append(
         {
+            "nome": "PDV Mobile",
+            "descricao": "Vendas diretas via PWA direto do celular ou tablet.",
+            "icone": "ti ti-device-mobile",
+            "cor": "pos",
+            "url": reverse("pos:pos_mobile"),
+            "resumo": "Acesso rapido ao seu Caixa Mobile Integrado.",
+        }
+    )
+
+    modulos.append(
+        {
+            "nome": "Caixa Mobile V6",
+            "descricao": "Gestão rápida de entradas, saídas e assinatura de recibos.",
+            "icone": "ti ti-receipt-2",
+            "cor": "finance",
+            "url": reverse("finance:caixa_mobile"),
+            "resumo": "Registro de Caixa integrado ao Financeiro.",
+        }
+    )
+
+    modulos.append(
+        {
             "nome": "Core",
             "descricao": "Configuracoes gerais e gestao de ciclos.",
             "icone": "ti ti-settings",

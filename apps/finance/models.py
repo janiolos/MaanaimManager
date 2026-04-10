@@ -61,6 +61,9 @@ class LancamentoFinanceiro(models.Model):
     criado_por = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="lancamentos_criados"
     )
+    setor_origem = models.CharField(max_length=100, blank=True, null=True)
+    pessoa = models.CharField(max_length=150, blank=True, null=True)
+    assinatura_b64 = models.TextField(blank=True, null=True)
     criado_em = models.DateTimeField(auto_now_add=True)
     atualizado_por = models.ForeignKey(
         settings.AUTH_USER_MODEL,

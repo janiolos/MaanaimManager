@@ -14,6 +14,7 @@ urlpatterns = [
     path("", include("apps.core.urls")),
     path("", include("apps.lodging.urls")),
     path("", include("apps.notifications.urls")),
+    path("pos/", include("apps.pos.urls")),
     path("", include("django.contrib.auth.urls")),
 ]
 

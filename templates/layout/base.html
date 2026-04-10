@@ -100,6 +100,22 @@
             </li>
             {% endif %}
 
+            <li class="nav-item">
+              <a class="nav-link {% if request.resolver_match.namespace  ==  'pos' %}active{% endif %}"
+                href="{% url 'pos:pos_mobile' %}">
+                <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="ti ti-device-mobile"></i></span>
+                <span class="nav-link-title text-warning fw-bold">PDV Mobile</span>
+              </a>
+            </li>
+
+            <li class="nav-item">
+              <a class="nav-link {% if request.resolver_match.url_name  ==  'caixa_mobile' %}active{% endif %}"
+                href="{% url 'finance:caixa_mobile' %}">
+                <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="ti ti-receipt-2"></i></span>
+                <span class="nav-link-title text-success fw-bold">Caixa Mobile</span>
+              </a>
+            </li>
+
             {% if modulos_ativos.notificacoes and acesso_modulos.notificacoes %}
             <li class="nav-item">
               <a class="nav-link {% if request.resolver_match.namespace  ==  'notifications' %}active{% endif %}"

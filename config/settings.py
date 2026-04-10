@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     "apps.inventory",
     "apps.lodging",
     "apps.notifications",
+    "apps.pos",
     "django_apscheduler",
 ]
 
