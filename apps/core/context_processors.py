@@ -15,7 +15,7 @@ def evento_atual(request):
         config = ConfiguracaoSistema.get_solo()
     except (OperationalError, ProgrammingError):
         config = ConfiguracaoSistema(
-            nome_sistema="Eventa",
+            nome_sistema="Maanaim",
             rotulo_evento_singular="Evento",
             rotulo_evento_plural="Eventos",
             modulo_financeiro_ativo=True,

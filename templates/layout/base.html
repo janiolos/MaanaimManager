@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block title %}{{ sistema_config.nome_sistema|default:"Eventa" }}{% endblock %}</title>
+  <title>{% block title %}{{ sistema_config.nome_sistema|default:"Maanaim" }} Manager{% endblock %}</title>
 
   <link href="{% static 'tabler/tabler.min.css' %}" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.46.0/tabler-icons.min.css" rel="stylesheet">
@@ -21,7 +21,7 @@
       <div class="container-fluid">
         <!-- Brand -->
         <a class="navbar-brand d-flex align-items-center me-3" href="/">
-          <span class="avatar avatar-sm rounded bg-primary text-white me-2">EV</span>
+          <span class="avatar avatar-sm rounded bg-primary text-white me-2">MM</span>
           <span class="d-none d-lg-inline">
             <span class="fw-bold">{{ sistema_config.nome_sistema|default:"Maanaim" }}</span>
             <span class="text-muted small ms-1">Manager</span>
