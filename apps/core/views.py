@@ -107,12 +107,12 @@ def home(request):
 
     modulos.append(
         {
-            "nome": "PDV Mobile",
-            "descricao": "Vendas diretas via PWA direto do celular ou tablet.",
+            "nome": "PDV Caixa",
+            "descricao": "Sistema de Caixa e Ponto de Venda integrado ao estoque e finanças.",
             "icone": "ti ti-device-mobile",
             "cor": "pos",
-            "url": reverse("pos:pos_mobile"),
-            "resumo": "Acesso rapido ao seu Caixa Mobile Integrado.",
+            "url": reverse("pos:pdv"),
+            "resumo": "Frente de Caixa e controle de vendas.",
         }
     )
 
