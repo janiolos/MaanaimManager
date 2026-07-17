@@ -20,8 +20,10 @@ async def seed_data():
     # Local IDs: Fazendinha = 1, Cantina = 2, Secretaria = 3, Livraria = 4
     families_data = [
         # Fazendinha (1)
-        {"nome": "Laticínios & Doces", "local_id": 1},
-        {"nome": "Artesanato & Souvenirs", "local_id": 1},
+        {"nome": "Produtos Coloniais", "local_id": 1},
+        {"nome": "Bebidas & Sucos", "local_id": 1},
+        {"nome": "Lanches & Salgados", "local_id": 1},
+        {"nome": "Lembranças ICM", "local_id": 1},
         # Cantina (2)
         {"nome": "Salgados", "local_id": 2},
         {"nome": "Bebidas", "local_id": 2},
@@ -45,14 +47,25 @@ async def seed_data():
         {"nome": "Suco Lata", "sku": "CAN-SUC-LAT", "unidade": "UN", "categoria": "CANTINA", "preco": 6.00, "local_id": 2, "family_name": "Bebidas"},
         {"nome": "Chocolate Barra", "sku": "CAN-CHO-BAR", "unidade": "UN", "categoria": "CANTINA", "preco": 6.50, "local_id": 2, "family_name": "Doces & Chocolates"},
         {"nome": "Trident", "sku": "CAN-TRI-DEN", "unidade": "UN", "categoria": "CANTINA", "preco": 3.00, "local_id": 2, "family_name": "Doces & Chocolates"},
-        # Fazendinha
-        {"nome": "Queijo Minas Padrão", "sku": "FAZ-QJO-MIN", "unidade": "UN", "categoria": "FAZENDINHA", "preco": 35.00, "local_id": 1, "family_name": "Laticínios & Doces"},
-        {"nome": "Doce de Leite Viçosa", "sku": "FAZ-DDL-VIC", "unidade": "UN", "categoria": "FAZENDINHA", "preco": 22.00, "local_id": 1, "family_name": "Laticínios & Doces"},
-        {"nome": "Manteiga Aviação 200g", "sku": "FAZ-MAN-AVI", "unidade": "UN", "categoria": "FAZENDINHA", "preco": 14.00, "local_id": 1, "family_name": "Laticínios & Doces"},
-        {"nome": "Caneca de Louça Maanaim", "sku": "FAZ-CAN-MAA", "unidade": "UN", "categoria": "FAZENDINHA", "preco": 25.00, "local_id": 1, "family_name": "Artesanato & Souvenirs"},
-        {"nome": "Chaveiro Madeira", "sku": "FAZ-CHA-MAD", "unidade": "UN", "categoria": "FAZENDINHA", "preco": 8.00, "local_id": 1, "family_name": "Artesanato & Souvenirs"},
+        # Fazendinha - Bebidas & Sucos
+        {"nome": "Suco de Uva Integral 500ml", "sku": "FAZ-SUC-UVA", "unidade": "UN", "categoria": "FAZENDINHA", "preco": 8.00, "local_id": 1, "family_name": "Bebidas & Sucos"},
+        {"nome": "Suco de Laranja Natural 500ml", "sku": "FAZ-SUC-LAR", "unidade": "UN", "categoria": "FAZENDINHA", "preco": 7.00, "local_id": 1, "family_name": "Bebidas & Sucos"},
+        {"nome": "Refrigerante Coca-Cola Lata", "sku": "FAZ-REF-COK", "unidade": "UN", "categoria": "FAZENDINHA", "preco": 5.00, "local_id": 1, "family_name": "Bebidas & Sucos"},
+        {"nome": "Refrigerante Guaraná Lata", "sku": "FAZ-REF-GUA", "unidade": "UN", "categoria": "FAZENDINHA", "preco": 5.00, "local_id": 1, "family_name": "Bebidas & Sucos"},
+        # Fazendinha - Produtos Coloniais
+        {"nome": "Queijo Minas Artesanal ICM", "sku": "FAZ-QJO-ICM", "unidade": "UN", "categoria": "FAZENDINHA", "preco": 35.00, "local_id": 1, "family_name": "Produtos Coloniais"},
+        {"nome": "Doce de Leite Colonial 500g", "sku": "FAZ-DDL-COL", "unidade": "UN", "categoria": "FAZENDINHA", "preco": 20.00, "local_id": 1, "family_name": "Produtos Coloniais"},
+        {"nome": "Mel Silvestre Maanaim 250g", "sku": "FAZ-MEL-MAA", "unidade": "UN", "categoria": "FAZENDINHA", "preco": 15.00, "local_id": 1, "family_name": "Produtos Coloniais"},
+        # Fazendinha - Lanches & Salgados
+        {"nome": "Bolo Caseiro de Fubá", "sku": "FAZ-BOL-FUB", "unidade": "UN", "categoria": "FAZENDINHA", "preco": 12.00, "local_id": 1, "family_name": "Lanches & Salgados"},
+        {"nome": "Pão de Queijo Recheado", "sku": "FAZ-PDQ-REC", "unidade": "UN", "categoria": "FAZENDINHA", "preco": 6.00, "local_id": 1, "family_name": "Lanches & Salgados"},
+        # Fazendinha - Lembranças ICM
+        {"nome": "Caneca Personalizada ICM", "sku": "FAZ-CAN-ICM", "unidade": "UN", "categoria": "FAZENDINHA", "preco": 25.00, "local_id": 1, "family_name": "Lembranças ICM"},
+        {"nome": "Chaveiro Madeira Maanaim", "sku": "FAZ-CHA-ICM", "unidade": "UN", "categoria": "FAZENDINHA", "preco": 8.00, "local_id": 1, "family_name": "Lembranças ICM"},
         # Livraria
         {"nome": "Bíblia de Estudo ACF", "sku": "LIV-BIB-ACF", "unidade": "UN", "categoria": "LIVRARIA", "preco": 120.00, "local_id": 4, "family_name": "Bíblias & Coletâneas"},
+        {"nome": "Coletânea de Louvores ICM (Grande)", "sku": "LIV-COL-GRA", "unidade": "UN", "categoria": "LIVRARIA", "preco": 50.00, "local_id": 4, "family_name": "Bíblias & Coletâneas"},
+        {"nome": "Coletânea de Louvores ICM (Pequena)", "sku": "LIV-COL-PEQ", "unidade": "UN", "categoria": "LIVRARIA", "preco": 35.00, "local_id": 4, "family_name": "Bíblias & Coletâneas"},
         {"nome": "Livro O Tabernáculo", "sku": "LIV-TAB-01", "unidade": "UN", "categoria": "LIVRARIA", "preco": 45.00, "local_id": 4, "family_name": "Livros & Literatura"},
         {"nome": "Livro As Eras da Igreja", "sku": "LIV-ERA-01", "unidade": "UN", "categoria": "LIVRARIA", "preco": 38.00, "local_id": 4, "family_name": "Livros & Literatura"},
         # Secretaria
