@@ -28,7 +28,7 @@ services:
     container_name: ${PROJECT_NAME:-maanaim}_backend
     restart: unless-stopped
     env_file:
-      - ./backend/.env
+      - .env
     environment:
       DATABASE_URL: ${DATABASE_URL:-postgresql+asyncpg://${POSTGRES_USER:-eventa}:${POSTGRES_PASSWORD:-eventa}@db:5432/${POSTGRES_DB:-eventa}}
       ENVIRONMENT: ${APP_ENV:-prod}
