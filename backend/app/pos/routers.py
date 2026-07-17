@@ -350,16 +350,20 @@ async def atualizar_local(
 async def abrir_caixa(
     local_id: int,
     user: Annotated[CurrentUser, Depends(require_scopes("pos:write"))],
+    evento_atual_id: EventoAtualId,
     session: Annotated[AsyncSession, Depends(get_session)],
 ):
     from app.pos.models import TurnoCaixa
+    if not evento_atual_id:
+        raise HTTPException(400, "É necessário selecionar um evento ativo para abrir o caixa")
+        
     local = await _get_local(session, local_id)
     if local.caixa_aberto:
         raise HTTPException(400, "Caixa já está aberto")
     
     turno = TurnoCaixa(
         local_id=local_id,
-        evento_id=local.evento_id,
+        evento_id=evento_atual_id,
         aberto_em=datetime.now(UTC),
         aberto_por_id=user.id,
         valor_abertura=0.0,

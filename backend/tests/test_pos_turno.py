@@ -100,3 +100,11 @@ async def test_consolidar_turno_e_fechar_sucesso(
         # Check mock pdf generation called
         mock_html.assert_called_once()
         mock_open.assert_called_once()
+
+        # Verifica se os lançamentos financeiros foram criados com o evento_id correto
+        from app.finance.models import LancamentoFinanceiro
+        added_objs = [call.args[0] for call in session.add.call_args_list]
+        lancamentos = [obj for obj in added_objs if isinstance(obj, LancamentoFinanceiro)]
+        assert len(lancamentos) > 0
+        for lanc in lancamentos:
+            assert lanc.evento_id == 1

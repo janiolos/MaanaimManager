@@ -158,8 +158,9 @@ class POSFinanceIntegration:
         
         # Fetch Event name
         evento_nome = "Geral"
-        if local.evento_id:
-            evt = await session.get(Evento, local.evento_id)
+        evt_id = turno.evento_id or local.evento_id
+        if evt_id:
+            evt = await session.get(Evento, evt_id)
             if evt:
                 evento_nome = evt.nome
                 
@@ -376,8 +377,12 @@ class POSFinanceIntegration:
                 f"Turno: #{turno.id} — "
                 f"Forma: {forma}"
             )
+            evt_id = turno.evento_id or local.evento_id
+            if not evt_id:
+                raise ValueError("Não foi possível fechar o caixa pois não há evento associado a este turno.")
+                
             lanc = LancamentoFinanceiro(
-                evento_id=local.evento_id,
+                evento_id=evt_id,
                 tipo=LancamentoFinanceiro.RECEITA,
                 categoria_id=categoria.id,
                 conta_id=conta.id,
