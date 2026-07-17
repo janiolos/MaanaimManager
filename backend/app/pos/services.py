@@ -153,6 +153,7 @@ class VendaService:
             total=total_itens,
             forma_pagamento=forma_pagamento,
             data_hora=datetime.now(UTC),
+            turno_id=local.caixa_atual_turno_id,
         )
         session.add(venda)
         await session.flush()  # para obter venda.id
@@ -178,16 +179,6 @@ class VendaService:
         # 6. Registrar pagamentos
         for pgto in payload.pagamentos:
             session.add(PagamentoVenda(venda_id=venda.id, tipo=pgto.tipo, valor=pgto.valor))
-
-        # 7. Criar lançamentos financeiros de receita
-        local_nome = "PDV"
-        if payload.local_id:
-            local_obj = await session.get(LocalVenda, payload.local_id)
-            if local_obj:
-                local_nome = local_obj.nome
-        await POSFinanceIntegration.criar_lancamentos_da_venda(
-            session, venda, payload.pagamentos, local_nome, vendedor_id
-        )
 
         await session.flush()
         await session.refresh(venda)

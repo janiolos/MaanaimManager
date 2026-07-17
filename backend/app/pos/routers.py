@@ -352,12 +352,26 @@ async def abrir_caixa(
     user: Annotated[CurrentUser, Depends(require_scopes("pos:write"))],
     session: Annotated[AsyncSession, Depends(get_session)],
 ):
+    from app.pos.models import TurnoCaixa
     local = await _get_local(session, local_id)
     if local.caixa_aberto:
         raise HTTPException(400, "Caixa já está aberto")
+    
+    turno = TurnoCaixa(
+        local_id=local_id,
+        evento_id=local.evento_id,
+        aberto_em=datetime.now(UTC),
+        aberto_por_id=user.id,
+        valor_abertura=0.0,
+        fechado=False,
+    )
+    session.add(turno)
+    await session.flush()
+    
     local.caixa_aberto = True
-    local.caixa_aberto_em = datetime.now(UTC)
+    local.caixa_aberto_em = turno.aberto_em
     local.caixa_aberto_por_id = user.id
+    local.caixa_atual_turno_id = turno.id
     await session.flush()
     await session.refresh(local)
     return local
@@ -369,15 +383,18 @@ async def fechar_caixa(
     user: Annotated[CurrentUser, Depends(require_scopes("pos:write"))],
     session: Annotated[AsyncSession, Depends(get_session)],
 ):
-    local = await _get_local(session, local_id)
-    if not local.caixa_aberto:
-        raise HTTPException(400, "Caixa já está fechado")
-    local.caixa_aberto = False
-    local.caixa_aberto_em = None
-    local.caixa_aberto_por_id = None
-    await session.flush()
-    await session.refresh(local)
-    return local
+    from app.pos.finance_integration import POSFinanceIntegration
+    try:
+        local = await POSFinanceIntegration.consolidar_turno_e_fechar(
+            session=session,
+            local_id=local_id,
+            user_id=user.id,
+        )
+        return local
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro interno ao fechar caixa: {e}")
 
 
 @router.get("/locais/{local_id}/caixa-atual")
@@ -387,7 +404,7 @@ async def obter_resumo_caixa_atual(
     session: Annotated[AsyncSession, Depends(get_session)],
 ):
     local = await _get_local(session, local_id)
-    if not local.caixa_aberto or not local.caixa_aberto_em:
+    if not local.caixa_aberto or not local.caixa_atual_turno_id:
         return {
             "caixa_aberto": False,
             "aberto_em": None,
@@ -397,8 +414,7 @@ async def obter_resumo_caixa_atual(
         }
 
     stmt = select(VendaMobile).where(
-        VendaMobile.local_id == local_id,
-        VendaMobile.data_hora >= local.caixa_aberto_em,
+        VendaMobile.turno_id == local.caixa_atual_turno_id,
     )
     result = await session.execute(stmt)
     vendas = result.scalars().all()
@@ -687,6 +703,12 @@ async def deletar_venda(
     venda = result.scalars().unique().first()
     if venda is None:
         raise HTTPException(404, "Venda não encontrada")
+
+    if venda.turno_id:
+        from app.pos.models import TurnoCaixa
+        turno = await session.get(TurnoCaixa, venda.turno_id)
+        if turno and turno.fechado:
+            raise HTTPException(400, "Não é possível excluir uma venda de um caixa já fechado")
 
     for item in venda.itens:
         if item.produto_local_id is None:

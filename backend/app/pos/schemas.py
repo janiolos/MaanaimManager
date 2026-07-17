@@ -31,6 +31,7 @@ class LocalVendaOut(_BaseModel):
     caixa_aberto: bool
     caixa_aberto_em: datetime | None
     caixa_aberto_por_id: int | None
+    caixa_atual_turno_id: int | None
     criado_em: datetime
 
 
@@ -228,6 +229,7 @@ class VendaOut(_BaseModel):
     data_hora: datetime
     total: Decimal
     forma_pagamento: str
+    turno_id: int | None
     itens: list[ItemVendaOut] = []
     pagamentos: list[PagamentoOut] = []
 

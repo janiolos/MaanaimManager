@@ -65,6 +65,9 @@ class LocalVenda(Base):
         BigInteger, ForeignKey("auth_user.id"), nullable=True
     )
     caixa_aberto_por: Mapped[User | None] = relationship(lazy="selectin", foreign_keys=[caixa_aberto_por_id])
+    caixa_atual_turno_id: Mapped[int | None] = mapped_column(
+        BigInteger, ForeignKey("pos_turnocaixa.id", ondelete="SET NULL"), nullable=True
+    )
 
     criado_em: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
@@ -73,6 +76,30 @@ class LocalVenda(Base):
     evento: Mapped[Evento | None] = relationship(lazy="selectin")
     familias: Mapped[list["FamiliaVenda"]] = relationship(back_populates="local", lazy="selectin")
     produtos: Mapped[list["ProdutoLocal"]] = relationship(back_populates="local", lazy="selectin")
+
+
+class TurnoCaixa(Base):
+    __tablename__ = "pos_turnocaixa"
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    local_id: Mapped[int] = mapped_column(
+        BigInteger, ForeignKey("pos_localvenda.id", ondelete="CASCADE"), nullable=False
+    )
+    evento_id: Mapped[int | None] = mapped_column(
+        BigInteger, ForeignKey("core_evento.id", ondelete="SET NULL"), nullable=True
+    )
+    aberto_em: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    fechado_em: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    aberto_por_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("auth_user.id"), nullable=False)
+    fechado_por_id: Mapped[int | None] = mapped_column(BigInteger, ForeignKey("auth_user.id"), nullable=True)
+    valor_abertura: Mapped[Decimal] = mapped_column(Numeric(12, 2), default=Decimal("0.00"), nullable=False)
+    valor_fechamento: Mapped[Decimal | None] = mapped_column(Numeric(12, 2), nullable=True)
+    fechado: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    relatorio_pdf: Mapped[str | None] = mapped_column(String(500), nullable=True)
+
+    local: Mapped["LocalVenda"] = relationship(lazy="selectin", foreign_keys=[local_id])
+    aberto_por: Mapped[User] = relationship(lazy="selectin", foreign_keys=[aberto_por_id])
+    fechado_por: Mapped[User | None] = relationship(lazy="selectin", foreign_keys=[fechado_por_id])
 
 
 class FamiliaVenda(Base):
@@ -201,6 +228,10 @@ class VendaMobile(Base):
     local: Mapped["LocalVenda | None"] = relationship(lazy="selectin")
     itens: Mapped[list["ItemVendaMobile"]] = relationship(back_populates="venda", lazy="selectin")
     pagamentos: Mapped[list["PagamentoVenda"]] = relationship(back_populates="venda", lazy="selectin")
+    turno_id: Mapped[int | None] = mapped_column(
+        BigInteger, ForeignKey("pos_turnocaixa.id", ondelete="SET NULL"), nullable=True
+    )
+    turno: Mapped[TurnoCaixa | None] = relationship(lazy="selectin")
 
 
 class PagamentoVenda(Base):

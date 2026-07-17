@@ -14,7 +14,7 @@ import logging.config
 from logging import getLogger
 
 from alembic import context
-from sqlalchemy import pool
+from sqlalchemy import pool, text
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
@@ -44,6 +44,7 @@ def do_run_migrations(connection: Connection) -> None:
         render_as_batch=False,
     )
     with context.begin_transaction():
+        connection.execute(text("SET CONSTRAINTS ALL IMMEDIATE"))
         context.run_migrations()
 
 

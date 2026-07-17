@@ -17,6 +17,7 @@ export interface LocalVenda {
   caixa_aberto: boolean;
   caixa_aberto_em: string | null;
   caixa_aberto_por_id: number | null;
+  caixa_atual_turno_id: number | null;
   criado_em: string;
 }
 
@@ -158,6 +159,7 @@ export interface VendaOut {
   data_hora: string;
   total: string;
   forma_pagamento: string;
+  turno_id: number | null;
   itens: ItemVendaOut[];
   pagamentos: PagamentoOut[];
 }

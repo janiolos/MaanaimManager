@@ -405,8 +405,12 @@ export function PDVPage() {
                 onClick={async () => {
                   try {
                     if (localAtual.caixa_aberto) {
+                      const turnoId = localAtual.caixa_atual_turno_id;
                       await fecharCaixa.mutateAsync(localAtual.id);
-                      toast.success("Caixa fechado");
+                      toast.success("Caixa fechado com sucesso!");
+                      if (turnoId) {
+                        window.open(`/media/pos/fechamento_${turnoId}.pdf`, "_blank");
+                      }
                     } else {
                       await abrirCaixa.mutateAsync(localAtual.id);
                       toast.success("Caixa aberto");
