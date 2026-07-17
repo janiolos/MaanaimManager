@@ -64,7 +64,7 @@ if [ -f "$ENV_FILE" ]; then
     if ! grep -q "BACKEND_CORS_ORIGINS" "$ENV_FILE"; then
         echo "🌐 Adding BACKEND_CORS_ORIGINS..."
         DOMAIN=$(grep "APP_ALLOWED_HOSTS" "$ENV_FILE" | cut -d'=' -f2 | cut -d',' -f1 || echo "localhost")
-        echo "BACKEND_CORS_ORIGINS=http://${DOMAIN},https://${DOMAIN}" >> "$ENV_FILE"
+        echo "BACKEND_CORS_ORIGINS=[\"http://${DOMAIN}\",\"https://${DOMAIN}\"]" >> "$ENV_FILE"
     fi
 else
     echo "❌ .env file not found for client! Please create it."
