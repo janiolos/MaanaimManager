@@ -1,0 +1,79 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* shadcn/ui tokens (light) - paleta portada do app.css legado */
+    --background: 220 14% 96%; /* #f4f6f9 - mm-bg */
+    --foreground: 213 27% 14%; /* #212529 - mm-ink */
+
+    --card: 0 0% 100%;
+    --card-foreground: 213 27% 14%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 213 27% 14%;
+
+    /* Primary: chumbo escuro AdminLTE (#343a40) */
+    --primary: 213 19% 23%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 220 14% 96%;
+    --secondary-foreground: 213 19% 23%;
+
+    --muted: 220 14% 96%;
+    --muted-foreground: 208 7% 46%; /* #6c757d */
+
+    --accent: 145 44% 44%; /* #28a745 */
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 71% 51%; /* #dc3545 */
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 210 17% 89%; /* #dee2e6 */
+    --input: 210 17% 89%;
+    --ring: 145 44% 44%;
+
+    --radius: 0.5rem;
+
+    --mm-warning: 45 100% 51%;
+    --mm-info: 187 78% 41%;
+    --mm-blue: 211 100% 25%;
+  }
+
+  .dark {
+    --background: 213 19% 12%;
+    --foreground: 220 14% 96%;
+    --card: 213 19% 16%;
+    --card-foreground: 220 14% 96%;
+    --popover: 213 19% 16%;
+    --popover-foreground: 220 14% 96%;
+    --primary: 145 44% 44%;
+    --primary-foreground: 213 19% 12%;
+    --secondary: 213 19% 20%;
+    --secondary-foreground: 220 14% 96%;
+    --muted: 213 19% 20%;
+    --muted-foreground: 220 10% 70%;
+    --accent: 145 44% 44%;
+    --accent-foreground: 213 19% 12%;
+    --destructive: 0 71% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 213 19% 25%;
+    --input: 213 19% 25%;
+    --ring: 145 44% 44%;
+  }
+
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+@layer utilities {
+  .font-display {
+    font-family: "Fraunces", serif;
+  }
+}

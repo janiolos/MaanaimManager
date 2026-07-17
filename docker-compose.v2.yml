@@ -1,0 +1,98 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: ${PROJECT_NAME:-maanaim}_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-eventa}
+      POSTGRES_USER: ${POSTGRES_USER:-eventa}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-eventa}
+      TZ: ${TIMEZONE:-America/Sao_Paulo}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    expose:
+      - "5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-eventa} -d ${POSTGRES_DB:-eventa}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    networks:
+      - internal
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: ${PROJECT_NAME:-maanaim}_backend
+    restart: unless-stopped
+    env_file:
+      - ./backend/.env
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgresql+asyncpg://${POSTGRES_USER:-eventa}:${POSTGRES_PASSWORD:-eventa}@db:5432/${POSTGRES_DB:-eventa}}
+      ENVIRONMENT: ${APP_ENV:-prod}
+      TIMEZONE: ${TIMEZONE:-America/Sao_Paulo}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-changeme-generate-32-random-bytes}
+      BACKEND_CORS_ORIGINS: ${BACKEND_CORS_ORIGINS:-http://localhost:8090}
+    expose:
+      - "8000"
+    volumes:
+      - backend_media:/app/media
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8000/api/v1/health || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    networks:
+      - internal
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: ${PROJECT_NAME:-maanaim}_frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    expose:
+      - "80"
+    networks:
+      - internal
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: ${PROJECT_NAME:-maanaim}_caddy
+    restart: unless-stopped
+    ports:
+      - "${HOST_PORT:-8090}:80"
+    volumes:
+      - ./caddy/Caddyfile.v2:/etc/caddy/Caddyfile:ro,Z
+      - backend_media:/srv/media:ro
+      - caddy_data:/data:z
+      - caddy_config:/config:z
+    depends_on:
+      backend:
+        condition: service_healthy
+      frontend:
+        condition: service_started
+    networks:
+      - internal
+
+networks:
+  internal:
+    name: ${PROJECT_NAME:-maanaim}_network
+
+volumes:
+  postgres_data:
+    name: ${PROJECT_NAME:-maanaim}_postgres_data
+  backend_media:
+    name: ${PROJECT_NAME:-maanaim}_backend_media
+  caddy_data:
+    name: ${PROJECT_NAME:-maanaim}_caddy_data
+  caddy_config:
+    name: ${PROJECT_NAME:-maanaim}_caddy_config

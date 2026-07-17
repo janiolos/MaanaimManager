@@ -1,0 +1,30 @@
+# Caddyfile v2 - roteia /api para o backend FastAPI e /* para o frontend nginx
+{
+	admin off
+	auto_https off
+}
+
+:80 {
+	encode gzip zstd
+
+	@backend path /api/* /docs /openapi.json /redoc
+	reverse_proxy @backend backend:8000 {
+		header_up X-Forwarded-Host {host}
+		header_up X-Forwarded-Proto {scheme}
+	}
+
+	@media path /media/*
+	uri @media strip_prefix /media
+	root @media /srv/media
+	file_server @media
+
+	# fallback: tudo o resto para o nginx do frontend
+	reverse_proxy frontend:80
+
+	header {
+		X-Content-Type-Options nosniff
+		X-Frame-Options DENY
+		Referrer-Policy strict-origin-when-cross-origin
+		-Server
+	}
+}
