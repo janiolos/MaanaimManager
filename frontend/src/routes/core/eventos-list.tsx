@@ -1,6 +1,7 @@
-import { Calendar, ChevronLeft, ChevronRight, Edit2, Lock, Plus, Search, X } from "lucide-react";
+import { Calendar, ChevronLeft, ChevronRight, Edit2, Lock, Plus, Search, X, Check } from "lucide-react";
 import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
+import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -8,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useEventos } from "@/routes/core/hooks";
 import { formatDateTime, formatDate } from "@/lib/utils";
+import { useEventoStore } from "@/stores/evento-store";
 
 const MONTH_NAMES = [
   "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
@@ -17,6 +19,7 @@ const MONTH_NAMES = [
 const WEEK_DAYS = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 
 export function EventosListPage() {
+  const { setEvento, eventoId } = useEventoStore();
   const [busca, setBusca] = useState("");
   const [statusFiltro, setStatusFiltro] = useState("");
   const [selectedDay, setSelectedDay] = useState<Date | null>(null);
@@ -321,18 +324,37 @@ export function EventosListPage() {
                                 ev.responsavel_geral.username
                               : "—"}
                           </td>
-                          <td className="px-4 py-3 text-center">
-                            {ev.fechado ? (
-                              <div className="flex items-center justify-center text-mm-muted gap-1 text-xs">
-                                <Lock size={12} /> Bloqueado
-                              </div>
-                            ) : (
-                              <Button asChild variant="ghost" size="sm">
-                                <Link to={`/core/eventos/${ev.id}/editar`}>
-                                  <Edit2 size={12} className="mr-1.5" /> Editar
-                                </Link>
-                              </Button>
-                            )}
+                          <td className="px-4 py-3">
+                            <div className="flex items-center justify-center gap-2">
+                              {ev.id === eventoId ? (
+                                <Badge variant="success" className="gap-1 bg-mm-accent hover:bg-mm-accent text-white px-2 py-1">
+                                  <Check size={12} /> Selecionado
+                                </Badge>
+                              ) : (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="h-7 px-2.5 text-xs font-medium hover:bg-mm-primary hover:text-white transition-colors"
+                                  onClick={() => {
+                                    setEvento(ev);
+                                    toast.success(`Evento selecionado: ${ev.nome}`);
+                                  }}
+                                >
+                                  Selecionar
+                                </Button>
+                              )}
+                              {ev.fechado ? (
+                                <div className="flex items-center text-mm-muted gap-1 text-xs px-2">
+                                  <Lock size={12} /> Bloqueado
+                                </div>
+                              ) : (
+                                <Button asChild variant="ghost" size="sm" className="h-7 px-2">
+                                  <Link to={`/core/eventos/${ev.id}/editar`}>
+                                    <Edit2 size={12} className="mr-1" /> Editar
+                                  </Link>
+                                </Button>
+                              )}
+                            </div>
                           </td>
                         </tr>
                       ))
