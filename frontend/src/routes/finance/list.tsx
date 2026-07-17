@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Plus, Search, Trash2, Pencil } from "lucide-react";
+import { Plus, Search, Trash2, Pencil, Paperclip } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { toast } from "sonner";
@@ -219,6 +219,23 @@ export function FinanceListPage() {
                             {l.pessoa && (
                               <span className="text-xs text-mm-muted">{l.pessoa}</span>
                             )}
+                            {l.anexos && l.anexos.length > 0 && (
+                              <div className="flex flex-wrap gap-1 mt-1">
+                                {l.anexos.map((a) => (
+                                  <a
+                                    key={a.id}
+                                    href={`/media/${a.arquivo}`}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="inline-flex items-center gap-1 text-[11px] text-mm-primary hover:underline bg-mm-primary/5 hover:bg-mm-primary/10 px-1.5 py-0.5 rounded border border-mm-primary/10 transition-colors"
+                                    title={a.descricao}
+                                  >
+                                    <Paperclip size={10} />
+                                    <span className="max-w-[120px] truncate">{a.descricao}</span>
+                                  </a>
+                                ))}
+                              </div>
+                            )}
                           </div>
                         </td>
                         <td className="px-4 py-3">
@@ -245,14 +262,50 @@ export function FinanceListPage() {
                               size="icon"
                               aria-label="Editar"
                               onClick={() => navigate(`/finance/${l.id}/editar`)}
+                              title="Editar Lançamento"
                             >
                               <Pencil size={16} />
                             </Button>
                             <Button
                               variant="ghost"
                               size="icon"
+                              aria-label="Adicionar comprovante"
+                              title="Adicionar comprovante/nota"
+                              onClick={() => {
+                                const input = document.createElement("input");
+                                input.type = "file";
+                                input.accept = "image/*,application/pdf";
+                                input.onchange = async (e) => {
+                                  const files = (e.target as HTMLInputElement).files;
+                                  if (!files || files.length === 0) return;
+                                  const file = files[0];
+                                  const formData = new FormData();
+                                  formData.append("file", file);
+                                  formData.append("descricao", file.name);
+
+                                  const toastId = toast.loading("Enviando comprovante...");
+                                  try {
+                                    await api.post(`/finance/lancamentos/${l.id}/anexos`, formData, {
+                                      headers: { "Content-Type": "multipart/form-data" },
+                                    });
+                                    toast.success("Comprovante adicionado!", { id: toastId });
+                                    refetch();
+                                  } catch (err: any) {
+                                    const errMsg = err?.response?.data?.detail || "Falha ao enviar comprovante.";
+                                    toast.error(errMsg, { id: toastId });
+                                  }
+                                };
+                                input.click();
+                              }}
+                            >
+                              <Paperclip size={16} className="text-mm-muted hover:text-mm-primary" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
                               aria-label="Excluir"
                               onClick={() => excluir(l.id, l.descricao)}
+                              title="Excluir Lançamento"
                             >
                               <Trash2 size={16} className="text-destructive" />
                             </Button>
