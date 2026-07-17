@@ -131,18 +131,24 @@ Operar os pontos de venda do retiro.
 ### Capacidades atuais
 
 - cadastro de locais;
-- abertura e fechamento de caixa;
+- abertura e fechamento de caixa por turnos;
 - famílias por local;
 - produtos locais;
 - transferência do estoque central para subestoque do local;
 - venda com múltiplos pagamentos;
+- conciliação de caixa consolidada por turno;
+- impressão de comprovante de venda e relatório oficial de fechamento (PDF via WeasyPrint);
 - dashboard e histórico de vendas.
 
 ### Regras de integridade atuais
 
 - local deve pertencer ao evento atual;
 - local deve estar ativo;
-- caixa deve estar aberto para vender;
+- caixa deve estar aberto (turno de caixa ativo) para realizar vendas;
+- vendas são vinculadas a um turno de caixa (`pos_turnocaixa`);
+- a criação de venda não gera lançamentos financeiros individuais;
+- o fechamento do caixa consolida os valores totais de venda do turno por forma de pagamento, criando os respectivos lançamentos financeiros contendo o PDF do relatório oficial de fechamento como anexo;
+- vendas pertencentes a turnos já fechados são bloqueadas contra exclusão ou alteração;
 - produtos inativos ou de outro local não podem entrar na venda;
 - itens duplicados na mesma venda são rejeitados;
 - desconto precisa respeitar permissão e limite configurado;
@@ -155,9 +161,7 @@ Operar os pontos de venda do retiro.
 
 - cancelamento e estorno de venda;
 - sangria e suprimento de caixa;
-- conciliação de caixa por turno;
 - catálogo de serviços sem estoque para secretaria;
-- impressão/geração de comprovante.
 
 ## Administração
 
