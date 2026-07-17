@@ -24,6 +24,7 @@ const MODULES: ModuleLink[] = [
   { to: "/inventory", label: "Estoque", requiredScope: "inventory:read", emoji: "📦" },
   { to: "/lodging", label: "Hospedagem", requiredScope: "lodging:read", emoji: "🏨" },
   { to: "/pos", label: "PDV", requiredScope: "core:read", emoji: "🛒" },
+  { to: "/voluntarios", label: "Voluntários", requiredScope: "core:read", emoji: "🙋" },
 ];
 
 export function AppShell({ children }: { children: ReactNode }) {
