@@ -69,7 +69,7 @@ services:
     container_name: ${PROJECT_NAME:-maanaim}_caddy
     restart: unless-stopped
     ports:
-      - "${HOST_PORT:-8090}:80"
+      - "127.0.0.1:${HOST_PORT:-8090}:80"
     volumes:
       - ./caddy/Caddyfile.v2:/etc/caddy/Caddyfile:ro,Z
       - backend_media:/srv/media:ro

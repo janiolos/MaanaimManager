@@ -121,3 +121,53 @@ Default access:
 - frontend: `http://localhost:8090`
 - backend API: `http://localhost:8000/api/v1`
 - docs: `http://localhost:8000/docs` in development mode
+
+# Clean Code para Agentes de IA
+
+Este guia estabelece os princípios de desenvolvimento de código otimizados para leitura, edição e manutenção por agentes de inteligência artificial (LLMs), baseados nas restrições técnicas de contexto, atenção e execução de ferramentas.
+
+---
+
+## Princípios de Desenvolvimento
+
+### 1. Funções e Arquivos Pequenos
+
+- **Regra:** Mantenha arquivos curtos (idealmente 200–300 linhas, máximo 500) e funções focadas (4 a 20 linhas).
+
+- **Porquê:** Evita o truncamento de contexto nas chamadas de ferramentas (*tool calls*), permitindo que o agente processe toda a unidade lógica de uma vez com atenção máxima.
+
+### 2. Responsabilidade Única (SRP)
+
+- **Regra:** Cada arquivo ou classe deve ter uma única responsabilidade clara.
+
+- **Porquê:** Facilita o isolamento de lógica, permitindo que o agente altere uma funcionalidade sem medo de efeitos colaterais e sem a necessidade de ler grandes partes do ecossistema.
+
+### 3. Nomes Significativos e Únicos (Grepáveis)
+
+- **Regra:** Use nomes altamente descritivos e evite termos genéricos (ex: prefira `InvoiceLineItemTotal` a `ItemTotal` ou `data`).
+
+- **Porquê:** Agentes navegam pelo repositório utilizando buscas léxicas rápidas (como `grep` ou `ripgrep`). Nomes únicos reduzem resultados falsos positivos e otimizam o uso de tokens.
+
+### 4. Comentários de Contexto e Proveniência (O "Porquê")
+
+- **Regra:** Adicione comentários que expliquem a motivação de decisões não óbvias (ex: contornos de bugs externos, regras de negócio complexas, histórico de decisão). Escreva docstrings estruturadas com exemplos de uso.
+
+- **Porquê:** Agentes leem e usam comentários como contexto de primeira classe. Ao contrário dos humanos, eles se beneficiam imensamente de explicações contextuais de alto nível sobre *por que* algo foi feito de determinada maneira.
+
+### 5. Tipagem Explícita
+
+- **Regra:** Sempre declare tipos explicitamente (Type Hints em Python, TypeScript em vez de JS, etc.).
+
+- **Porquê:** Reduz a necessidade de inferência cognitiva por parte do LLM, evitando erros de interpretação sobre os contratos de entrada/saída das funções.
+
+### 6. DRY (Don't Repeat Yourself) estrito
+
+- **Regra:** Elimine duplicações de código de forma agressiva.
+
+- **Porquê:** O agente pode falhar em identificar todas as cópias duplicadas espalhadas pelo repositório ao realizar uma refatoração, gerando inconsistências silenciosas.
+
+### 7. Testabilidade Automatizada e Headless
+
+- **Regra:** Os testes devem ser facilmente executáveis pelo agente sem intervenção manual (comandos documentados no `README.md` ou `CLAUDE.md`, execução rápida, sem dependência de credenciais locais não versionadas).
+
+- **Porquê:** O agente trabalha em ciclos de *tentativa-erro-ajuste*. Se ele não puder rodar a suíte de testes de forma autônoma para validar as alterações, o risco de introduzir regressões invisíveis é alto.
