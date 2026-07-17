@@ -45,6 +45,7 @@ import { ProdutosLocalListPage } from "@/routes/pos/produtos-local-list";
 import { EntradaFormPage as PosEntradaFormPage } from "@/routes/pos/entrada-form";
 import { ConfiguracoesPage } from "@/routes/core/configuracoes";
 import { AdminPage } from "@/routes/core/admin";
+import { VoluntariosPage } from "@/routes/voluntarios";
 
 interface ProtectedProps {
   children: React.ReactNode;
@@ -464,6 +465,14 @@ function App() {
           element={
             <Protected requireEvento>
               <AdminPage />
+            </Protected>
+          }
+        />
+        <Route
+          path="/voluntarios"
+          element={
+            <Protected requireEvento>
+              <VoluntariosPage />
             </Protected>
           }
         />

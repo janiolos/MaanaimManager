@@ -20,6 +20,7 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from app.config import settings
 from app.core import models  # noqa: F401 - garante registro no metadata
+from app.volunteers import models as volunteers_models  # noqa: F401
 from app.db.base import Base
 
 config = context.config

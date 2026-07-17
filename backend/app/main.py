@@ -14,6 +14,7 @@ from app.finance.routers import router as finance_router
 from app.inventory.routers import router as inventory_router
 from app.lodging.routers import router as lodging_router
 from app.pos.routers import router as pos_router
+from app.volunteers.routers import router as volunteers_router
 from app.middleware.audit import AuditLogMiddleware
 from app.middleware.inactivity import InactivityLogoutMiddleware
 
@@ -47,6 +48,7 @@ def create_app() -> FastAPI:
     app.include_router(inventory_router, prefix="/api/v1")
     app.include_router(lodging_router, prefix="/api/v1")
     app.include_router(pos_router, prefix="/api/v1")
+    app.include_router(volunteers_router, prefix="/api/v1")
 
     @app.get("/api/v1/health", tags=["health"])
     async def health() -> dict[str, str]:
