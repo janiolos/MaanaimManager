@@ -17,7 +17,7 @@ OUT_FILE="${BACKUP_DIR_HOST}/${TIMESTAMP}_${PROJECT_NAME}.sql.gz"
 mkdir -p "$BACKUP_DIR_HOST"
 
 echo "[INFO] Iniciando backup do banco..."
-docker compose exec -T db pg_dump -U "$POSTGRES_USER" -d "$POSTGRES_DB" | gzip -c > "$OUT_FILE"
+docker compose -f docker-compose.v2.yml exec -T db pg_dump -U "$POSTGRES_USER" -d "$POSTGRES_DB" | gzip -c > "$OUT_FILE"
 
 if [[ ! -s "$OUT_FILE" ]]; then
   echo "[ERRO] Backup inválido: arquivo vazio ou inexistente."

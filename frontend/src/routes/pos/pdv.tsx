@@ -409,9 +409,15 @@ export function PDVPage() {
                     if (localAtual.caixa_aberto) {
                       const turnoId = localAtual.caixa_atual_turno_id;
                       await fecharCaixa.mutateAsync(localAtual.id);
-                      toast.success("Caixa fechado com sucesso!");
                       if (turnoId) {
-                        window.open(`/media/pos/fechamento_${turnoId}.pdf`, "_blank");
+                        toast.success("Caixa fechado com sucesso!", {
+                          action: {
+                            label: "Ver PDF",
+                            onClick: () => window.open(`/media/pos/fechamento_${turnoId}.pdf`, "_blank"),
+                          },
+                        });
+                      } else {
+                        toast.success("Caixa fechado com sucesso!");
                       }
                     } else {
                       if (!eventoId) {

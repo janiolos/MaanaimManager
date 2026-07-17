@@ -18,7 +18,6 @@ from app.pos.models import (
     FamiliaVenda,
     ItemVendaMobile,
     LocalVenda,
-    PagamentoVenda,
     ProdutoLocal,
     VendaMobile,
 )
@@ -86,12 +85,13 @@ async def pos_dashboard(
     session: Annotated[AsyncSession, Depends(get_session)],
     local_id: int | None = Query(default=None),
     mes: str | None = Query(default=None),
+    evento_filtro_id: int | None = Query(default=None),
 ):
     from decimal import Decimal
-    from app.core.models import Evento
-    from app.inventory.models import Produto
 
-    eid = _require_evento(evento_id)
+    from app.core.models import Evento
+
+    eid = evento_filtro_id if evento_filtro_id is not None else _require_evento(evento_id)
 
     # 1. Fetch matching sales for KPIs and Vendas tab
     stmt = (

@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { useLocais, usePDVDashboard, usePosLocalAtual } from "@/routes/pos/hooks";
+import { useEventos } from "@/routes/core/hooks";
+import { useEventoStore } from "@/stores/evento-store";
 import { formatBRL } from "@/lib/utils";
 import { POSNav } from "./pos-nav";
 import { ShoppingCart, Package } from "lucide-react";
@@ -259,12 +261,17 @@ const MONTHS = [
 export function PDVDashboardPage() {
   const { data: locais } = useLocais();
   const { localId, setLocalId } = usePosLocalAtual();
+  const defaultEventoId = useEventoStore((s) => s.eventoId);
+  const [selectedEventoId, setSelectedEventoId] = useState<number | null>(defaultEventoId);
   const [selectedMonth, setSelectedMonth] = useState<string>("Todos");
   const [activeTab, setActiveTab] = useState<"geral" | "vendas" | "estoque">("geral");
 
+  const { data: eventos } = useEventos();
+
   const { data: dash, isLoading } = usePDVDashboard(
     localId ?? undefined,
-    selectedMonth === "Todos" ? undefined : selectedMonth
+    selectedMonth === "Todos" ? undefined : selectedMonth,
+    selectedEventoId
   );
 
   const locaisFiltrados = locais?.filter((l) => l.modulo_dashboard && l.ativo) ?? [];
@@ -280,6 +287,20 @@ export function PDVDashboardPage() {
           <p className="text-xs text-cyan-200/60 mt-0.5">Visão consolidada e análises de desempenho do ponto de venda.</p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
+          {/* Event Selector */}
+          <select
+            className="h-10 rounded-md border border-[#1a464f] bg-[#071d22] px-3 py-2 text-sm text-cyan-100 focus:outline-none focus:ring-1 focus:ring-[#3bd671]"
+            value={selectedEventoId ?? ""}
+            onChange={(e) => setSelectedEventoId(e.target.value ? Number(e.target.value) : null)}
+          >
+            <option value="" className="bg-[#071d22]">Todos os eventos</option>
+            {eventos?.map((evt) => (
+              <option key={evt.id} value={evt.id} className="bg-[#071d22]">
+                {evt.nome} {evt.ativo ? "(Ativo)" : ""}
+              </option>
+            ))}
+          </select>
+
           {/* Month Selector */}
           <select
             className="h-10 rounded-md border border-[#1a464f] bg-[#071d22] px-3 py-2 text-sm text-cyan-100 focus:outline-none focus:ring-1 focus:ring-[#3bd671]"

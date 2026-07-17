@@ -222,15 +222,16 @@ export function useCriarTransferenciaLocal() {
 }
 
 // Dashboard PDV
-export function usePDVDashboard(localId?: number, mes?: string) {
+export function usePDVDashboard(localId?: number, mes?: string, eventoFiltroId?: number | null) {
   const eventoId = useEventoStore((s) => s.eventoId);
   return useQuery<PDVDashboard>({
-    queryKey: ["pos", "dashboard", eventoId, localId, mes],
+    queryKey: ["pos", "dashboard", eventoId, localId, mes, eventoFiltroId],
     queryFn: async () => {
       const { data } = await api.get("/pos/dashboard", {
         params: {
           ...(localId ? { local_id: localId } : {}),
           ...(mes ? { mes } : {}),
+          ...(eventoFiltroId ? { evento_filtro_id: eventoFiltroId } : {}),
         },
       });
       return data;

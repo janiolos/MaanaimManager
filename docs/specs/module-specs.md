@@ -138,16 +138,18 @@ Operar os pontos de venda do retiro.
 - venda com múltiplos pagamentos;
 - conciliação de caixa consolidada por turno;
 - impressão de comprovante de venda e relatório oficial de fechamento (PDF via WeasyPrint);
-- dashboard e histórico de vendas.
+- dashboard e histórico de vendas com suporte a filtros locais por evento, mês e local de venda.
 
 ### Regras de integridade atuais
 
 - local deve pertencer ao evento atual;
 - local deve estar ativo;
 - caixa deve estar aberto (turno de caixa ativo) para realizar vendas;
+- a abertura de turnos de caixa exige obrigatoriamente a associação a um evento ativo;
 - vendas são vinculadas a um turno de caixa (`pos_turnocaixa`);
 - a criação de venda não gera lançamentos financeiros individuais;
-- o fechamento do caixa consolida os valores totais de venda do turno por forma de pagamento, criando os respectivos lançamentos financeiros contendo o PDF do relatório oficial de fechamento como anexo;
+- o fechamento do caixa consolida os valores totais de venda do turno por forma de pagamento, criando os respectivos lançamentos financeiros contendo o PDF do relatório oficial de fechamento como anexo (garantindo que o lançamento financeiro herde o mesmo evento do turno de caixa);
+- o fluxo de fechamento de caixa mantém o operador na página do PDV do local correspondente, exibindo uma notificação interativa (toast) que permite abrir o relatório em PDF sob demanda (evitando redirecionamento automático disruptivo);
 - vendas pertencentes a turnos já fechados são bloqueadas contra exclusão ou alteração;
 - produtos inativos ou de outro local não podem entrar na venda;
 - itens duplicados na mesma venda são rejeitados;
