@@ -1,77 +1,148 @@
-# Eventa (MaanaimManager)
+# MaanaimManager
 
-Sistema web modular para gestao operacional por ciclos (entidade tecnica: `Evento`).
+Sistema de gestão para retiros espirituais em fazenda, reescrito em FastAPI + React sobre o schema PostgreSQL herdado do projeto Django anterior.
 
-## Visao geral
-- Backend: Django 6 + PostgreSQL
-- Frontend: Tabler + CSS customizado
-- Modulos:
-  - Nucleo (`apps.core`)
-  - Financeiro (`apps.finance`)
-  - Estoque (`apps.inventory`)
-  - Hospedagem (`apps.lodging`)
-  - Lembretes WhatsApp (`apps.notifications`)
-- Deploy padrao: Docker Compose + Caddy + HTTPS automatico
+## Escopo atual
 
-## Funcionalidades principais
-- Controle de perfis e permissoes por modulo
-- Ciclo operacional com selecao de evento ativo por sessao
-- Lancamentos financeiros, relatorios e dashboard
-- Estoque com entradas/saidas e alertas de minimo/maximo
-- Hospedagem com status visual de chale e regras de reserva
-- Lembretes WhatsApp com agendamento por data/hora, mensagem personalizada e midia opcional
+O projeto cobre os módulos operacionais centrais:
 
-## Requisitos (desenvolvimento local)
-- Python 3.11+
-- PostgreSQL 16 (ou container)
-- Dependencias de `requirements.txt`
+- autenticação e seleção de evento;
+- administração básica de eventos, usuários, permissões e configuração;
+- financeiro por evento, com relatórios e exportações;
+- estoque central;
+- hospedagem em chalés;
+- PDV com subestoque por local de venda;
+- integração financeira das vendas do PDV.
 
-## Rodar localmente
-1. Criar ambiente virtual e instalar dependencias:
+Locais de venda atualmente tratados no domínio do PDV:
+
+- cantina;
+- fazendinha;
+- livraria;
+- secretaria.
+
+## Stack
+
+| Camada | Tecnologia |
+|---|---|
+| Backend | Python 3.13, FastAPI, SQLAlchemy 2 async, Alembic, Pydantic v2 |
+| Frontend | React 19, TypeScript, Vite, TailwindCSS, shadcn/ui, Zustand, TanStack Query |
+| Banco | PostgreSQL 16 |
+| Autenticação | JWT com refresh cookie e escopos derivados dos grupos legados |
+| PDF | WeasyPrint |
+| Infra local | Docker Compose + Caddy |
+
+## Estrutura
+
+```text
+MaanaimManager/
+├── backend/                 # API FastAPI
+│   ├── app/
+│   │   ├── auth/
+│   │   ├── core/
+│   │   ├── finance/
+│   │   ├── inventory/
+│   │   ├── lodging/
+│   │   ├── pos/
+│   │   ├── db/
+│   │   └── middleware/
+│   ├── alembic/
+│   └── scripts/
+├── frontend/                # SPA React
+│   └── src/
+│       ├── components/
+│       ├── lib/
+│       ├── routes/
+│       └── stores/
+├── caddy/
+├── docs/design/             # artefatos visuais arquivados
+├── scripts/backup.sh        # backup do banco
+├── docker-compose.v2.yml    # stack ativa
+└── lixeira/                 # legado movido da árvore principal
+```
+
+## Status dos módulos
+
+| Módulo | Backend | Frontend | Observações |
+|---|---|---|---|
+| Auth | OK | OK | login, refresh, logout, usuário atual |
+| Core | OK | OK | eventos, admin, configuração e permissões |
+| Finance | OK | OK | lançamentos, dashboard, DRE, fluxo, conciliação, oficial, PDF/CSV |
+| Inventory | OK | OK | produtos, entradas, requisições, cotações e fornecedores |
+| Lodging | OK | OK | chalés, reservas, ações e mapa |
+| POS | OK | OK | locais, famílias, subestoque, transferências, vendas e caixa |
+
+## Regras importantes já implementadas
+
+- o backend preserva nomes de tabelas do schema legado Django;
+- o evento ativo é informado pelo header `X-Evento-Id`;
+- o PDV opera com subestoque por local, sem entrada direta fora da transferência do estoque central;
+- vendas do PDV validam caixa aberto, local do evento, permissões de desconto e estoque disponível;
+- relatórios financeiros continuam sendo gerados no backend, incluindo PDF.
+
+## Subir o projeto com Docker
+
+Pré-requisitos:
+
+- Docker com `docker compose`;
+- arquivo `backend/.env` configurado;
+- opcionalmente `.env.v2` ou variáveis exportadas no shell para customizar nomes/portas.
+
+Comando:
+
 ```bash
+docker compose -f docker-compose.v2.yml up -d --build
+```
+
+Acessos padrão:
+
+- aplicação: `http://localhost:8090`
+- API interna: `http://localhost:8000/api/v1`
+- Swagger: `http://localhost:8000/docs` quando `ENVIRONMENT` estiver em modo de desenvolvimento
+
+## Desenvolvimento local
+
+### Backend
+
+```bash
+cd backend
 python -m venv .venv
 source .venv/bin/activate
-pip install -r requirements.txt
+pip install -e .[dev]
+alembic upgrade head
+uvicorn app.main:app --reload --port 8000
 ```
 
-2. Criar `.env` (baseado em `.env.example`) e ajustar credenciais.
+### Frontend
 
-3. Rodar migracoes e seed opcional:
 ```bash
-python manage.py migrate
-python manage.py seed_eventa
-python manage.py createsuperuser
+cd frontend
+npm install
+npm run dev
 ```
 
-4. Subir servidor:
+Em desenvolvimento, o frontend usa a configuração de `VITE_API_BASE_URL` para acessar a API.
+
+## Operação
+
+Backup manual do banco:
+
 ```bash
-python manage.py runserver
+./scripts/backup.sh
 ```
 
-## Rodar com Docker (stack completa)
-```bash
-chmod +x scripts/*.sh
-./scripts/install.sh
-```
+Os arquivos são gravados em `backups/db/`. Se `BACKUP_S3_BUCKET` estiver configurado, o script também envia o dump para S3.
 
-Comandos uteis:
-```bash
-docker compose ps
-docker compose logs -f app
-./scripts/healthcheck.sh
-```
+## Documentação interna
 
-## Rotas principais
-- `/login/` e `/logout/`
-- `/dashboard/`
-- `/core/evento/` (selecao de ciclo atual)
-- `/finance/lancamentos/`
-- `/inventory/produtos/`
-- `/lodging/chales/`
-- `/notifications/`
+- [backend/README.md](./backend/README.md)
+- [frontend/README.md](./frontend/README.md)
+- [docs/specs/README.md](./docs/specs/README.md)
+- [SECURITY.md](./SECURITY.md)
+- [AGENTS.md](./AGENTS.md)
 
-## Documentacao
-- Arquitetura e uso completo: `DOCUMENTACAO_COMPLETA.md`
-- MVP e escopo: `EVENTA_MVP.md`
-- Deploy VPS: `docs/README_DEPLOY.md`
-- Operacao diaria: `docs/RUNBOOK.md`
+## Observações
+
+- a árvore Django anterior foi removida da raiz e preservada em `lixeira/legacy_django_2026-07-15`;
+- ainda existe uma pendência operacional para `data/static`, mantida fora da lixeira por permissão de filesystem;
+- há dívida técnica pré-existente de lint no backend, fora do escopo da limpeza documental.
