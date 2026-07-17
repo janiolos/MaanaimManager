@@ -24,10 +24,10 @@ fi
 echo "[INFO] Restaurando $BACKUP_FILE no banco de dados local (${POSTGRES_DB})..."
 
 echo "[INFO] Recriando banco de dados (forçando desconexão de sessões ativas)..."
-docker compose exec -T db dropdb -U "$POSTGRES_USER" --force --if-exists "$POSTGRES_DB"
-docker compose exec -T db createdb -U "$POSTGRES_USER" "$POSTGRES_DB"
+docker compose -f docker-compose.v2.yml exec -T db dropdb -U "$POSTGRES_USER" --force --if-exists "$POSTGRES_DB"
+docker compose -f docker-compose.v2.yml exec -T db createdb -U "$POSTGRES_USER" "$POSTGRES_DB"
 
 echo "[INFO] Importando dados..."
-gunzip -c "$BACKUP_FILE" | docker compose exec -T db psql -U "$POSTGRES_USER" -d "$POSTGRES_DB"
+gunzip -c "$BACKUP_FILE" | docker compose -f docker-compose.v2.yml exec -T db psql -U "$POSTGRES_USER" -d "$POSTGRES_DB"
 
 echo "[OK] Restauração concluída!"
