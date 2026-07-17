@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import date
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status, File, UploadFile
 from fastapi.responses import Response
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -254,6 +254,88 @@ async def lancamento_excluir(
     except NoResultFound as exc:
         raise HTTPException(status_code=404, detail="Lançamento não encontrado") from exc
     await services.LancamentoService.delete(session, lanc)
+
+
+@router.post("/lancamentos/{lancamento_id}/anexos", status_code=201)
+async def lancamento_adicionar_anexo(
+    current: Annotated[CurrentUser, Depends(require_scopes("finance:write"))],
+    lancamento_id: int,
+    session: Annotated[AsyncSession, Depends(get_session)],
+    file: UploadFile = File(...),
+    descricao: str = Query(""),
+):
+    import os
+    import shutil
+    import uuid
+    from app.finance.models import AnexoLancamento
+    from app.core.models import Evento
+
+    try:
+        lanc = await services.LancamentoService.get(session, lancamento_id)
+    except NoResultFound as exc:
+        raise HTTPException(status_code=404, detail="Lançamento não encontrado") from exc
+
+    evento = await session.get(Evento, lanc.evento_id)
+    if evento is not None and (evento.fechado or evento.status == Evento.ENCERRADO):
+        raise HTTPException(status_code=422, detail="Evento encerrado - não é permitido adicionar anexos")
+
+    media_dir = "/app/media" if os.path.exists("/app/media") else "./media"
+    os.makedirs(media_dir, exist_ok=True)
+
+    ext = os.path.splitext(file.filename or "")[1]
+    unique_filename = f"anexo_{uuid.uuid4().hex}{ext}"
+    file_path = os.path.join(media_dir, unique_filename)
+
+    with open(file_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+
+    anexo = AnexoLancamento(
+        lancamento_id=lanc.id,
+        arquivo=unique_filename,
+        descricao=descricao or file.filename or "Anexo",
+        enviado_por_id=current.id,
+    )
+    session.add(anexo)
+    await session.commit()
+    await session.refresh(anexo)
+    return {"id": anexo.id, "arquivo": anexo.arquivo, "descricao": anexo.descricao}
+
+
+@router.delete("/lancamentos/{lancamento_id}/anexos/{anexo_id}", status_code=204)
+async def lancamento_remover_anexo(
+    current: Annotated[CurrentUser, Depends(require_scopes("finance:write"))],
+    lancamento_id: int,
+    anexo_id: int,
+    session: Annotated[AsyncSession, Depends(get_session)],
+):
+    import os
+    from app.finance.models import AnexoLancamento
+    from app.core.models import Evento
+
+    try:
+        lanc = await services.LancamentoService.get(session, lancamento_id)
+    except NoResultFound as exc:
+        raise HTTPException(status_code=404, detail="Lançamento não encontrado") from exc
+
+    evento = await session.get(Evento, lanc.evento_id)
+    if evento is not None and (evento.fechado or evento.status == Evento.ENCERRADO):
+        raise HTTPException(status_code=422, detail="Evento encerrado - não é permitido remover anexos")
+
+    anexo = await session.get(AnexoLancamento, anexo_id)
+    if anexo is None or anexo.lancamento_id != lancamento_id:
+        raise HTTPException(status_code=404, detail="Anexo não encontrado")
+
+    media_dir = "/app/media" if os.path.exists("/app/media") else "./media"
+    file_path = os.path.join(media_dir, anexo.arquivo)
+    if os.path.exists(file_path):
+        try:
+            os.remove(file_path)
+        except Exception:
+            pass
+
+    await session.delete(anexo)
+    await session.commit()
+    return Response(status_code=204)
 
 
 # --------------------------- Dashboard ---------------------------

@@ -18,6 +18,7 @@ interface ModuleLink {
 }
 
 const MODULES: ModuleLink[] = [
+  { to: "/", label: "Início", requiredScope: "core:read", emoji: "🏠" },
   { to: "/core/eventos", label: "Eventos", requiredScope: "core:read", emoji: "📅" },
   { to: "/finance/dashboard", label: "Financeiro", requiredScope: "finance:read", emoji: "💰" },
   { to: "/inventory", label: "Estoque", requiredScope: "inventory:read", emoji: "📦" },
@@ -67,18 +68,21 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
 
           <nav className="hidden md:flex items-center gap-1">
-            {visibleModules.map((m) => (
-              <Link
-                key={m.to}
-                to={m.to}
-                className={cn(
-                  "px-3 py-2 rounded text-sm font-medium text-white/80 hover:text-white hover:bg-white/10",
-                  location.pathname.startsWith(m.to) && "bg-white/15 text-white",
-                )}
-              >
-                <span aria-hidden> {m.emoji}</span> {m.label}
-              </Link>
-            ))}
+            {visibleModules.map((m) => {
+              const isActive = m.to === "/" ? location.pathname === "/" : location.pathname.startsWith(m.to);
+              return (
+                <Link
+                  key={m.to}
+                  to={m.to}
+                  className={cn(
+                    "px-3 py-2 rounded text-sm font-medium text-white/80 hover:text-white hover:bg-white/10",
+                    isActive && "bg-white/15 text-white",
+                  )}
+                >
+                  <span aria-hidden> {m.emoji}</span> {m.label}
+                </Link>
+              );
+            })}
           </nav>
 
           <div className="flex items-center gap-3">
@@ -119,16 +123,22 @@ export function AppShell({ children }: { children: ReactNode }) {
 
         {open && (
           <nav className="md:hidden border-t border-white/10 bg-mm-primary-dark">
-            {visibleModules.map((m) => (
-              <Link
-                key={m.to}
-                to={m.to}
-                onClick={() => setOpen(false)}
-                className="block px-4 py-3 text-sm text-white/90 hover:bg-white/10 border-b border-white/5"
-              >
-                <span aria-hidden>{m.emoji}</span> {m.label}
-              </Link>
-            ))}
+            {visibleModules.map((m) => {
+              const isActive = m.to === "/" ? location.pathname === "/" : location.pathname.startsWith(m.to);
+              return (
+                <Link
+                  key={m.to}
+                  to={m.to}
+                  onClick={() => setOpen(false)}
+                  className={cn(
+                    "block px-4 py-3 text-sm border-b border-white/5",
+                    isActive ? "bg-white/10 text-white font-semibold" : "text-white/90 hover:bg-white/10"
+                  )}
+                >
+                  <span aria-hidden className="mr-1.5">{m.emoji}</span> {m.label}
+                </Link>
+              );
+            })}
           </nav>
         )}
       </header>

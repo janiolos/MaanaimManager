@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft, Save } from "lucide-react";
+import { ArrowLeft, Save, Paperclip, Trash2, Eye, FileText, Upload } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { api } from "@/lib/api";
 import { useCategorias, useContas } from "@/routes/finance/hooks";
-import type { Lancamento } from "@/routes/finance/types";
+import type { Lancamento, AnexoLancamento } from "@/routes/finance/types";
 
 const schema = z.object({
   tipo: z.enum(["RECEITA", "DESPESA"]),
@@ -31,6 +31,9 @@ export function FinanceFormPage() {
   const isEdit = Boolean(id);
   const navigate = useNavigate();
   const [saving, setSaving] = useState(false);
+  const [anexos, setAnexos] = useState<AnexoLancamento[]>([]);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -59,21 +62,81 @@ export function FinanceFormPage() {
           valor: l.valor,
           forma_pagamento: l.forma_pagamento,
         });
+        setAnexos(l.anexos || []);
       })
       .catch(() => toast.error("Lançamento não encontrado"));
   }, [id, isEdit, form]);
+
+  async function uploadFileForLancamento(lancamentoId: number, fileToUpload: File) {
+    const formData = new FormData();
+    formData.append("file", fileToUpload);
+    formData.append("descricao", fileToUpload.name);
+
+    const res = await api.post<{ id: number; arquivo: string; descricao: string }>(
+      `/finance/lancamentos/${lancamentoId}/anexos`,
+      formData,
+      {
+        headers: { "Content-Type": "multipart/form-data" },
+      }
+    );
+    return res.data;
+  }
+
+  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    const file = files[0];
+
+    if (isEdit && id) {
+      setUploading(true);
+      try {
+        const newAnexo = await uploadFileForLancamento(Number(id), file);
+        setAnexos((prev) => [...prev, newAnexo as unknown as AnexoLancamento]);
+        toast.success("Comprovante enviado com sucesso");
+      } catch (err) {
+        toast.error("Falha ao enviar comprovante");
+      } finally {
+        setUploading(false);
+      }
+    } else {
+      setSelectedFile(file);
+    }
+  }
+
+  async function handleDeleteAnexo(anexoId: number) {
+    if (!window.confirm("Deseja realmente remover este anexo?")) return;
+    try {
+      await api.delete(`/finance/lancamentos/${id}/anexos/${anexoId}`);
+      setAnexos((prev) => prev.filter((a) => a.id !== anexoId));
+      toast.success("Anexo removido");
+    } catch {
+      toast.error("Falha ao remover anexo");
+    }
+  }
 
   async function onSubmit(values: FormValues) {
     setSaving(true);
     const payload = { ...values, valor: Number(values.valor) };
     try {
+      let targetId = id;
       if (isEdit) {
         await api.patch(`/finance/lancamentos/${id}`, payload);
         toast.success("Lançamento atualizado");
       } else {
-        await api.post(`/finance/lancamentos`, payload);
+        const res = await api.post<Lancamento>(`/finance/lancamentos`, payload);
+        targetId = String(res.data.id);
         toast.success("Lançamento criado");
       }
+
+      if (selectedFile && targetId) {
+        try {
+          await uploadFileForLancamento(Number(targetId), selectedFile);
+          toast.success("Comprovante enviado com sucesso");
+        } catch {
+          toast.error("Lançamento criado, mas falha ao subir comprovante");
+        }
+      }
+
       navigate("/finance");
     } catch (err) {
       toast.error("Falha ao salvar");
@@ -193,11 +256,73 @@ export function FinanceFormPage() {
               </div>
             </div>
 
-            <div className="flex justify-end gap-2 pt-4">
+            {/* Seção de Anexos */}
+            <div className="border-t pt-4 space-y-3">
+              <Label className="text-sm font-semibold flex items-center gap-1.5 text-mm-primary">
+                <Paperclip size={16} /> Comprovante / Nota Fiscal
+              </Label>
+              <p className="text-xs text-mm-muted">
+                Envie a foto ou arquivo PDF referente a esta entrada/saída financeira para registro.
+              </p>
+
+              {/* Arquivos já existentes */}
+              {isEdit && anexos.length > 0 && (
+                <div className="space-y-2">
+                  {anexos.map((a) => (
+                    <div
+                      key={a.id}
+                      className="flex items-center justify-between p-2.5 bg-mm-bg rounded border text-sm"
+                    >
+                      <div className="flex items-center gap-2 overflow-hidden">
+                        <FileText size={16} className="text-mm-muted flex-shrink-0" />
+                        <span className="truncate font-medium">{a.descricao}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <a
+                          href={`/media/${a.arquivo}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="p-1 hover:bg-mm-borderc rounded text-mm-blue"
+                          title="Visualizar anexo"
+                        >
+                          <Eye size={16} />
+                        </a>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteAnexo(a.id)}
+                          className="p-1 hover:bg-mm-borderc rounded text-mm-danger"
+                          title="Remover anexo"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Seleção de arquivo */}
+              <div className="flex items-center gap-3">
+                <label className="flex items-center gap-2 px-3 py-2 bg-mm-bg hover:bg-mm-borderc/40 border rounded cursor-pointer text-sm font-medium transition-colors">
+                  <Upload size={16} className="text-mm-muted" />
+                  <span>{selectedFile ? selectedFile.name : "Escolher arquivo..."}</span>
+                  <input
+                    type="file"
+                    accept="image/*,application/pdf"
+                    onChange={handleFileChange}
+                    className="hidden"
+                    disabled={uploading}
+                  />
+                </label>
+                {uploading && <span className="text-xs text-mm-muted">Subindo arquivo...</span>}
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2 pt-4 border-t">
               <Button variant="outline" type="button" onClick={() => navigate("/finance")}>
                 Cancelar
               </Button>
-              <Button type="submit" disabled={saving}>
+              <Button type="submit" disabled={saving || uploading}>
                 <Save className="mr-2" size={16} /> {saving ? "Salvando..." : "Salvar"}
               </Button>
             </div>

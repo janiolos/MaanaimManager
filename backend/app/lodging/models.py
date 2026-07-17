@@ -118,14 +118,14 @@ class ReservaChale(Base):
 
     criado_por_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("auth_user.id"))
     criado_por: Mapped[User] = relationship(lazy="selectin", foreign_keys=[criado_por_id])
-    criado_em: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    criado_em: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), default=datetime.utcnow)
 
     atualizado_por_id: Mapped[int | None] = mapped_column(
         BigInteger, ForeignKey("auth_user.id"), nullable=True
     )
     atualizado_por: Mapped[User | None] = relationship(lazy="selectin", foreign_keys=[atualizado_por_id])
     atualizado_em: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+        DateTime(timezone=True), server_default=func.now(), default=datetime.utcnow, onupdate=func.now()
     )
 
 
@@ -161,12 +161,12 @@ class AcaoChale(Base):
 
     criado_por_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("auth_user.id"))
     criado_por: Mapped[User] = relationship(lazy="selectin", foreign_keys=[criado_por_id])
-    criado_em: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    criado_em: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), default=datetime.utcnow)
 
     atualizado_por_id: Mapped[int | None] = mapped_column(
         BigInteger, ForeignKey("auth_user.id"), nullable=True
     )
     atualizado_por: Mapped[User | None] = relationship(lazy="selectin", foreign_keys=[atualizado_por_id])
     atualizado_em: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+        DateTime(timezone=True), server_default=func.now(), default=datetime.utcnow, onupdate=func.now()
     )
