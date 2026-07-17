@@ -11,6 +11,7 @@ import { PAGAMENTO_LABELS, PAGAMENTO_COLORS } from "@/routes/pos/types";
 import { cn, formatBRL } from "@/lib/utils";
 import { api } from "@/lib/api";
 import { POSNav } from "./pos-nav";
+import { useEventoStore } from "@/stores/evento-store";
 
 interface CartItem {
   produtoLocal: ProdutoLocal;
@@ -29,6 +30,7 @@ export function PDVPage() {
   const abrirCaixa = useAbrirCaixa();
   const fecharCaixa = useFecharCaixa();
   const barcodeRef = useRef<HTMLInputElement>(null);
+  const eventoId = useEventoStore((s) => s.eventoId);
 
   const localAtual = useMemo(
     () => locais?.find((l) => l.id === localSelecionado),
@@ -412,6 +414,10 @@ export function PDVPage() {
                         window.open(`/media/pos/fechamento_${turnoId}.pdf`, "_blank");
                       }
                     } else {
+                      if (!eventoId) {
+                        toast.error("É obrigatório selecionar um evento ativo para abrir o caixa!");
+                        return;
+                      }
                       await abrirCaixa.mutateAsync(localAtual.id);
                       toast.success("Caixa aberto");
                     }
